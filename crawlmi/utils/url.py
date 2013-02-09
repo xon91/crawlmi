@@ -1,4 +1,6 @@
-from urllib import quote
+import os
+import urllib
+import urlparse
 
 
 # The unreserved URL characters (RFC 3986)
@@ -37,7 +39,7 @@ def requote_url(url):
     # Then quote only illegal characters (do not quote reserved, unreserved,
     # or '%')
     assert isinstance(url, str), 'requote_url expects url to be str'
-    return quote(_unquote_unreserved(url), safe="!#$%&'()*+,/:;=?@[]~")
+    return urllib.quote(_unquote_unreserved(url), safe="!#$%&'()*+,/:;=?@[]~")
 
 
 def requote_ajax(fragment):
@@ -47,3 +49,20 @@ def requote_ajax(fragment):
     fragment = fragment.replace('%', '%25').replace('#', '%23')
     fragment = fragment.replace('&', '%26').replace('+', '%2B')
     return fragment
+
+
+def path_to_file_uri(path):
+    '''Convert local filesystem path to legal File URIs as described in:
+    http://en.wikipedia.org/wiki/File_URI_scheme
+    '''
+    x = urllib.pathname2url(os.path.abspath(path))
+    if os.name == 'nt':
+        x = x.replace('|', ':')  # http://bugs.python.org/issue5861
+    return 'file:///%s' % x.lstrip('/')
+
+
+def file_uri_to_path(uri):
+    '''Convert File URI to local filesystem path according to:
+    http://en.wikipedia.org/wiki/File_URI_scheme
+    '''
+    return urllib.url2pathname(urlparse.urlparse(uri).path)
