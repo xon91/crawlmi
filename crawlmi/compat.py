@@ -1,5 +1,7 @@
 '''Imports of optional libraries.'''
 
+optional_features = set()
+
 try:
     import charade as chardet
 except ImportError:
@@ -7,3 +9,12 @@ except ImportError:
         import chardet
     except ImportError:
         chardet = None
+if chardet is not None:
+    optional_features.add('chardet')
+
+try:
+    import OpenSSL
+except ImportError:
+    OpenSSL = None
+if OpenSSL is not None:
+    optional_features.add('ssl')
