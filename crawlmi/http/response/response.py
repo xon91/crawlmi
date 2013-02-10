@@ -20,18 +20,21 @@ class Response(object):
         try:
             return self.request.meta
         except AttributeError:
-            raise AttributeError('Response.meta unavailable. %s' % _no_request_error)
+            raise AttributeError('Response.meta unavailable. %s' %
+                                 _no_request_error)
 
     @property
     def history(self):
         try:
             return self.request.history
         except AttributeError:
-            raise AttributeError('Response.history unavailable. %s' % _no_request_error)
+            raise AttributeError('Response.history unavailable. %s' %
+                                 _no_request_error)
 
     @property
     def original_url(self):
         try:
             return self.request.original_url
         except AttributeError:
-            raise AttributeError('Response.original_url unavailable. %s' % _no_request_error)
+            raise AttributeError('Response.original_url unavailable. %s' %
+                                 _no_request_error)

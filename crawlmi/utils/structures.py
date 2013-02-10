@@ -31,7 +31,8 @@ class CaseInsensitiveDict(dict):
         return dict.get(self, self.normkey(key), self.normvalue(def_val))
 
     def setdefault(self, key, def_val=None):
-        return dict.setdefault(self, self.normkey(key), self.normvalue(def_val))
+        return dict.setdefault(self, self.normkey(key),
+                               self.normvalue(def_val))
 
     def update(self, seq):
         seq = seq.iteritems() if isinstance(seq, dict) else seq

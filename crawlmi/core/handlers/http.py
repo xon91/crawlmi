@@ -4,7 +4,8 @@ from twisted.internet import reactor
 
 from crawlmi.compat import optional_features
 from crawlmi.exceptions import NotSupported
-from crawlmi.core.webclient import CrawlmiHTPPClientFactory, CrawlmiClientContextFactory
+from crawlmi.core.webclient import (CrawlmiHTPPClientFactory,
+        CrawlmiClientContextFactory)
 
 
 ssl_supported = 'ssl' in optional_features
@@ -27,6 +28,6 @@ class HttpDownloadHandler(object):
             if ssl_supported:
                 return reactor.connectSSL(host, port, factory,
                         CrawlmiClientContextFactory())
-            raise NotSupported('HTTPS not supported: install pyopenssl library')
+            raise NotSupported('HTTPS not supported: install pyopenssl')
         else:
             return reactor.connectTCP(host, port, factory)

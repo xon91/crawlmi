@@ -74,7 +74,7 @@ class CrawlmiHTTPClient(HTTPClient):
         self.transport.loseConnection()
         self.factory.noPage(
                 defer.TimeoutError('Getting %s took longer than %s seconds.' %
-                (self.factory.url, self.factory.timeout)))
+                                   (self.factory.url, self.factory.timeout)))
 
 
 class CrawlmiHTPPClientFactory(HTTPClientFactory):
@@ -92,7 +92,8 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
         self.response_headers = None
         self.timeout = timeout
         self.start_time = time()
-        self.deferred = defer.Deferred().addCallback(self._build_response, request)
+        self.deferred = defer.Deferred()
+        self.deferred.addCallback(self._build_response, request)
         self.invalid_headers = []
 
         # Fixes Twisted 11.1.0+ support as HTTPClientFactory is expected
@@ -116,7 +117,8 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
 
     def _build_response(self, body, request):
         if self.invalid_headers:
-            raise BadHttpHeaderError('Invalid headers received: %s' % self.invalid_headers)
+            raise BadHttpHeaderError('Invalid headers received: %s' %
+                                     self.invalid_headers)
 
         response = Response(url=self.url, status=self.status,
             headers=self.response_headers, body=body, request=request)
@@ -124,14 +126,17 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
         return response
 
     def _set_connection_attributes(self, request):
-        self.scheme, self.netloc, self.host, self.port, self.path = self._parse_url_args(request.url)
+        self.scheme, self.netloc, self.host, self.port, self.path = \
+            self._parse_url_args(request.url)
         if request.proxy:
-            self.scheme, _, self.host, self.port, _ = self._parse_url_args(request.proxy)
+            self.scheme, _, self.host, self.port, _ = \
+                self._parse_url_args(request.proxy)
             self.path = self.url
 
     def _parse_url_args(self, url):
         parsed = urlparse(url.strip())
-        path = urlunparse(('', '', parsed.path or '/', parsed.params, parsed.query, ''))
+        path = urlunparse(('', '', parsed.path or '/', parsed.params,
+                           parsed.query, ''))
         host = parsed.hostname
         port = parsed.port
         scheme = parsed.scheme

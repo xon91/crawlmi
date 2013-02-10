@@ -7,8 +7,8 @@ from crawlmi.utils.url import requote_url, requote_ajax
 
 class Request(object):
     def __init__(self, url, callback=None, method='GET', headers={},
-            params={}, body='', meta={}, errback=None, proxy=None,
-            history=[], encoding='utf-8'):
+                 params={}, body='', meta={}, errback=None, proxy=None,
+                 history=[], encoding='utf-8'):
         self.callback = callback
         self.errback = errback
 
@@ -61,7 +61,8 @@ class Request(object):
         if not scheme:
             raise ValueError('Invalid URL %s: No schema supplied.' % url)
         if not netloc and not path:
-            raise ValueError('Invalid URL %s: No netloc nor path supplied.' % url)
+            raise ValueError('Invalid URL %s: No netloc nor path supplied.' %
+                             url)
 
         # Bare domains aren't valid URLs.
         if not path:
@@ -83,7 +84,8 @@ class Request(object):
                 query = '_escaped_fragment_=%s' % fragment
             fragment = ''
 
-        return requote_url(urlunparse([scheme, netloc, path, _params, query, fragment]))
+        return requote_url(urlunparse([scheme, netloc, path, _params, query,
+                                       fragment]))
 
     def _encode_params(self, data):
         '''Encode parameters in a piece of data.
@@ -108,8 +110,10 @@ class Request(object):
                 for v in vs:
                     if v is not None:
                         result.append(
-                            (k.encode(self._encoding) if isinstance(k, unicode) else k,
-                             v.encode(self._encoding) if isinstance(v, unicode) else v))
+                            (k.encode(self._encoding) if isinstance(k, unicode)
+                                else k,
+                             v.encode(self._encoding) if isinstance(v, unicode)
+                                else v))
             return urlencode(result, doseq=True)
         else:
             raise TypeError('Bad type for `params` object: %s' % type(data))

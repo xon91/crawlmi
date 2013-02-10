@@ -1,4 +1,5 @@
-'''More info on encoding detection: http://www.whatwg.org/specs/web-apps/current-work/multipage/parsing.html
+'''More info on encoding detection:
+http://www.whatwg.org/specs/web-apps/current-work/multipage/parsing.html
 '''
 
 import cgi
@@ -12,11 +13,12 @@ from crawlmi.compat import chardet
 # regexps for parsing HTTP meta tags
 _template_pattern = r'''%s\s*=\s*["']?\s*%s\s*["']?'''
 _httpequiv_re = _template_pattern % ('http-equiv', 'Content-Type')
-_content_re = _template_pattern % ('content', r'(?P<mime>[^;]+);\s*charset=(?P<charset>[\w-]+)')
+_content_re = _template_pattern % ('content',
+    r'(?P<mime>[^;]+);\s*charset=(?P<charset>[\w-]+)')
 _content2_re = _template_pattern % ('charset', r'(?P<charset2>[\w-]+)')
 _xml_encoding_re = _template_pattern % ('encoding', r'(?P<xmlcharset>[\w-]+)')
 
-# check for meta tags, or xml decl. and stop search if a body tag is encountered
+# check for meta tags, or xml decl. Stop search if a body tag is encountered.
 _body_encoding_re = re.compile(
     r'<\s*(?:meta(?:(?:\s+%s|\s+%s){2}|\s+%s)|\?xml\s[^>]+%s|body)' %
         (_httpequiv_re, _content_re, _content2_re, _xml_encoding_re), re.I)
@@ -143,7 +145,8 @@ def get_encoding_from_locale(locale):
     return _locale_mapping.get(locale, 'windows-1252')
 
 
-def get_unicode_from_response(r, default='utf-8', locale=None, auto_detect=False):
+def get_unicode_from_response(r, default='utf-8', locale=None,
+                              auto_detect=False):
     '''Return the unicode content from the response.
 
     This function tries to simulate the browser:
