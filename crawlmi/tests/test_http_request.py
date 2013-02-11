@@ -200,8 +200,10 @@ class RequestTest(unittest2.TestCase):
         def somecallback():
             pass
 
-        r1 = Request('http://www.example.com', callback=somecallback, errback=somecallback)
-        r1.meta['foo'] = 'bar'
+        r1 = Request('http://www.example.com', callback=somecallback,
+            errback=somecallback, method='post', headers={'hello': 'world'},
+            params={'a': 'b'}, body='blablabla', meta={'c': 'd'}, proxy='123',
+            priority=10, history=[1, 2, 3], encoding='latin1')
         r2 = r1.copy()
 
         self.assertIs(r1.callback, somecallback)
@@ -209,12 +211,17 @@ class RequestTest(unittest2.TestCase):
         self.assertIs(r2.callback, r1.callback)
         self.assertIs(r2.errback, r2.errback)
 
-        self.assertIsNot(r1.meta, r2.meta)
-        self.assertDictEqual(r1.meta, r2.meta)
+        self.assertEqual(r1.url, r2.url)
+        self.assertEqual(r1.method, r2.method)
         self.assertIsNot(r1.headers, r2.headers)
         self.assertDictEqual(r1.headers, r2.headers)
+        self.assertIsNot(r1.meta, r2.meta)
+        self.assertDictEqual(r1.meta, r2.meta)
         self.assertIsNot(r1.history, r2.history)
         self.assertListEqual(r1.history, r2.history)
+        self.assertEqual(r1.body, r2.body)
+        self.assertEqual(r1.proxy, r2.proxy)
+        self.assertEqual(r1.priority, r2.priority)
         self.assertEqual(r1.encoding, r2.encoding)
 
     def test_copy_inherited_classes(self):
