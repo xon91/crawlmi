@@ -2,6 +2,7 @@ from urlparse import urlparse, urlunparse
 from urllib import urlencode
 
 from crawlmi.http.headers import Headers
+from crawlmi.utils.python import to_str
 from crawlmi.utils.url import requote_url, requote_ajax
 
 
@@ -54,8 +55,10 @@ class Request(object):
         return str(method).upper()
 
     def _prepare_url(self, url, params):
-        if isinstance(url, unicode):
-            url = url.encode(self._encoding)
+        if isinstance(url, basestring):
+            url = to_str(url, self._encoding)
+        else:
+            raise TypeError('Bad type for `url` object: %s' % type(url))
 
         scheme, netloc, path, _params, query, fragment = urlparse(url)
         if not scheme:
@@ -94,10 +97,8 @@ class Request(object):
         2-tuples. Order is retained if data is a list of 2-tuples but abritrary
         if parameters are supplied as a dict.
         '''
-        if isinstance(data, str):
-            return data
-        elif isinstance(data, unicode):
-            return data.encode(self._encoding)
+        if isinstance(data, basestring):
+            return to_str(data, self._encoding)
         elif hasattr(data, '__iter__'):
             result = []
             if isinstance(data, dict):
@@ -109,22 +110,14 @@ class Request(object):
                     vs = [vs]
                 for v in vs:
                     if v is not None:
-                        result.append(
-                            (k.encode(self._encoding) if isinstance(k, unicode)
-                                else k,
-                             v.encode(self._encoding) if isinstance(v, unicode)
-                                else v))
+                        result.append((to_str(k, self._encoding),
+                                       to_str(v, self._encoding)))
             return urlencode(result, doseq=True)
         else:
             raise TypeError('Bad type for `params` object: %s' % type(data))
 
     def _prepare_body(self, body):
-        if isinstance(body, str):
-            return body
-        elif isinstance(body, unicode):
-            return body.encode(self._encoding)
-        else:
-            raise TypeError('Bad type for `body` object: %s' % type(body))
+        return to_str(body, self._encoding)
 
     def copy(self):
         '''Return a copy of this Request.'''

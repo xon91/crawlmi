@@ -118,7 +118,7 @@ class RequestTest(unittest2.TestCase):
         self.assertEqual(body, 'Price: \xc2\xa3100')
         latin_body = r_latin1._prepare_body(u'Price: \xa3100')
         self.assertEqual(latin_body, 'Price: \xa3100')
-        self.assertRaises(TypeError, r._prepare_body, 10)
+        self.assertEqual(r._prepare_body(10), '10')
 
     def test_encode_params(self):
         r = Request(url=gh_url)
@@ -168,6 +168,9 @@ class RequestTest(unittest2.TestCase):
         self.assertRaises(ValueError, r._prepare_url, 'www.github.com', {})
         self.assertRaises(ValueError, r._prepare_url, '/etc/fstab', {})
         self.assertRaises(ValueError, r._prepare_url, 'http://', {})
+
+        # bad url type
+        self.assertRaises(TypeError, r._prepare_url, 10, {})
 
         # empty path
         test(r, 'http://www.github.com', 'http://www.github.com/')
