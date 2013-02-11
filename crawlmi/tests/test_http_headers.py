@@ -87,32 +87,26 @@ class HeadersTest(unittest2.TestCase):
         self.assertEqual(h.getlist('X-Forwarded-For'), ['ip1', 'ip2'])
 
     def test_copy(self):
-        h1 = Headers({'header1': ['value1', 'value2']})
+        h1 = Headers({'header1': ['value1', 'value2']}, encoding='ascii')
         h2 = copy.copy(h1)
         self.assertEqual(h1, h2)
+        self.assertEqual(h1.encoding, h2.encoding)
         self.assertEqual(h1.getlist('header1'), h2.getlist('header1'))
         self.assertIsNot(h1.getlist('header1'), h2.getlist('header1'))
         self.assertIsInstance(h2, Headers)
 
-    def test_appendlist(self):
+    def test_add(self):
         h1 = Headers({'header1': 'value1'})
-        h1.appendlist('header1', 'value3')
+        h1.add('header1', 'value3')
         self.assertEqual(h1.getlist('header1'), ['value1', 'value3'])
 
         h1 = Headers()
-        h1.appendlist('header1', 'value1')
-        h1.appendlist('header1', 'value3')
+        h1.add('header1', 'value1')
+        h1.add('header1', 'value3')
         self.assertEqual(h1.getlist('header1'), ['value1', 'value3'])
 
-    def test_setlist(self):
-        h1 = Headers({'header1': 'value1'})
-        self.assertEqual(h1.getlist('header1'), ['value1'])
-        h1.setlist('header1', ['value2', 'value3'])
-        self.assertEqual(h1.getlist('header1'), ['value2', 'value3'])
-
-    def test_setlistdefault(self):
-        h1 = Headers({'header1': 'value1'})
-        h1.setlistdefault('header1', ['value2', 'value3'])
-        h1.setlistdefault('header2', ['value2', 'value3'])
-        self.assertEqual(h1.getlist('header1'), ['value1'])
-        self.assertEqual(h1.getlist('header2'), ['value2', 'value3'])
+    def test_clear(self):
+        h = Headers({'a': 'b'})
+        self.assertIn('a', h)
+        h.clear()
+        self.assertNotIn('a', h)

@@ -51,7 +51,7 @@ class CrawlmiHTTPClient(HTTPClient):
                 self.transport.loseConnection()
 
     def handleHeader(self, key, value):
-        self.headers.appendlist(key, value)
+        self.headers.add(key, value)
 
     def handleStatus(self, version, status, message):
         self.factory.gotStatus(version, status, message)

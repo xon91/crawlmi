@@ -1,65 +1,72 @@
-from crawlmi.utils.structures import CaseInsensitiveDict
+from crawlmi.utils.python import to_str
 
 
-class Headers(CaseInsensitiveDict):
+class Headers(dict):
 
     def __init__(self, seq=None, encoding='utf-8'):
         self.encoding = encoding
-        super(Headers, self).__init__(seq)
+        if seq is not None:
+            self.update(seq)
 
     def normkey(self, key):
-        '''Headers must not be unicode.'''
-        if isinstance(key, unicode):
-            return key.title().encode(self.encoding)
-        return key.title()
+        return to_str(key.title(), self.encoding)
 
     def normvalue(self, value):
-        '''Headers must not be unicode.'''
         if not hasattr(value, '__iter__'):
             value = [value]
-        return [x.encode(self.encoding) if isinstance(x, unicode) else x
-            for x in value]
+        return [to_str(x, self.encoding) for x in value]
 
     def __getitem__(self, key):
-        try:
-            return super(Headers, self).__getitem__(key)[-1]
-        except IndexError:
-            return None
+        return dict.__getitem__(self, self.normkey(key))[-1]
 
-    def get(self, key, def_val=None):
-        try:
-            return super(Headers, self).get(key, def_val)[-1]
-        except IndexError:
-            return None
+    def __setitem__(self, key, value):
+        dict.__setitem__(self, self.normkey(key), self.normvalue(value))
 
-    def getlist(self, key, def_val=None):
-        try:
-            return super(Headers, self).__getitem__(key)
-        except KeyError:
-            if def_val is not None:
-                return self.normvalue(def_val)
-            return []
+    def __delitem__(self, key):
+        dict.__delitem__(self, self.normkey(key))
 
-    def setlist(self, key, list_):
-        self[key] = list_
+    def __contains__(self, key):
+        return dict.__contains__(self, self.normkey(key))
+    has_key = __contains__
 
-    def setlistdefault(self, key, default_list=()):
-        return self.setdefault(key, default_list)
+    def __copy__(self):
+        return self.__class__(self, self.encoding)
+    copy = __copy__
 
-    def appendlist(self, key, value):
-        lst = self.getlist(key)
-        lst.extend(self.normvalue(value))
-        self[key] = lst
+    def setdefault(self, key, default=None):
+        return dict.setdefault(self, self.normkey(key), self.normvalue(default))
+
+    def get(self, key, default=None):
+        key = self.normkey(key)
+        return self[key] if key in self else default
+
+    def getlist(self, key, default=[]):
+        key = self.normkey(key)
+        if key in self:
+            return dict.__getitem__(self, key)
+        else:
+            if not hasattr(default, '__iter__'):
+                default = [default]
+            return default
+
+    def add(self, key, value):
+        key = self.normkey(key)
+        value = self.normvalue(value)
+        if key not in self:
+            dict.__setitem__(self, key, value)
+        else:
+            dict.__getitem__(self, key).extend(value)
+
+    def update(self, seq):
+        seq = seq.iteritems() if isinstance(seq, dict) else seq
+        for (k, v) in seq:
+            self.add(k, v)
+
+    def values(self):
+        return [self[k] for k in self.keys()]
 
     def items(self):
         return list(self.iteritems())
 
     def iteritems(self):
         return ((k, self.getlist(k)) for k in self.keys())
-
-    def values(self):
-        return [self[k] for k in self.keys()]
-
-    def __copy__(self):
-        return self.__class__(self)
-    copy = __copy__
