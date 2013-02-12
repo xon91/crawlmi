@@ -11,7 +11,7 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
 
 from crawlmi.core.handlers import FileDownloadHandler, HttpDownloadHandler
 from crawlmi.http.request import Request
-from crawlmi.settings.settings import Settings
+from crawlmi.settings import Settings
 from crawlmi.utils.url import path_to_file_uri
 
 

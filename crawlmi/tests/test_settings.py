@@ -1,6 +1,6 @@
 import unittest2
 
-from crawlmi.settings.settings import Settings
+from crawlmi.settings import Settings
 
 
 class SettingsTest(unittest2.TestCase):
