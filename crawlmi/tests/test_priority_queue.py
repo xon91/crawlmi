@@ -1,8 +1,7 @@
 import random
 import unittest2
 
-from crawlmi.queue.memory_queue import MemoryQueue
-from crawlmi.queue.priority_queue import PriorityQueue
+from crawlmi.queue import MemoryQueue, PriorityQueue
 
 
 def qfactory(priority):

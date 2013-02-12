@@ -1,7 +1,7 @@
 import random
 import unittest2
 
-from crawlmi.queue.heap import Heap
+from crawlmi.queue import Heap
 
 
 class HeapTest(unittest2.TestCase):

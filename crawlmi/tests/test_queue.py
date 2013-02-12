@@ -1,6 +1,6 @@
 import unittest2
 
-from crawlmi.queue.memory_queue import MemoryQueue
+from crawlmi.queue import MemoryQueue
 
 
 class QueueTest(unittest2.TestCase):
