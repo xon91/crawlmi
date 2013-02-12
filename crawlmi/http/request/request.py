@@ -90,8 +90,7 @@ class Request(object):
 
         quoted = requote_url(urlunparse([scheme, netloc, path, _params, query,
                                        fragment]))
-        self.scheme, self.netloc, self.path, self.params, self.query, \
-            self.fragment = urlparse(quoted)
+        self.parsed_url = urlparse(quoted)
         return quoted
 
     def _encode_params(self, data):

@@ -23,11 +23,11 @@ class GeneralHandler(object):
 
     def _get_handler(self, request):
         try:
-            handler = self._handlers[request.scheme]
+            handler = self._handlers[request.parsed_url.scheme]
         except KeyError:
             msg = self._not_configured.get(
-                request.scheme,
+                request.parsed_url.scheme,
                 'no handler available for that scheme')
             raise NotSupported('Unsupported URL scheme `%s`: %s' %
-                               (request.scheme, msg))
+                               (request.parsed_url.scheme, msg))
         return handler

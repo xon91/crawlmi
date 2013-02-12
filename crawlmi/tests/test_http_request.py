@@ -1,4 +1,5 @@
 import unittest2
+from urlparse import urlparse
 
 from crawlmi.http.headers import Headers
 from crawlmi.http.request import Request
@@ -178,13 +179,7 @@ class RequestTest(unittest2.TestCase):
         # url and params and fragments
         r2 = Request(u'http://www.github.com/hello \xa3 world/?a=10,20&b=30#start=10',
                      params={'c': 'linkin \xa3 park'})
-        self.assertEqual(r2.url, 'http://www.github.com/hello%20%C2%A3%20world/?a=10,20&b=30&c=linkin+%A3+park#start=10')
-        self.assertEqual(r2.scheme, 'http')
-        self.assertEqual(r2.netloc, 'www.github.com')
-        self.assertEqual(r2.path, '/hello%20%C2%A3%20world/')
-        self.assertEqual(r2.params, '')
-        self.assertEqual(r2.query, 'a=10,20&b=30&c=linkin+%A3+park')
-        self.assertEqual(r2.fragment, 'start=10')
+        self.assertEqual(r2.parsed_url, urlparse(r2.url))
 
         # ajax excaping
         test(r, 'http://www.example.com/ajax.html#!key1=value1&key2=value2',
