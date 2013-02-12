@@ -9,13 +9,15 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
         NoLengthResource, HostHeaderResource,
         PayloadResource, BrokenDownloadResource)
 
-from crawlmi.core.handlers import FileDownloadHandler, HttpDownloadHandler
+from crawlmi.core.handlers import (FileDownloadHandler, HttpDownloadHandler,
+        GeneralHandler)
+from crawlmi.exceptions import NotConfigured, NotSupported
 from crawlmi.http.request import Request
 from crawlmi.settings import Settings
 from crawlmi.utils.url import path_to_file_uri
 
 
-class FileTestCase(unittest.TestCase):
+class FileTest(unittest.TestCase):
 
     def setUp(self):
         self.tmpname = self.mktemp()
@@ -40,7 +42,7 @@ class FileTestCase(unittest.TestCase):
         return self.assertFailure(d, IOError)
 
 
-class HttpTestCase(unittest.TestCase):
+class HttpTest(unittest.TestCase):
 
     def setUp(self):
         name = self.mktemp()
@@ -132,7 +134,7 @@ class UriResource(resource.Resource):
         return request.uri
 
 
-class HttpProxyTestCase(unittest.TestCase):
+class HttpProxyTest(unittest.TestCase):
 
     def setUp(self):
         site = server.Site(UriResource(), timeout=None)
@@ -165,3 +167,34 @@ class HttpProxyTestCase(unittest.TestCase):
 
         request = Request(self.getURL('path/to/resource'))
         return self.download_request(request).addCallback(_test)
+
+
+class NonConfiguredHandler(object):
+    def __init__(self, settings):
+        raise NotConfigured()
+
+
+class GeneralTest(unittest.TestCase):
+
+    def setUp(self):
+        self.settings = Settings({
+            'DOWNLOAD_HANDLERS_BASE': {
+                'file': 'crawlmi.core.handlers.FileDownloadHandler',
+                'http': 'crawlmi.core.handlers.HttpDownloadHandler',
+                'https': 'crawlmi.tests.test_downloader_handlers.NonConfiguredHandler',
+            }
+        })
+        self.handler = GeneralHandler(self.settings)
+
+    def test_init(self):
+        self.assertIsInstance(self.handler._handlers['file'], FileDownloadHandler)
+        self.assertIsInstance(self.handler._handlers['http'], HttpDownloadHandler)
+        self.assertIn('https', self.handler._not_configured)
+
+    def test_get_handler(self):
+        h = self.handler._get_handler(Request('file:///etc/fstab'))
+        self.assertIsInstance(h, FileDownloadHandler)
+        h = self.handler._get_handler(Request('http://www.github.com/'))
+        self.assertIsInstance(h, HttpDownloadHandler)
+        self.assertRaises(NotSupported, self.handler._get_handler,
+                          Request('https://www.githib.com/'))
