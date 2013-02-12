@@ -57,7 +57,7 @@ class EncodingDetectionTest(unittest2.TestCase):
             '''<meta http-equiv="Fake-Content-Type-Header" content="text/html; charset=utf-8">'''))
 
 
-class CodecsEncodingTestCase(unittest2.TestCase):
+class CodecsEncodingTest(unittest2.TestCase):
     def test_resolve_encoding(self):
         self.assertEqual(_norm_encoding('latin1'), 'cp1252')
         self.assertEqual(_norm_encoding(' Latin-1'), 'cp1252')
@@ -65,7 +65,7 @@ class CodecsEncodingTestCase(unittest2.TestCase):
         self.assertEqual(_norm_encoding('unknown encoding'), None)
 
 
-class UnicodeDecodingTestCase(unittest2.TestCase):
+class UnicodeDecodingTest(unittest2.TestCase):
     def test_utf8(self):
         self.assertEqual(unicode('\xc2\xa3', 'utf-8', 'replace'), u'\xa3')
 

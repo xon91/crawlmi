@@ -181,7 +181,7 @@ class HTTPPageGetterTest(unittest.TestCase):
         return self.assertFailure(factory.deferred, BadHttpHeaderError)
 
 
-class WebClientTestCase(unittest.TestCase):
+class WebClientTest(unittest.TestCase):
     def _listen(self, site):
         return reactor.listenTCP(0, site, interface='127.0.0.1')
 
