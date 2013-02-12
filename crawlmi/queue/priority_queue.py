@@ -26,11 +26,16 @@ class PriorityQueue(Queue):
         self.qfactory = qfactory
         self._heap = Heap()
         self._active_queues = {}
+        self._inactive_queues = {}
 
     def _push(self, priority, value):
         if priority not in self._active_queues:
-            self._active_queues[priority] = self.qfactory(priority)
             self._heap.push(priority)
+            if priority in self._inactive_queues:
+                self._active_queues[priority] = self._inactive_queues[priority]
+                del self._inactive_queues[priority]
+            else:
+                self._active_queues[priority] = self.qfactory(priority)
         self._active_queues[priority].push(value)
 
     def _peek(self):
@@ -42,8 +47,8 @@ class PriorityQueue(Queue):
         q = self._active_queues[top_priority]
         result = q.pop()
         if len(q) == 0:
+            self._inactive_queues[top_priority] = q
             del self._active_queues[top_priority]
-            q.close()
             self._heap.pop()
         return result
 
@@ -51,5 +56,8 @@ class PriorityQueue(Queue):
         for p, q in self._active_queues.iteritems():
             q.close()
         del self._active_queues
+        for p, q in self._inactive_queues.iteritems():
+            q.close()
+        del self._inactive_queues
         self._heap.close()
         del self._heap

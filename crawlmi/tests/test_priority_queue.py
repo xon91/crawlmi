@@ -29,6 +29,23 @@ class PriorityQueueTest(unittest2.TestCase):
         self.assertRaises(IndexError, q.pop)
         self.assertEqual(len(q), 0)
 
+    def test_inactive(self):
+        q = PriorityQueue(qfactory)
+        self.assertEqual(len(q._active_queues), 0)
+        self.assertEqual(len(q._inactive_queues), 0)
+        q.push(1, 1)
+        self.assertEqual(len(q._active_queues), 1)
+        self.assertEqual(len(q._inactive_queues), 0)
+        q.pop()
+        self.assertEqual(len(q._active_queues), 0)
+        self.assertEqual(len(q._inactive_queues), 1)
+        q.push(2, 2)
+        self.assertEqual(len(q._active_queues), 1)
+        self.assertEqual(len(q._inactive_queues), 1)
+        q.push(1, 3)
+        self.assertEqual(len(q._active_queues), 2)
+        self.assertEqual(len(q._inactive_queues), 0)
+
     def test_close(self):
         q = PriorityQueue(qfactory)
         q.push(1, 1)
@@ -75,3 +92,6 @@ class PriorityQueueTest(unittest2.TestCase):
                 values.sort()
                 self.assertEqual(values[-1][1], q.peek(), operations)
             self.assertEqual(len(q), len(values), operations)
+            active = set(q._active_queues)
+            inactive = set(q._inactive_queues)
+            self.assertSetEqual(active & inactive, set())
