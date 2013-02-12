@@ -88,8 +88,11 @@ class Request(object):
                 query = '_escaped_fragment_=%s' % fragment
             fragment = ''
 
-        return requote_url(urlunparse([scheme, netloc, path, _params, query,
+        quoted = requote_url(urlunparse([scheme, netloc, path, _params, query,
                                        fragment]))
+        self.scheme, self.netloc, self.path, self.params, self.query, \
+            self.fragment = urlparse(quoted)
+        return quoted
 
     def _encode_params(self, data):
         '''Encode parameters in a piece of data.
