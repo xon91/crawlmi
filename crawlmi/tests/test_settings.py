@@ -33,22 +33,20 @@ class SettingsTest(unittest2.TestCase):
         values = {}
         for (k, v) in self.tests.iteritems():
             values[k] = v[0]
-        self.settings = Settings(values=values)
+        self.settings = Settings(values)
 
-    def test_init(self):
-        s1, s2 = Settings(), Settings()
-        self.assertIsNot(s1.values, s2.values)
-        values = {'1': '2'}
-        s3 = Settings(values)
-        self.assertIsNot(s3.values, values)
+    def test_from_module(self):
+        s = Settings.from_module('crawlmi.settings.default_settings')
+        self.assertIn('CONCURRENT_REQUESTS', s)
+        self.assertNotIn('blabla', s)
+        self.assertNotIn('__name__', s)
 
-        self.assertTrue('1' in s3)
-        self.assertFalse('2' in s3)
-        self.assertEqual(s3['1'], '2')
-        self.assertEqual(s3.get('1'), '2')
-        self.assertEqual(s3.get('1', '3'), '2')
-        self.assertIsNone(s3.get('2'))
-        self.assertEqual(s3.get('2', '3'), '3')
+    def test_copy(self):
+        s1 = Settings({'a': 'b'})
+        s2 = s1.copy()
+        self.assertIsInstance(s2, Settings)
+        self.assertIsNot(s1, s2)
+        self.assertDictEqual(s1, s2)
 
     def _get_answers(self, prefix):
         result = []
