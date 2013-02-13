@@ -1,6 +1,6 @@
 # Downloader settings
 
-DOWNLOAD_HANDLERS_BASE = {
+DOWNLOAD_HANDLERS = {
     'file': 'crawlmi.core.handlers.FileDownloadHandler',
     'http': 'crawlmi.core.handlers.HttpDownloadHandler',
     'https': 'crawlmi.core.handlers.HttpDownloadHandler',

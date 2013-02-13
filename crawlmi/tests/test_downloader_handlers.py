@@ -178,7 +178,7 @@ class GeneralTest(unittest.TestCase):
 
     def setUp(self):
         self.settings = Settings({
-            'DOWNLOAD_HANDLERS_BASE': {
+            'DOWNLOAD_HANDLERS': {
                 'file': 'crawlmi.core.handlers.FileDownloadHandler',
                 'http': 'crawlmi.core.handlers.HttpDownloadHandler',
                 'https': 'crawlmi.tests.test_downloader_handlers.NonConfiguredHandler',

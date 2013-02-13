@@ -8,7 +8,7 @@ class GeneralHandler(object):
     def __init__(self, settings):
         self._handlers = {}
         self._not_configured = {}
-        handlers = settings.get('DOWNLOAD_HANDLERS_BASE', {})
+        handlers = settings.get('DOWNLOAD_HANDLERS', {})
         for scheme, clspath in handlers.iteritems():
             cls = load_object(clspath)
             try:
