@@ -17,8 +17,8 @@ class ScheduledCall(object):
         self._next_args = None
         self._next_kwargs = None
         self._call = None
-        # _clock is used in unittests
-        self._clock = None
+        # clock override is used in unittests
+        self.clock = default_kwargs.pop('clock', None) or reactor
 
     def schedule(self, delay=0, *args, **kwargs):
         '''Schedule the function call.
@@ -35,10 +35,7 @@ class ScheduledCall(object):
                 self._next_args = self._default_args
                 self._next_kwargs = self._default_kwargs
 
-            if self._clock is None:
-                self._call = reactor.callLater(delay, self)
-            else:
-                self._call = self._clock.callLater(delay, self)
+            self._call = self.clock.callLater(delay, self)
             return True
         return False
 

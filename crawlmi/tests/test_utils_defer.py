@@ -22,9 +22,9 @@ class ScheduledCallTest(unittest2.TestCase):
     def setUp(self):
         self.clock = task.Clock()
         self.obj = ModifiedObject()
-        self.sc = ScheduledCall(self.obj.func, *self.default_args,
+        self.sc = ScheduledCall(self.obj.func, clock=self.clock,
+                                *self.default_args,
                                 **self.default_kwargs)
-        self.sc._clock = self.clock
 
     def _check(self, args, kwargs):
         if args is None:
@@ -36,6 +36,13 @@ class ScheduledCallTest(unittest2.TestCase):
             self.assertIsNone(self.obj.kwargs)
         else:
             self.assertEqual(self.obj.kwargs, kwargs)
+
+    def test_init(self):
+        # test initializing ScheduledCall without overriding its clock
+        sc = ScheduledCall(self.obj.func, *self.default_args,
+                           **self.default_kwargs)
+        sc.schedule(0)
+        sc.cancel()
 
     def test_get_time_and_is_scheduled(self):
         self.clock.advance(10)
