@@ -1,16 +1,17 @@
 import unittest2
 
-from twisted.internet import task
-
+from crawlmi.utils.clock import Clock
 from crawlmi.utils.defer import ScheduledCall
 
 
 class ModifiedObject(object):
     def __init__(self):
+        self.num_calls = 0
         self.args = None
         self.kwargs = None
 
     def func(self, *args, **kwargs):
+        self.num_calls += 1
         self.args = args
         self.kwargs = kwargs
 
@@ -20,7 +21,7 @@ class ScheduledCallTest(unittest2.TestCase):
     default_kwargs = {'a': 47, 'b': 'c'}
 
     def setUp(self):
-        self.clock = task.Clock()
+        self.clock = Clock()
         self.obj = ModifiedObject()
         self.sc = ScheduledCall(self.obj.func, clock=self.clock,
                                 *self.default_args,
@@ -96,6 +97,18 @@ class ScheduledCallTest(unittest2.TestCase):
         self._check(over_args, {})
 
     def test_nested_call(self):
+        def func(*args, **kwargs):
+            self.obj.func(*args, **kwargs)
+            self.sc.schedule()
+        self.sc._func = func
+        self.sc.schedule()
+        self.assertEqual(self.obj.num_calls, 0)
+        self.clock.advance(0)
+        self.assertEqual(self.obj.num_calls, 1)
+        self.clock.advance(0)
+        self.assertEqual(self.obj.num_calls, 2)
+
+    def test_nested_call_delay(self):
         args1 = ('a',)
         kwargs1 = {'a': 'b'}
         args2 = ('b',)
