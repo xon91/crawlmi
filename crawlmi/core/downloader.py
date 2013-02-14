@@ -1,10 +1,11 @@
+from functools import partial
 import random
 
 from twisted.internet import reactor, defer
 
 from crawlmi.core.handlers import GeneralHandler
 from crawlmi.queue import MemoryQueue
-from crawlmi.utils.defer import ScheduledCall
+from crawlmi.utils.defer import LoopingCall, ScheduledCall
 
 
 class Slot(object):
@@ -16,7 +17,8 @@ class Slot(object):
     downloader.
     '''
 
-    def __init__(self, download_handler, concurrency, delay, randomize_delay):
+    def __init__(self, download_handler, concurrency, delay, randomize_delay,
+                 clock=None):
         self.download_handler = download_handler
         self.concurrency = concurrency
         self.delay = delay
@@ -25,14 +27,13 @@ class Slot(object):
         self.transferring = set()  # requests being downloaded (subset of `in_progress`)
         self.last_download_time = 0
         self.queue = MemoryQueue()  # queue of (request, deferred)
-        self.processing = ScheduledCall(self._process)
-        # _clock is used in unittests
-        self._clock = reactor
+        # clock is used in unittests
+        self.clock = clock or reactor
+        self.delayed_processing = ScheduledCall(self._process, clock=self.clock)
 
     def enqueue(self, request, dfd):
         '''Main entry point.
-        Put the new request to the queue and if possible, process it in the
-        next reactor iteration.
+        Put the new request to the queue and if possible, start downloading it.
         '''
         def remove_in_progress(response):
             self.in_progress.remove(request)
@@ -40,7 +41,7 @@ class Slot(object):
         self.in_progress.add(request)
         dfd.addBoth(remove_in_progress)
         self.queue.push((request, dfd))
-        self.processing.schedule()
+        self._process()
 
     @property
     def free_slots(self):
@@ -53,11 +54,11 @@ class Slot(object):
         '''Process the requests in the queue, while respecting the delay and
         concurrency.
         '''
-        if self._schedule_delay():
+        if self.delayed_processing.is_scheduled() or self._schedule_delay():
             return
 
         while self.queue and self.free_slots > 0:
-            self.last_download_time = self._clock.seconds()
+            self.last_download_time = self.clock.seconds()
             request, downloaded_dfd = self.queue.pop()
             dfd = self._download(request)
             dfd.chainDeferred(downloaded_dfd)
@@ -67,11 +68,11 @@ class Slot(object):
     def _schedule_delay(self):
         if self.delay:
             penalty = (self.last_download_time + self.get_download_delay() -
-                       self._clock.seconds())
+                       self.clock.seconds())
             if penalty > 0:
                 # following schedule should always be successfull, because
                 # `_schedule_delay()` is only called from within `_process()`
-                self.processing.schedule(penalty)
+                self.delayed_processing.schedule(penalty)
                 return True
         return False
 
@@ -83,7 +84,7 @@ class Slot(object):
         # after the response is downloaded, remove it from `transferring`
         def remove_transferring(response):
             self.transferring.remove(request)
-            self.processing.schedule()  # process unblocked requests
+            self._process()  # process unblocked requests
             return response
         self.transferring.add(request)
         dfd.addBoth(remove_transferring)
@@ -106,29 +107,29 @@ class Downloader(object):
     and `inq` and `outq` are persistent queues, no requests should be lost.
     '''
 
-    def __init__(self, engine, inq, outq):
-        self.engine = engine
-        self.settings = engine.settings
+    def __init__(self, settings, inq, outq, download_handler=None, clock=None):
         self.inq = inq  # queue of requests
         self.outq = outq  # queue of responses
-        self.download_handler = GeneralHandler(self.settings)
+        self.download_handler = download_handler or GeneralHandler(settings)
         self.slots = {}
         self.num_in_progress = 0
-        self.processing = ScheduledCall(self.process)
+        self.clock = clock or reactor
+        self.processing = LoopingCall(self.process, clock=self.clock)
+        self.processing.schedule()
 
-        self.download_delay = self.settings.get_int('DOWNLOAD_DELAY')
-        self.randomize_delay = self.settings.get_int(
+        self.download_delay = settings.get_int('DOWNLOAD_DELAY')
+        self.randomize_delay = settings.get_int(
             'RANDOMIZE_DOWNLOAD_DELAY')
         if self.download_delay:
             self.total_concurrency = self.domain_concurrency = 1
             self.use_domain_specific = False
         else:
-            self.total_concurrency = self.settings.get_int(
+            self.total_concurrency = settings.get_int(
                 'CONCURRENT_REQUESTS')
-            self.domain_concurrency = self.settings.get_int(
+            self.domain_concurrency = settings.get_int(
                 'CONCURRENT_REQUESTS_PER_DOMAIN')
             if (not self.domain_concurrency or
-                    self.domain_concurrency > self.total_concurrency):
+                    self.domain_concurrency >= self.total_concurrency):
                 self.use_domain_specific = False
                 self.domain_concurrency = self.total_concurrency
             else:
@@ -142,30 +143,34 @@ class Downloader(object):
         return self.num_in_progress == 0
 
     def process(self):
-        self.processing.schedule()
-
         while self.inq and self.free_slots > 0:
             request = self.inq.pop()
-            slot = self._get_slot(request)
+            key, slot = self._get_slot(request)
 
             def remove_in_progress(response):
                 self.num_in_progress -= 1
                 self._clear_slots()  # clear empty slots
-                self.outq.push((request, response))
                 return response
+
+            def enqueue_result(request, response):
+                self.outq.push((request, response))
+                # don't return anything from here, in a case an error occured
+
             self.num_in_progress += 1
             dfd = defer.Deferred().addBoth(remove_in_progress)
+            dfd.addBoth(partial(enqueue_result, request))
             slot.enqueue(request, dfd)
 
     def _get_slot(self, request):
         key = request.parsed_url.hostname if self.use_domain_specific else ''
         if key not in self.slots:
             self.slots[key] = Slot(
-                self,
+                self.download_handler,
                 self.domain_concurrency,
                 self.download_delay,
-                self.randomize_delay)
-        return self.slots[key]
+                self.randomize_delay,
+                clock=self.clock)
+        return key, self.slots[key]
 
     def _clear_slots(self):
         '''Clear unused slots and avoid memory leaking.'''
