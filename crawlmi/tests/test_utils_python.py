@@ -2,6 +2,7 @@ import unittest2
 
 from crawlmi.utils.python import to_unicode, to_str
 
+
 class UtilsPythonTest(unittest2.TestCase):
 
     def test_to_str(self):

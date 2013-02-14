@@ -62,7 +62,7 @@ class CrawlmiFileLogObserverTest(unittest.TestCase):
 
     def test_err_noargs(self):
         try:
-            a = 1/0
+            a = 1 / 0
         except:
             log.err()
         self.assertIn('Traceback', self.logged())
