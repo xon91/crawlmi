@@ -1,13 +1,13 @@
 class DummyStats(object):
 
-    def __init__(self):
-        self._stats = {}
+    def __init__(self, engine):
+        pass
 
     def get_value(self, key, default=None):
         return default
 
     def get_stats(self):
-        return self._stats
+        return {}
 
     def set_value(self, key, value):
         pass
@@ -25,4 +25,7 @@ class DummyStats(object):
         pass
 
     def clear_stats(self):
-        self._stats.clear()
+        pass
+
+    def dump_stats(self):
+        pass

@@ -1,7 +1,13 @@
+import pprint
+
+from crawlmi import log
+
+
 class MemoryStats(object):
 
-    def __init__(self):
+    def __init__(self, engine):
         self._stats = {}
+        self._dump = engine.settings.get_bool('STATS_DUMP')
 
     def get_value(self, key, default=None):
         return self._stats.get(key, default)
@@ -27,3 +33,7 @@ class MemoryStats(object):
 
     def clear_stats(self):
         self._stats.clear()
+
+    def dump_stats(self):
+        if self._dump:
+            log.msg('Dumping crawlmi stats:\n' + pprint.pformat(self._stats))
