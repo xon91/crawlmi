@@ -1,25 +1,18 @@
-from cStringIO import StringIO
-
 from twisted.trial import unittest
 
 from crawlmi import log
 from crawlmi.stats import DummyStats, MemoryStats
-from crawlmi.utils.test import get_engine
+from crawlmi.utils.test import get_engine, LogWrapper
 
 
 class StatsTest(unittest.TestCase):
 
     def setUp(self):
-        self.f = StringIO()
-        self.flo = log.CrawlmiFileLogObserver(self.f)
-        self.flo.start()
+        self.lw = LogWrapper()
+        self.lw.setUp(log.INFO, 'utf-8')
 
     def tearDown(self):
-        self.flushLoggedErrors()
-        self.flo.stop()
-
-    def logged(self):
-        return self.f.getvalue().strip()[25:]  # strip timestamp
+        self.lw.tearDown()
 
     def test_memory_stats(self):
         stats = MemoryStats(get_engine(STATS_DUMP=True))
@@ -49,7 +42,7 @@ class StatsTest(unittest.TestCase):
         self.assertEqual(stats.get_value('test4'), 7)
 
         stats.dump_stats()
-        logged = self.logged()
+        logged = self.lw.get_logged()
         self.assertTrue(logged.startswith('[crawlmi] INFO: Dumping crawlmi stats:'))
         self.assertIn('test', logged)
         self.assertIn('test2', logged)
