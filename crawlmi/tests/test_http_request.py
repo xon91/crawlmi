@@ -3,6 +3,7 @@ from urlparse import urlparse
 
 from crawlmi.http.headers import Headers
 from crawlmi.http.request import Request
+from crawlmi.settings import Settings
 
 
 gh_url = 'http://www.github.com/'
@@ -24,16 +25,19 @@ class RequestTest(unittest2.TestCase):
         self.assertIsInstance(r.headers, Headers)
         self.assertIsInstance(r.meta, dict)
         self.assertIsInstance(r.history, list)
+        self.assertIsInstance(r.settings, Settings)
 
         # test copiing of parameters
         headers = Headers({'Accept': 'gzip', 'Custom-Header': 'nothing to tell you'})
         meta = {'a': 'b', 'c': 'd'}
         params = {'a': 10, 'b': 20}
+        settings = {'hello': 'world'}
         history = ['a', 'b']
         encoding = 'latin1'
         body = u'Price: \xa3100'
         r = Request(url=gh_url, method='post', headers=headers, body=body,
-            encoding=encoding, meta=meta, params=params, history=history)
+            encoding=encoding, meta=meta, params=params, history=history,
+            settings=settings)
         self.assertEqual(r.url, 'http://www.github.com/?a=10&b=20')
         self.assertEqual(r.method, 'POST')
         self.assertEqual(r.encoding, 'latin1')
@@ -41,6 +45,7 @@ class RequestTest(unittest2.TestCase):
 
         test_copy_dict(headers, r.headers, 'headers')
         test_copy_dict(meta, r.meta, 'meta')
+        test_copy_dict(settings, r.settings, 'settings')
         self.assertIsInstance(r.history, list)
         self.assertListEqual(r.history, history)
         self.assertIsNot(r.history, history)
@@ -204,7 +209,7 @@ class RequestTest(unittest2.TestCase):
         r1 = Request('http://www.example.com', callback=somecallback,
             errback=somecallback, method='post', headers={'hello': 'world'},
             params={'a': 'b'}, body='blablabla', meta={'c': 'd'}, proxy='123',
-            priority=10, history=[1, 2, 3], encoding='latin1')
+            priority=10, history=[1, 2, 3], encoding='latin1', settings={'a': 'b'})
         r2 = r1.copy()
 
         self.assertIs(r1.callback, somecallback)
@@ -218,6 +223,8 @@ class RequestTest(unittest2.TestCase):
         self.assertDictEqual(r1.headers, r2.headers)
         self.assertIsNot(r1.meta, r2.meta)
         self.assertDictEqual(r1.meta, r2.meta)
+        self.assertIsNot(r1.settings, r2.settings)
+        self.assertDictEqual(r1.settings, r2.settings)
         self.assertIsNot(r1.history, r2.history)
         self.assertListEqual(r1.history, r2.history)
         self.assertEqual(r1.body, r2.body)

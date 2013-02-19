@@ -2,6 +2,7 @@ from urlparse import urlparse, urlunparse
 from urllib import urlencode
 
 from crawlmi.http.headers import Headers
+from crawlmi.settings import Settings
 from crawlmi.utils.python import to_str
 from crawlmi.utils.url import requote_url, requote_ajax
 
@@ -9,7 +10,7 @@ from crawlmi.utils.url import requote_url, requote_ajax
 class Request(object):
     def __init__(self, url, callback=None, method='GET', headers={},
                  params={}, body='', meta={}, errback=None, proxy=None,
-                 priority=0, history=[], encoding='utf-8'):
+                 priority=0, history=[], encoding='utf-8', settings={}):
         self.callback = callback
         self.errback = errback
 
@@ -18,6 +19,7 @@ class Request(object):
         self.history = list(history)
         self.proxy = proxy
         self.priority = priority
+        self.settings = Settings(settings)
 
         # following attributes are immutable
         self._encoding = encoding
@@ -131,7 +133,7 @@ class Request(object):
         given new values.
         '''
         for x in ['url', 'callback', 'method', 'headers', 'body', 'priority',
-                'meta', 'errback', 'proxy', 'history', 'encoding']:
+                'meta', 'errback', 'proxy', 'history', 'encoding', 'settings']:
             kwargs.setdefault(x, getattr(self, x))
         cls = kwargs.pop('cls', self.__class__)
         return cls(*args, **kwargs)
