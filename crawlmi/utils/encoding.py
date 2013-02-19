@@ -43,7 +43,7 @@ def get_encoding_from_headers(headers):
     content_type, params = cgi.parse_header(content_type)
 
     if 'charset' in params:
-        encoding = params['charset'].strip("'\"")
+        encoding = params['charset'].strip('\'"')
     elif 'text' in content_type:
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
         encoding = 'iso-8859-1'

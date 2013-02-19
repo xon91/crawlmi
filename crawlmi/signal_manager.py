@@ -29,13 +29,13 @@ class SignalManager(object):
                 response = robustApply(receiver, signal=signal, sender=sender,
                                        *args, **kwargs)
                 if isinstance(response, defer.Deferred):
-                    log.msg(format="Cannot return deferreds from signal handler: %(receiver)s",
+                    log.msg(format='Cannot return deferreds from signal handler: %(receiver)s',
                             level=log.ERROR, receiver=receiver)
             except dont_log:
                 result = Failure()
             except Exception:
                 result = Failure()
-                log.err(result, "Error caught on signal handler: %s" % receiver)
+                log.err(result, 'Error caught on signal handler: %s' % receiver)
             else:
                 result = response
             responses.append((receiver, result))
@@ -47,7 +47,7 @@ class SignalManager(object):
 
         def logerror(failure, recv):
             if dont_log is None or not isinstance(failure.value, dont_log):
-                log.err(failure, "Error caught on signal handler: %s" % recv)
+                log.err(failure, 'Error caught on signal handler: %s' % recv)
             return failure
 
         dfds = []
