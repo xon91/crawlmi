@@ -30,8 +30,12 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 
 # Extensions
 
-EXTENSIONS_BASE = {}
+EXTENSIONS_BASE = {
+    'crawlmi.middleware.extensions.log_stats.LogStats': 0,
+}
 EXTENSIONS = {}
+
+LOG_STATS_INTERVAL = 60.0
 
 
 # Downloader pipeline
