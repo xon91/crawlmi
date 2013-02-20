@@ -2,7 +2,7 @@ import unittest2
 
 from crawlmi.exceptions import NotConfigured
 from crawlmi.middleware.middleware_manager import MiddlewareManager
-from crawlmi.utils.test import get_engine
+from crawlmi.utils.test import get_engine, LogWrapper
 
 
 class M1(object):
@@ -27,7 +27,22 @@ class TestMiddlewareManager(MiddlewareManager):
 
 
 class MiddlewareManagerTest(unittest2.TestCase):
+    def setUp(self):
+        self.lw = LogWrapper()
+        self.lw.setUp()
+
+    def tearDown(self):
+        self.lw.tearDown()
+
     def test_init(self):
         mw = TestMiddlewareManager(get_engine())
+        active = [x.__class__ for x in mw.middlewares]
+        self.assertListEqual(active, [M1, M2])
+
+        logged = self.lw.get_first_line()
+        self.assertEqual(logged, "[crawlmi] WARNING: Disabled <class 'crawlmi.tests.test_middleware_manager.MOff'>:")
+
+    def test_init2(self):
+        mw = TestMiddlewareManager(get_engine(), mw_classes=[M1, M2, MOff])
         active = [x.__class__ for x in mw.middlewares]
         self.assertListEqual(active, [M1, M2])

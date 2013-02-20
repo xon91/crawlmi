@@ -9,26 +9,30 @@ class MiddlewareManager(object):
     # used in output messages
     component_name = ''
 
-    def __init__(self, engine):
+    def __init__(self, engine, mw_classes=None):
         self.engine = engine
         self.settings = engine.settings
-        self.middlewares = self._get_middlewares()
+        self.middlewares = self._get_middlewares(mw_classes)
 
     def _get_mwlist(self):
         raise NotImplementedError
 
-    def _get_middlewares(self):
-        mwlist = self._get_mwlist()
+    def _get_middlewares(self, mw_classes):
+        if mw_classes is None:
+            mwlist = []
+            for clspath in self._get_mwlist():
+                mwlist.append(load_object(clspath))
+        else:
+            mwlist = mw_classes
+
         middlewares = []
-        for clspath in mwlist:
+        for mwcls in mwlist:
             try:
-                mwcls = load_object(clspath)
                 mw = mwcls(self.engine)
                 middlewares.append(mw)
             except NotConfigured as e:
-                clsname = clspath.split('.')[-1]
                 log.msg(format='Disabled %(clsname)s: %(error)s',
-                        level=log.WARNING, clsname=clsname, error=e)
+                        level=log.WARNING, clsname=mwcls, error=e)
 
         enabled = [x.__class__.__name__ for x in middlewares]
         log.msg(format='Enabled %(componentname)ss: %(enabledlist)s',
