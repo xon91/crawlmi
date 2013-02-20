@@ -32,6 +32,14 @@ class ResponseTest(unittest2.TestCase):
         self.assertEqual(r.status, 301)
         self.assertRaises(ValueError, Response, 'http://example.com', status='lala200')
 
+    def test_properties(self):
+        r = Response('', body='hey')
+
+        def set_body():
+            r.body = ''
+        self.assertEqual(r.body, 'hey')
+        self.assertRaises(AttributeError, set_body)
+
     def test_request(self):
         req = Request(url='http://github.com', meta={'a': 'b'})
         req.history = ['a', 'b']
@@ -45,3 +53,24 @@ class ResponseTest(unittest2.TestCase):
         self.assertRaisesRegexp(AttributeError, _no_request_error, lambda: r.meta)
         self.assertRaisesRegexp(AttributeError, _no_request_error, lambda: r.history)
         self.assertRaisesRegexp(AttributeError, _no_request_error, lambda: r.original_url)
+
+    def test_copy(self):
+        req = Request('http://gh.com/')
+        r1 = Response(url='http://hey.com/', status=201, headers={'a': 'b'},
+                      body='hey', request=req)
+        r2 = r1.copy()
+
+        self.assertEqual(r1.url, r2.url)
+        self.assertEqual(r1.status, r2.status)
+        self.assertEqual(r1.body, r2.body)
+        self.assertIs(r1.request, r2.request)
+        self.assertIsInstance(r2.headers, Headers)
+        self.assertDictEqual(r1.headers, r2.headers)
+
+    def test_copy_inherited_classes(self):
+        class CustomResponse(Response):
+            pass
+
+        r1 = CustomResponse('')
+        r2 = r1.copy()
+        self.assertIsInstance(r2, CustomResponse)
