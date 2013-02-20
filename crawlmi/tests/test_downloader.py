@@ -5,6 +5,7 @@ from twisted.python.failure import Failure
 
 from crawlmi.core.downloader import Slot, Downloader
 from crawlmi.http.request import Request
+from crawlmi.http.response import Response
 from crawlmi.queue import MemoryQueue
 from crawlmi.settings import Settings
 from crawlmi.utils.clock import Clock
@@ -20,6 +21,7 @@ class MockDownloaderHandler(object):
         return dfd
 
     def call(self, request, response):
+        response.request = request
         self.dfds[request].callback(response)
 
     def fail(self, request, error):
@@ -64,17 +66,17 @@ class DownloaderSlotTest(unittest2.TestCase):
         self.assertEqual(self.slot.free_slots, 0)
 
         # download r2
-        self.handler.call(r2, r2)
-        self.assertIs(received[-1], r2)
+        self.handler.call(r2, Response(''))
+        self.assertIs(received[-1].request, r2)
         self.assertEqual(len(self.slot.transferring), 2)
         self.assertEqual(len(self.slot.in_progress), 2)
         self.assertEqual(self.slot.free_slots, 0)
 
         # download r1 and r3
-        self.handler.call(r3, r3)
-        self.handler.call(r1, r1)
-        self.assertIs(received[-2], r3)
-        self.assertIs(received[-1], r1)
+        self.handler.call(r3, Response(''))
+        self.handler.call(r1, Response(''))
+        self.assertIs(received[-2].request, r3)
+        self.assertIs(received[-1].request, r1)
         self.assertEqual(self.slot.free_slots, 2)
 
         # nothing happens now
@@ -100,7 +102,7 @@ class DownloaderSlotTest(unittest2.TestCase):
         self.assertEqual(self.slot.delayed_processing.get_time(), 15)
 
         # download the 1st request
-        self.handler.call(r1, r1)
+        self.handler.call(r1, Response(''))
         self.assertEqual(len(self.slot.in_progress), 2)
         self.assertEqual(len(self.slot.transferring), 0)
         self.assertEqual(self.slot.free_slots, 1)
@@ -159,10 +161,10 @@ class DownloaderSlotTest(unittest2.TestCase):
         # other requests should be ok
         self.assertEqual(len(self.slot.in_progress), 2)
         self.assertEqual(len(self.slot.transferring), 2)
-        self.handler.call(r2, r2)
-        self.assertEqual(received[-1], r2)
-        self.handler.call(r3, r3)
-        self.assertEqual(received[-1], r3)
+        self.handler.call(r2, Response(''))
+        self.assertEqual(received[-1].request, r2)
+        self.handler.call(r3, Response(''))
+        self.assertEqual(received[-1].request, r3)
         self.assertEqual(len(self.slot.in_progress), 0)
         self.assertEqual(len(self.slot.transferring), 0)
 
@@ -255,27 +257,27 @@ class DownloaderTest(unittest2.TestCase):
         self.clock.advance(20)
         self.assertEqual(len(self.inq), 3)
         # download the first request
-        self.handler.call(requests[0], 'hello')
+        self.handler.call(requests[0], Response('hello'))
         self.assertEqual(self.dwn.free_slots, 1)  # slot is immediately available
         # result is also available
         result = self.outq.peek()
-        self.assertIs(result[0], requests[0])
-        self.assertEqual(result[1], 'hello')
+        self.assertIs(result.request, requests[0])
+        self.assertEqual(result.url, 'hello')
         # enqueue third request
         self.clock.advance(0)
         self.assertEqual(self.dwn.free_slots, 0)
         # download second request
-        self.handler.call(requests[1], requests[1])
+        self.handler.call(requests[1], Response(''))
         # enqueue fourth request
         self.clock.advance(0)
         self.assertEqual(self.dwn.free_slots, 0)
         # fourth request should not begin download, until 3rd request is done
-        self.assertRaises(KeyError, self.handler.call, requests[3], requests[3])
+        self.assertRaises(KeyError, self.handler.call, requests[3], Response(''))
         # finish
-        self.handler.call(requests[2], requests[2])
-        self.handler.call(requests[3], requests[3])
+        self.handler.call(requests[2], Response(''))
+        self.handler.call(requests[3], Response(''))
         self.clock.advance(0)
-        self.handler.call(requests[4], requests[4])
+        self.handler.call(requests[4], Response(''))
         # final checks
         self.clock.pump([1] * 10)
         self.assertEqual(len(self.outq), 5)
@@ -292,24 +294,24 @@ class DownloaderTest(unittest2.TestCase):
         err = ValueError('my bad')
         self.handler.fail(requests[0], err)
         self.assertEqual(self.dwn.free_slots, 1)
-        req, fail = self.outq.pop()
-        self.assertIs(req, requests[0])
+        fail = self.outq.pop()
+        self.assertIs(fail.request, requests[0])
         self.assertIs(fail.value, err)
         # fail 3rd request
         self.handler.fail(requests[2], err)
-        req, fail = self.outq.pop()
-        self.assertIs(req, requests[2])
+        fail = self.outq.pop()
+        self.assertIs(fail.request, requests[2])
         self.assertIs(fail.value, err)
         # succeed 2nd request
-        self.handler.call(requests[1], 'nice!')
-        req, resp = self.outq.pop()
-        self.assertIs(req, requests[1])
-        self.assertEqual(resp, 'nice!')
+        self.handler.call(requests[1], Response('nice!', request=requests[1]))
+        resp = self.outq.pop()
+        self.assertIs(resp.request, requests[1])
+        self.assertEqual(resp.url, 'nice!')
 
     def test_clear_slots(self):
         requests = [get_request(id)[0] for id in xrange(30)]
         for r in requests:
             self.inq.push(r)
             self.clock.advance(0)
-            self.handler.call(r, '')
+            self.handler.call(r, Response(''))
         self.assertLessEqual(len(self.dwn.slots), 2 * self.dwn.total_concurrency)

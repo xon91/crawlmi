@@ -152,9 +152,12 @@ class Downloader(object):
                 self._clear_slots()  # clear empty slots
                 return response
 
-            def enqueue_result(request, response):
-                self.outq.push((request, response))
-                # don't return anything from here, in a case an error occured
+            def enqueue_result(request, result):
+                # in a case, result is actually a Failure
+                result.request = request
+                self.outq.push(result)
+                # don't return anything from here, in a case an error occured -
+                # we don't want it to be logged
 
             self.num_in_progress += 1
             dfd = defer.Deferred().addBoth(remove_in_progress)

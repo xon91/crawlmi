@@ -46,6 +46,7 @@ class PipelineManager(MiddlewareManager):
                 return request
 
     def process_response(self, response):
+        # we can be sure that response.request is set from the downloader
         request = response.request
 
         for pr, pf in self._process_response:
