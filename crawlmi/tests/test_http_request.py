@@ -1,5 +1,6 @@
-import unittest2
 from urlparse import urlparse
+
+from twisted.trial import unittest
 
 from crawlmi.http.headers import Headers
 from crawlmi.http.request import Request
@@ -9,7 +10,7 @@ from crawlmi.settings import Settings
 gh_url = 'http://www.github.com/'
 
 
-class RequestTest(unittest2.TestCase):
+class RequestTest(unittest.TestCase):
 
     def test_init(self):
         self.assertRaises(Exception, Request)

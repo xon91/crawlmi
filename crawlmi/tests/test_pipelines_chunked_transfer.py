@@ -1,10 +1,10 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.middleware.pipelines.chunked_transfer import ChunkedTransfer
 from crawlmi.utils.test import get_engine
 
 
-class ChunkedTransferTest(unittest2.TestCase):
+class ChunkedTransferTest(unittest.TestCase):
     def test_decode_chunked_transfer(self):
         ct = ChunkedTransfer(get_engine())
 

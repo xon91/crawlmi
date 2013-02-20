@@ -1,4 +1,4 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi import signals
 from crawlmi.exceptions import NotConfigured
@@ -9,7 +9,7 @@ from crawlmi.utils.clock import Clock
 from crawlmi.utils.test import get_engine, LogWrapper
 
 
-class LogStatsTest(unittest2.TestCase):
+class LogStatsTest(unittest.TestCase):
     def setUp(self):
         self.clock = Clock()
         self.engine = get_engine(LOG_STATS_INTERVAL=30)

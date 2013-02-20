@@ -1,9 +1,9 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.utils.python import to_unicode, to_str
 
 
-class UtilsPythonTest(unittest2.TestCase):
+class UtilsPythonTest(unittest.TestCase):
 
     def test_to_str(self):
         self.assertEqual(to_str(u'\xa3 49'), '\xc2\xa3 49')

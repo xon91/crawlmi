@@ -1,4 +1,4 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.utils.clock import Clock
 from crawlmi.utils.defer import ScheduledCall, LoopingCall
@@ -16,7 +16,7 @@ class ModifiedObject(object):
         self.kwargs = kwargs
 
 
-class ScheduledCallTest(unittest2.TestCase):
+class ScheduledCallTest(unittest.TestCase):
     default_args = (10, 'hello')
     default_kwargs = {'a': 47, 'b': 'c'}
 
@@ -128,7 +128,7 @@ class ScheduledCallTest(unittest2.TestCase):
         self._check(args2, kwargs2)
 
 
-class LoopingCallTest(unittest2.TestCase):
+class LoopingCallTest(unittest.TestCase):
     default_args = (10, 'hello')
     default_kwargs = {'a': 47, 'b': 'c'}
 

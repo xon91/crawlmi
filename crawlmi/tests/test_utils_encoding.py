@@ -1,12 +1,13 @@
 import codecs
-import unittest2
+
+from twisted.trial import unittest
 
 from crawlmi.utils.encoding import (_read_bom, get_encoding_from_headers,
         get_encoding_from_content, _norm_encoding, get_unicode_from_response)
 from crawlmi.http.headers import Headers
 
 
-class EncodingDetectionTest(unittest2.TestCase):
+class EncodingDetectionTest(unittest.TestCase):
     def test_bom(self):
         # cjk water character in unicode
         water_unicode = u'\u6C34'
@@ -57,7 +58,7 @@ class EncodingDetectionTest(unittest2.TestCase):
             '''<meta http-equiv="Fake-Content-Type-Header" content="text/html; charset=utf-8">'''))
 
 
-class CodecsEncodingTest(unittest2.TestCase):
+class CodecsEncodingTest(unittest.TestCase):
     def test_resolve_encoding(self):
         self.assertEqual(_norm_encoding('latin1'), 'cp1252')
         self.assertEqual(_norm_encoding(' Latin-1'), 'cp1252')
@@ -65,7 +66,7 @@ class CodecsEncodingTest(unittest2.TestCase):
         self.assertEqual(_norm_encoding('unknown encoding'), None)
 
 
-class UnicodeDecodingTest(unittest2.TestCase):
+class UnicodeDecodingTest(unittest.TestCase):
     def test_utf8(self):
         self.assertEqual(unicode('\xc2\xa3', 'utf-8', 'replace'), u'\xa3')
 
@@ -85,7 +86,7 @@ class MockResponse(object):
             self.headers['Content-Type'] = 'text/html; charset=' + encoding
 
 
-class HtmlConversionTests(unittest2.TestCase):
+class HtmlConversionTests(unittest.TestCase):
 
     def test_unicode_body(self):
         unicode_string = u'\u043a\u0438\u0440\u0438\u043b\u043b\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0442\u0435\u043a\u0441\u0442'

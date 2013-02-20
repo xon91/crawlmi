@@ -1,11 +1,11 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.http.headers import Headers
 from crawlmi.http.request import Request
 from crawlmi.http.response import Response
 
 
-class ResponseTest(unittest2.TestCase):
+class ResponseTest(unittest.TestCase):
 
     def test_init(self):
         self.assertRaises(Exception, Response)

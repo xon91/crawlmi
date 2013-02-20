@@ -1,5 +1,6 @@
 import random
-import unittest2
+
+from twisted.trial import unittest
 
 from crawlmi.queue import MemoryQueue, PriorityQueue
 
@@ -8,7 +9,7 @@ def qfactory(priority):
     return MemoryQueue()
 
 
-class PriorityQueueTest(unittest2.TestCase):
+class PriorityQueueTest(unittest.TestCase):
 
     def test_basic(self):
         q = PriorityQueue(qfactory)

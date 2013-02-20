@@ -1,7 +1,6 @@
-import unittest2
-
 from twisted.internet import defer
 from twisted.python.failure import Failure
+from twisted.trial import unittest
 
 from crawlmi.core.downloader import Slot, Downloader
 from crawlmi.http.request import Request
@@ -35,7 +34,7 @@ def get_request(domain='github', func=None):
     return (Request('http://www.%s.com/' % domain), dfd)
 
 
-class DownloaderSlotTest(unittest2.TestCase):
+class DownloaderSlotTest(unittest.TestCase):
     default_concurrency = 2
     default_delay = 0
     default_randomize_delay = False
@@ -169,7 +168,7 @@ class DownloaderSlotTest(unittest2.TestCase):
         self.assertEqual(len(self.slot.transferring), 0)
 
 
-class DownloaderTest(unittest2.TestCase):
+class DownloaderTest(unittest.TestCase):
 
     default_settings = Settings({
         'CONCURRENT_REQUESTS': 2,

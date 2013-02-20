@@ -1,4 +1,4 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.exceptions import NotConfigured
 from crawlmi.middleware.middleware_manager import MiddlewareManager
@@ -26,7 +26,7 @@ class TestMiddlewareManager(MiddlewareManager):
                 for x in ['M1', 'MOff', 'M2']]
 
 
-class MiddlewareManagerTest(unittest2.TestCase):
+class MiddlewareManagerTest(unittest.TestCase):
     def setUp(self):
         self.lw = LogWrapper()
         self.lw.setUp()

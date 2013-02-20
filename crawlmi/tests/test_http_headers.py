@@ -1,10 +1,11 @@
 import copy
-import unittest2
+
+from twisted.trial import unittest
 
 from crawlmi.http.headers import Headers
 
 
-class HeadersTest(unittest2.TestCase):
+class HeadersTest(unittest.TestCase):
     def test_basics(self):
         h = Headers({'Content-Type': 'text/html', 'Content-Length': 1234})
         self.assertIn('Content-Type', h)

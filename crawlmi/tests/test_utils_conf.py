@@ -1,9 +1,9 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.utils.conf import build_component_list
 
 
-class UtilsConfTest(unittest2.TestCase):
+class UtilsConfTest(unittest.TestCase):
 
     def test_build_component_list(self):
         base = {'one': 1, 'two': 2, 'three': 3, 'five': 5, 'six': None}

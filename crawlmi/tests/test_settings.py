@@ -1,9 +1,9 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.settings import Settings
 
 
-class SettingsTest(unittest2.TestCase):
+class SettingsTest(unittest.TestCase):
     tests = {
         'BOOL_TRUE_1': (1, True),
         'BOOL_TRUE_2': ('1', True),

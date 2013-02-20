@@ -1,5 +1,6 @@
 from os.path import join
-import unittest2
+
+from twisted.trial import unittest
 
 from crawlmi.tests import tests_datadir
 from crawlmi.utils.gz import gunzip
@@ -7,7 +8,7 @@ from crawlmi.utils.gz import gunzip
 
 SAMPLE_DIR = join(tests_datadir, 'compressed')
 
-class GzTest(unittest2.TestCase):
+class GzTest(unittest.TestCase):
     def test_gunzip_basic(self):
         with open(join(SAMPLE_DIR, 'feed-sample1.xml.gz'), 'rb') as f:
             text = gunzip(f.read())

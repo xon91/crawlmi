@@ -1,6 +1,5 @@
-import unittest2
-
 from twisted.python.failure import Failure
+from twisted.trial import unittest
 
 from crawlmi.exceptions import RestartPipeline
 from crawlmi.http.request import Request
@@ -9,7 +8,7 @@ from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.utils.test import get_engine
 
 
-class PipelineManagerTest(unittest2.TestCase):
+class PipelineManagerTest(unittest.TestCase):
     def setUp(self):
         self.mws = []
         self.actions = []

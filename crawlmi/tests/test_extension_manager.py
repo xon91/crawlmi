@@ -1,4 +1,4 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.exceptions import NotConfigured
 from crawlmi.middleware.extension_manager import ExtensionManager
@@ -24,7 +24,7 @@ class EOff(object):
         raise NotConfigured
 
 
-class ExtensionManagerTest(unittest2.TestCase):
+class ExtensionManagerTest(unittest.TestCase):
     def test_basic(self):
         em = ExtensionManager(get_engine(), mw_classes=[E1, E2, EOff])
         active = [x.__class__ for x in em.middlewares]

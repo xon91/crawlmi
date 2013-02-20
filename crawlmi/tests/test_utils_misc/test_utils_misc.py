@@ -1,9 +1,9 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.utils.misc import arg_to_iter, load_object
 
 
-class UtilsMiscTest(unittest2.TestCase):
+class UtilsMiscTest(unittest.TestCase):
 
     def test_load_object(self):
         obj = load_object('crawlmi.utils.misc.load_object')

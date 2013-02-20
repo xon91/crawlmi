@@ -1,10 +1,11 @@
 import random
-import unittest2
+
+from twisted.trial import unittest
 
 from crawlmi.queue import Heap
 
 
-class HeapTest(unittest2.TestCase):
+class HeapTest(unittest.TestCase):
     def test_basic(self):
         h = Heap()
         self.assertEqual(len(h), 0)

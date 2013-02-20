@@ -1,9 +1,9 @@
-import unittest2
+from twisted.trial import unittest
 
 from crawlmi.queue import MemoryQueue
 
 
-class QueueTest(unittest2.TestCase):
+class QueueTest(unittest.TestCase):
 
     def _test(self, qcls):
         q = qcls()
