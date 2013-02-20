@@ -1,6 +1,5 @@
 from twisted.trial import unittest
 
-from crawlmi import log
 from crawlmi.stats import DummyStats, MemoryStats
 from crawlmi.utils.test import get_engine, LogWrapper
 
@@ -9,7 +8,7 @@ class StatsTest(unittest.TestCase):
 
     def setUp(self):
         self.lw = LogWrapper()
-        self.lw.setUp(log.INFO, 'utf-8')
+        self.lw.setUp()
 
     def tearDown(self):
         self.lw.tearDown()
@@ -42,8 +41,9 @@ class StatsTest(unittest.TestCase):
         self.assertEqual(stats.get_value('test4'), 7)
 
         stats.dump_stats()
-        logged = self.lw.get_logged()
+        logged = self.lw.get_first_line(clear=False)
         self.assertTrue(logged.startswith('[crawlmi] INFO: Dumping crawlmi stats:'))
+        logged = self.lw.get_logged()
         self.assertIn('test', logged)
         self.assertIn('test2', logged)
         self.assertIn('test3', logged)

@@ -15,7 +15,7 @@ def get_engine(custom_settings=None, **kwargs):
 
 
 class LogWrapper(object):
-    def setUp(self, level, encoding):
+    def setUp(self, level=log.INFO, encoding='utf-8'):
         self.f = StringIO()
         self.flo = log.CrawlmiFileLogObserver(self.f, level, encoding)
         self.flo.start()
@@ -23,12 +23,22 @@ class LogWrapper(object):
     def tearDown(self):
         self.flo.stop()
 
-    def get_logged(self, strip=True):
+    def clear(self):
+        self.f.reset()
+        self.f.truncate()
+
+    def get_logged(self, clear=True):
         logged = self.f.getvalue()
-        if strip:
-            logged = logged.strip()[25:]
+        if clear:
+            self.clear()
         return logged
 
-    def get_first_line(self, strip=True):
-        logged = self.get_logged(strip)
-        return logged.splitlines()[0] if logged else ''
+    def get_lines(self, strip=True, clear=True):
+        lines = self.get_logged(clear=clear).splitlines()
+        if strip:
+            lines = map(lambda l: l.strip()[25:], lines)
+        return lines
+
+    def get_first_line(self, strip=True, clear=True):
+        lines = self.get_lines(strip=strip, clear=clear)
+        return lines[0] if lines else ''
