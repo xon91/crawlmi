@@ -14,7 +14,10 @@ class LogStats(object):
         engine.signals.connect(self.engine_started, signal=signals.engine_started)
         engine.signals.connect(self.engine_stopped, signal=signals.engine_stopped)
         engine.signals.connect(self.response_received, signal=signals.response_received)
+        engine.signals.connect(self.response_downloaded, signal=signals.response_downloaded)
 
+        self.received = 0
+        self.received_prev = 0
         self.downloaded = 0
         self.downloaded_prev = 0
 
@@ -24,11 +27,17 @@ class LogStats(object):
     def engine_stopped(self):
         self.logging.cancel()
 
-    def response_received(self):
+    def response_downloaded(self):
         self.downloaded += 1
 
+    def response_received(self):
+        self.received += 1
+
     def log(self):
-        per_minute = (self.downloaded - self.downloaded_prev) * self.multiplier
+        received_speed = (self.received - self.received_prev) * self.multiplier
+        downloaded_speed = (self.downloaded - self.downloaded_prev) * self.multiplier
+
+        self.received_prev = self.received
         self.downloaded_prev = self.downloaded
-        msg = 'Crawled %d pages (at %d pages/min)' % (self.downloaded, per_minute)
-        log.msg(msg)
+        log.msg('Crawled %d pages (at %d pages/min). Raw speed %d downloads/min.' %
+                (self.received, received_speed, downloaded_speed))
