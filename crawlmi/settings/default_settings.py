@@ -40,5 +40,7 @@ LOG_STATS_INTERVAL = 60.0
 
 # Downloader pipeline
 
-PIPELINE_BASE = {}
+PIPELINE_BASE = {
+    'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
+}
 PIPELINE = {}
