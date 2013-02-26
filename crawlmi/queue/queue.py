@@ -1,4 +1,11 @@
 class Queue(object):
+    '''Base class for the queue object.
+    It implements the boilerplate code:
+        - keep track of the number of stored objects
+        - forbid operations on closed queue
+        - forbid peeking and popping from empty queue
+    Child classes only need to implement _push, _peek, _pop and _close.
+    '''
 
     def __init__(self):
         self._closed = False

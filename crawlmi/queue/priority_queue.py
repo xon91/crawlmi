@@ -12,9 +12,6 @@ class PriorityQueue(Queue):
     there are many different priorities and even faster, when there are only
     few different priorities.
 
-    PriorityQueue internally uses the implementation of the ordinary queue,
-    defined through `qfactory`. Internal queue has to inherit from `Queue`.
-
     The constructor receives a `qfactory` argument, which is a callable used to
     instantiate a new (internal) queue when a new priority is allocated. The
     `qfactory` function is called with the priority number as first and only
