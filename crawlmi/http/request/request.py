@@ -28,7 +28,7 @@ class Request(object):
         self._body = self._prepare_body(body)
 
     def __repr__(self):
-        return '<Request [%s]>' % (self._method)
+        return '<Request [%s] %s>' % (self._method, self._url)
 
     @property
     def url(self):
@@ -48,7 +48,8 @@ class Request(object):
 
     @property
     def details(self):
-        return '<Request [%s]> (Meta: %s)' % (self._method, self.meta)
+        return '<Request [%s] %s> (Meta: %s)' % (self._method, self._url,
+                                                 self.meta)
 
     @property
     def original_url(self):
@@ -91,7 +92,7 @@ class Request(object):
             fragment = ''
 
         quoted = requote_url(urlunparse([scheme, netloc, path, _params, query,
-                                       fragment]))
+                                         fragment]))
         self.parsed_url = urlparse(quoted)
         return quoted
 
@@ -132,8 +133,8 @@ class Request(object):
         '''Create a new Request with the same attributes except for those
         given new values.
         '''
-        for x in ['url', 'callback', 'method', 'headers', 'body', 'priority',
-                'meta', 'errback', 'proxy', 'history', 'encoding', 'settings']:
+        for x in ['url', 'callback', 'errback', 'method', 'headers', 'priority',
+                  'meta', 'body', 'proxy', 'history', 'encoding', 'settings']:
             kwargs.setdefault(x, getattr(self, x))
         cls = kwargs.pop('cls', self.__class__)
         return cls(*args, **kwargs)
