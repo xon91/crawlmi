@@ -48,8 +48,9 @@ class Request(object):
 
     @property
     def details(self):
-        return '<Request [%s] %s> (Meta: %s)' % (self._method, self._url,
-                                                 self.meta)
+        '''Useful for debugging purposes.'''
+        return '<Request [%s] %s> (Headers: %s, History: %s, Meta: %s, Proxy: %s, Settings %s)' % \
+            (self._method, self._url, self.headers, self.meta, self.proxy, self.settings)
 
     @property
     def original_url(self):
