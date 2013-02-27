@@ -1,5 +1,10 @@
+# invoked when engine is running and happy to download
 # args:
 engine_started = object()
+# invoked when engine is about to be stopped. Engine is still running, though.
+# args:
+engine_stopping = object()
+# invoked when engine stopped and is not running anymore.
 # args:
 engine_stopped = object()
 
