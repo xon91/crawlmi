@@ -12,8 +12,8 @@ engine_stopped = object()
 # args: request
 request_received = object()
 # invoked when the response is popped out of the outq
-# args: response
+# args: response (either Response or Failure)
 response_downloaded = object()
 # invoked when the response successfully passes through downloader pipeline
-# args: response
+# args: response (either Response or Failure)
 response_received = object()
