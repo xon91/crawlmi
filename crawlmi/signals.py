@@ -17,3 +17,7 @@ response_downloaded = object()
 # invoked when the response successfully passes through downloader pipeline
 # args: response (either Response or Failure)
 response_received = object()
+# invoked when spider does not process the Failure received either from
+# downloader or the pipeline, or raised inside the spider
+# args: failure
+spider_error = object()

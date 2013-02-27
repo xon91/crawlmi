@@ -116,7 +116,7 @@ class Engine(object):
         if isinstance(request_or_response, Request):
             self.signals.send(signal=signals.request_received,
                               request=request_or_response)
-            self.inq.push(request_or_response)
+            self.inq.push(request_or_response.priority, request_or_response)
         elif isinstance(request_or_response, Response):
             request_or_response.request = request
             self.outq.push(request_or_response)
@@ -134,17 +134,24 @@ class Engine(object):
                 continue
 
             request = result.request
-
             dfd = defer_result(result)
             dfd.addCallback(self.signals.send,
                             signal=signals.response_received,
                             response=result)
-            dfd.addCallbacks(request.callback, request.errback)
-            dfd.addCallbacks(self._handle_spider_output,
-                             self._handle_spider_error)
+            dfd.addCallbacks(request.callback or self.spider.parse,
+                             request.errback)
+            dfd.addCallback(self._handle_spider_output, request=request)
+            dfd.addErrback(self._handle_spider_error, request=request)
 
-    def _handle_spider_output(self, result):
-        pass
+    def _handle_spider_output(self, result, request):
+        result = arg_to_iter(result)
+        for request in result:
+            assert isinstance(request, Request), \
+                'spider must return None, request or iterable of requests'
+            self.download(request)
 
-    def _handle_spider_error(self, failure):
-        pass
+    def _handle_spider_error(self, failure, request):
+        # set `request` in a case the error was raised inside the spider
+        failure.request = request
+        self.signals.send(signal=signals.spider_error, failure=failure)
+        log.err(failure, 'Error when downloading %s' % request)
