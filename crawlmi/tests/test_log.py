@@ -18,6 +18,10 @@ class CrawlmiFileLogObserverTest(unittest.TestCase):
         log.msg('Hello')
         self.assertEqual(self.lw.get_first_line(), '[crawlmi] INFO: Hello')
 
+    def test_format(self):
+        log.msg(format='%(hi)s', hi='Hello')
+        self.assertEqual(self.lw.get_first_line(), '[crawlmi] INFO: Hello')
+
     def test_msg_level1(self):
         log.msg('Hello', level=log.WARNING)
         self.assertEqual(self.lw.get_first_line(), '[crawlmi] WARNING: Hello')

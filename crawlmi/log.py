@@ -103,7 +103,7 @@ def msg(message=None, level=INFO, **kw):
         log.msg(message, **kw)
 
 
-def err(message=None, why=None, level=ERROR, **kw):
+def err(stuff=None, why=None, level=ERROR, **kw):
     kw['logLevel'] = level
     kw.setdefault('system', 'crawlmi')
-    log.err(message, why, **kw)
+    log.err(stuff, why, **kw)
