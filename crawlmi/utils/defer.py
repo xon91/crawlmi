@@ -1,4 +1,32 @@
-from twisted.internet import reactor
+from twisted.internet import defer, reactor
+from twisted.python.failure import Failure
+
+
+def defer_fail(failure):
+    '''Same as twisted.internet.defer.fail, but delay calling errback until
+    next reactor loop
+    '''
+    d = defer.Deferred()
+    reactor.callLater(0, d.errback, failure)
+    return d
+
+
+def defer_succeed(result):
+    '''Same as twsited.internet.defer.succed, but delay calling callback until
+    next reactor loop
+    '''
+    d = defer.Deferred()
+    reactor.callLater(0, d.callback, result)
+    return d
+
+
+def defer_result(result):
+    if isinstance(result, defer.Deferred):
+        return result
+    elif isinstance(result, Failure):
+        return defer_fail(result)
+    else:
+        return defer_succeed(result)
 
 
 class LoopingCall(object):
