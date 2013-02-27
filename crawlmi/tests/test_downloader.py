@@ -263,24 +263,45 @@ class DownloaderTest(unittest.TestCase):
         self.assertIs(result.request, requests[0])
         self.assertEqual(result.url, 'hello')
         # enqueue third request
-        self.clock.advance(0)
+        self.clock.advance(Downloader.QUEUE_CHECK_FREQUENCY)
         self.assertEqual(self.dwn.free_slots, 0)
         # download second request
         self.handler.call(requests[1], Response(''))
         # enqueue fourth request
-        self.clock.advance(0)
+        self.clock.advance(Downloader.QUEUE_CHECK_FREQUENCY)
         self.assertEqual(self.dwn.free_slots, 0)
         # fourth request should not begin download, until 3rd request is done
         self.assertRaises(KeyError, self.handler.call, requests[3], Response(''))
         # finish
         self.handler.call(requests[2], Response(''))
         self.handler.call(requests[3], Response(''))
-        self.clock.advance(0)
+        self.clock.advance(Downloader.QUEUE_CHECK_FREQUENCY)
         self.handler.call(requests[4], Response(''))
         # final checks
         self.clock.pump([1] * 10)
         self.assertEqual(len(self.outq), 5)
         self.assertTrue(self.dwn.is_idle())
+
+    def test_close(self):
+        req1 = get_request('a')[0]
+        req2 = get_request('b')[0]
+        self.inq.push(req1)
+        self.clock.advance(20)
+        self.inq.push(req2)
+        # test basic attributes, before and after closing
+        self.assertTrue(self.dwn.running)
+        self.assertTrue(self.dwn.processing.is_scheduled())
+        self.dwn.close()
+        self.assertFalse(self.dwn.running)
+        self.assertFalse(self.dwn.processing.is_scheduled())
+
+        self.clock.advance(20)
+        self.assertEqual(len(self.inq), 1)  # request 2 remains unqueued
+
+        # downloader behavior after closing
+        self.assertEqual(len(self.outq), 0)
+        self.handler.call(req1, Response(''))
+        self.assertEqual(len(self.outq), 0)
 
     def test_fail(self):
         self._update_dwn(CONCURRENT_REQUESTS=3, CONCURRENT_REQUESTS_PER_DOMAIN=2)
@@ -311,6 +332,6 @@ class DownloaderTest(unittest.TestCase):
         requests = [get_request(id)[0] for id in xrange(30)]
         for r in requests:
             self.inq.push(r)
-            self.clock.advance(0)
+            self.clock.advance(Downloader.QUEUE_CHECK_FREQUENCY)
             self.handler.call(r, Response(''))
         self.assertLessEqual(len(self.dwn.slots), 2 * self.dwn.total_concurrency)

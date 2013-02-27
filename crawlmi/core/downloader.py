@@ -11,10 +11,6 @@ from crawlmi.utils.defer import LoopingCall, ScheduledCall
 class Slot(object):
     '''Slot represents a queue of requests for one particular domain.
     It respects both DOWNLOAD_DELAY and CONCURRENT_REQUESTS_PER_DOMAIN.
-
-    Slot never contains more than CONCURRENT_REQUESTS pending requests, so
-    it is a very lightweight structure. All the heavy lifting happens in the
-    downloader.
     '''
 
     def __init__(self, download_handler, concurrency, delay, randomize_delay,
@@ -100,12 +96,10 @@ class Downloader(object):
     '''Fetch requests from `inq` queue. When downloaded, put the results into
     `outq` queue. Respect CONCURRENT_REQUESTS setting.
     Requests are further divided into specific slots, based on their domains.
-
-    `inq` can possibly be very big, keep that in mind.
-
-    IMPORTANT - always keep in mind, that if crawlmi is killed unexpectably,
-    and `inq` and `outq` are persistent queues, no requests should be lost.
     '''
+
+    # how many seconds to wait between the checks of inq
+    QUEUE_CHECK_FREQUENCY = 0.1
 
     def __init__(self, settings, inq, outq, download_handler=None, clock=None):
         self.inq = inq  # queue of requests
@@ -115,7 +109,8 @@ class Downloader(object):
         self.num_in_progress = 0
         self.clock = clock or reactor
         self.processing = LoopingCall(self.process, clock=self.clock)
-        self.processing.schedule()
+        self.processing.schedule(self.QUEUE_CHECK_FREQUENCY, now=True)
+        self.running = True
 
         self.download_delay = settings.get_int('DOWNLOAD_DELAY')
         self.randomize_delay = settings.get_int(
@@ -135,6 +130,10 @@ class Downloader(object):
             else:
                 self.use_domain_specific = True
 
+    def close(self):
+        self.processing.cancel()
+        self.running = False
+
     @property
     def free_slots(self):
         return self.total_concurrency - self.num_in_progress
@@ -143,7 +142,7 @@ class Downloader(object):
         return self.num_in_progress == 0
 
     def process(self):
-        while self.inq and self.free_slots > 0:
+        while self.running and self.inq and self.free_slots > 0:
             request = self.inq.pop()
             key, slot = self._get_slot(request)
 
@@ -155,7 +154,9 @@ class Downloader(object):
             def enqueue_result(request, result):
                 # in a case, result is actually a Failure
                 result.request = request
-                self.outq.push(result)
+                # make sure not to modify outq, after stopping the downloader
+                if self.running:
+                    self.outq.push(result)
                 # don't return anything from here, in a case an error occured -
                 # we don't want it to be logged
 
