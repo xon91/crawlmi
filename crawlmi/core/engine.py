@@ -128,20 +128,21 @@ class Engine(object):
                               response=response)
             result = self.pipeline.process_response(response)
             if result is None:
-                continue
+                pass
             elif isinstance(result, Request):
                 self.download(result)
-                continue
-
-            request = result.request
-            dfd = defer_result(result)
-            dfd.addCallback(self.signals.send,
-                            signal=signals.response_received,
-                            response=result)
-            dfd.addCallbacks(request.callback or self.spider.parse,
-                             request.errback)
-            dfd.addCallback(self._handle_spider_output, request=request)
-            dfd.addErrback(self._handle_spider_error, request=request)
+            else:
+                request = result.request
+                self.signals.send(signal=signals.response_received,
+                                  response=result)
+                dfd = defer_result(result, clock=self.clock)
+                dfd.addCallbacks(request.callback or self.spider.parse,
+                                 request.errback)
+                dfd.addCallbacks(
+                    self._handle_spider_output,
+                    self._handle_spider_error,
+                    callbackKeywords={'request': request},
+                    errbackKeywords={'request': request})
 
     def _handle_spider_output(self, result, request):
         result = arg_to_iter(result)
