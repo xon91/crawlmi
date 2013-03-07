@@ -15,3 +15,6 @@ class BaseSpider(object):
 
     def resume_crawl(self):
         pass
+
+    def parse(self, response):
+        pass
