@@ -5,6 +5,9 @@ class BaseSpider(object):
     def __init__(self, name=None):
         self.name = name
 
+    def start_requests(self):
+        pass
+
     def set_engine(self, engine):
         self.engine = engine
         # overwrite spider-specific settings with the global settings
