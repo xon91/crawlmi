@@ -31,7 +31,8 @@ def get_encoding_from_content(content):
     match = _body_encoding_re.search(chunk)
     if match:
         return _norm_encoding(match.group('charset') or
-                match.group('charset2') or match.group('xmlcharset'))
+                              match.group('charset2') or
+                              match.group('xmlcharset'))
 
 
 def get_encoding_from_headers(headers):
