@@ -1,6 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.utils.python import to_unicode, to_str
+from crawlmi.utils.python import to_unicode, to_str, is_binary
 
 
 class UtilsPythonTest(unittest.TestCase):
@@ -18,3 +18,13 @@ class UtilsPythonTest(unittest.TestCase):
         self.assertEqual(to_unicode(u'\xf1e\xf1e\xf1e'), u'\xf1e\xf1e\xf1e')
         self.assertEqual(to_unicode([10, 11]), u'[10, 11]')
         self.assertIn(u'\ufffd', to_unicode('a\xedb', 'utf-8', errors='replace'))
+
+    def test_is_binary(self):
+        # basic tests
+        self.assertFalse(is_binary("hello"))
+        # utf-16 strings contain null bytes
+        self.assertFalse(is_binary(u"hello".encode('utf-16')))
+        # one with encoding
+        self.assertFalse(is_binary("<div>Price \xa3</div>"))
+        # finally some real binary bytes
+        self.assertTrue(is_binary("\x02\xa3"))

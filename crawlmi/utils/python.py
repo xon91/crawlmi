@@ -14,3 +14,12 @@ def to_str(value, encoding='utf-8', errors='strict'):
         return value.encode(encoding, errors)
     else:
         return str(value)
+
+
+_binarychars = set(map(chr, xrange(32))) - set(['\0', '\t', '\n', '\r'])
+
+def is_binary(data):
+    '''Return True if the given data is considered binary, or False
+    otherwise, by looking for binary bytes.
+    '''
+    return any(c in _binarychars for c in data)
