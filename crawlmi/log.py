@@ -84,7 +84,17 @@ def _adapt_eventdict(eventDict, log_level=INFO, encoding='utf-8', prepend_level=
     return ev
 
 
-def start(logfile=None, loglevel=INFO, logstdout=True, encoding='utf-8'):
+def _get_log_level(level_name_or_id):
+    if isinstance(level_name_or_id, int):
+        return level_name_or_id
+    elif isinstance(level_name_or_id, basestring):
+        return globals()[level_name_or_id]
+    else:
+        raise ValueError("Unknown log level: %r" % level_name_or_id)
+
+
+def start(logfile=None, loglevel='INFO', logstdout=True, encoding='utf-8'):
+    loglevel = _get_log_level(loglevel)
     file = open(logfile, 'a') if logfile else sys.stderr
     observer = CrawlmiFileLogObserver(file, loglevel, encoding)
     _oldshowwarning = warnings.showwarning
