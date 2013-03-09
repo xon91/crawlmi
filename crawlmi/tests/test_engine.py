@@ -84,6 +84,7 @@ class EngineTest(unittest.TestCase):
         self.assertEqual(len(self.engine.outq), 0)
         self.assertIsInstance(self.engine.extensions, ExtensionManager)
         self.assertIsInstance(self.engine.pipeline, PipelineManager)
+        self.assertEqual(self.engine.spider.engine, self.engine)
 
     def check_signals(self, signals=None):
         if signals is not None:
@@ -128,6 +129,7 @@ class EngineTest(unittest.TestCase):
         resp = Response('', request=req)
         self.engine.outq.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
+        self.clock.advance(0)
         self.check_signals([signals.response_downloaded,
                             signals.response_received])
 
@@ -137,6 +139,7 @@ class EngineTest(unittest.TestCase):
         self.engine.outq.push(fail)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
         self.clock.advance(0)
+        self.clock.advance(0)
         self.check_signals([signals.response_downloaded,
                             signals.response_received,
                             signals.spider_error])
@@ -145,12 +148,14 @@ class EngineTest(unittest.TestCase):
         self.pipeline.resp = lambda req: None
         self.engine.outq.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
+        self.clock.advance(0)
         self.check_signals([signals.response_downloaded])
 
         # pipeline request
         self.pipeline.resp = lambda req: Request('http://github.com/')
         self.engine.outq.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
+        self.clock.advance(0)
         self.check_signals([signals.response_downloaded,
                             signals.request_received])
         self.assertEqual(len(self.engine.inq), 1)
@@ -160,6 +165,7 @@ class EngineTest(unittest.TestCase):
         self.pipeline.resp = lambda req: Failure(Exception())
         self.engine.outq.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
+        self.clock.advance(0)
         self.clock.advance(0)
         self.check_signals([signals.response_downloaded,
                             signals.response_received,

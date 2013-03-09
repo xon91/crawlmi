@@ -1,4 +1,5 @@
 from twisted.internet import reactor
+from twisted.python.failure import Failure
 
 from crawlmi import log, signals
 from crawlmi.core.downloader import Downloader
@@ -79,12 +80,23 @@ class Engine(object):
         # initialize downloader pipeline
         self.pipeline = PipelineManager(self)
 
+        # now that everything is ready, set the spider's engine
+        self.spider.set_engine(self)
+
     def start(self):
         self.running = True
         self.signals.send(signal=signals.engine_started)
         self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
 
-    def stop(self, reason):
+        # process start requests from spider
+        try:
+            requests = self.spider.start_requests()
+            for req in arg_to_iter(requests):
+                self.download(req)
+        except:
+            log.err(Failure(), 'Error when processing start requests.')
+
+    def stop(self, reason=''):
         self.signals.send(signal=signals.engine_stopping)
         self.running = False
         self.processing.cancel()
@@ -126,23 +138,28 @@ class Engine(object):
             response = self.outq.pop()
             self.signals.send(signal=signals.response_downloaded,
                               response=response)
-            result = self.pipeline.process_response(response)
-            if result is None:
-                pass
-            elif isinstance(result, Request):
-                self.download(result)
-            else:
-                request = result.request
-                self.signals.send(signal=signals.response_received,
-                                  response=result)
-                dfd = defer_result(result, clock=self.clock)
-                dfd.addCallbacks(request.callback or self.spider.parse,
-                                 request.errback)
-                dfd.addCallbacks(
-                    self._handle_spider_output,
-                    self._handle_spider_error,
-                    callbackKeywords={'request': request},
-                    errbackKeywords={'request': request})
+            dfd = defer_result(response, clock=self.clock)
+            dfd.addBoth(self.pipeline.process_response)
+            dfd.addBoth(self._handle_pipeline_result)
+
+    def _handle_pipeline_result(self, result):
+        if result is None:
+            pass
+        elif isinstance(result, Request):
+            self.download(result)
+        else:
+            request = result.request
+            self.signals.send(signal=signals.response_received,
+                              response=result)
+            dfd = defer_result(result, clock=self.clock)
+            dfd.addCallbacks(request.callback or self.spider.parse,
+                             request.errback)
+            dfd.addCallbacks(
+                self._handle_spider_output,
+                self._handle_spider_error,
+                callbackKeywords={'request': request},
+                errbackKeywords={'request': request})
+            return dfd
 
     def _handle_spider_output(self, result, request):
         result = arg_to_iter(result)
