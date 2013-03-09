@@ -30,6 +30,7 @@ class Engine(object):
         use `setup()`.
         '''
         self.spider = spider
+        self.pending_requests = 0
 
         # initialize settings
         # 1. Crawlmi default settings
@@ -126,12 +127,16 @@ class Engine(object):
             return
 
         if isinstance(request_or_response, Request):
+            self.pending_requests += 1
             self.signals.send(signal=signals.request_received,
                               request=request_or_response)
             self.inq.push(request_or_response.priority, request_or_response)
         elif isinstance(request_or_response, Response):
             request_or_response.request = request
             self.outq.push(request_or_response)
+
+    def is_idle(self):
+        return self.pending_requests == 0 and len(self.outq) == 0
 
     def _process_queue(self):
         while self.running and not self.paused and self.outq:
@@ -141,6 +146,14 @@ class Engine(object):
             dfd = defer_result(response, clock=self.clock)
             dfd.addBoth(self.pipeline.process_response)
             dfd.addBoth(self._handle_pipeline_result)
+            dfd.addBoth(self._finalize_download)
+
+        # check stopping condition
+        if self.is_idle():
+            self.stop('finished')
+
+    def _finalize_download(self, _):
+        self.pending_requests -= 1
 
     def _handle_pipeline_result(self, result):
         if result is None:
