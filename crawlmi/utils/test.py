@@ -12,8 +12,11 @@ def get_engine(custom_settings=None, **kwargs):
     '''
     custom_settings = Settings(custom_settings or {})
     custom_settings.update(kwargs)
-    return Engine(BaseSpider('dummy'), custom_settings=custom_settings,
-                  clock=Clock())
+    engine = Engine(BaseSpider('dummy'), custom_settings=custom_settings,
+                    clock=Clock())
+    # disable stopping engine when idle
+    engine.is_idle = lambda: False
+    return engine
 
 
 class LogWrapper(object):
