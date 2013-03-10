@@ -41,6 +41,13 @@ LOG_STATS_INTERVAL = 60.0
 # Downloader pipeline
 
 PIPELINE_BASE = {
+    'crawlmi.middleware.pipelines.default_headers.DefaultHeaders': 550,
     'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
 }
 PIPELINE = {}
+
+
+DEFAULT_REQUEST_HEADERS = {
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en',
+}
