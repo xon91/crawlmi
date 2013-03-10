@@ -15,7 +15,7 @@ class Response(object):
         self._body = body or ''
 
     def __repr__(self):
-        return '<Response [%s]>' % (self.status)
+        return '<%s [%s]>' % (self.__class__.__name__, self.status)
 
     @property
     def body(self):
