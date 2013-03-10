@@ -7,7 +7,7 @@ from twisted.internet import defer
 
 from crawlmi.compat import optional_features
 from crawlmi.http.headers import Headers
-from crawlmi.http.response import Response
+from crawlmi.http.response import factory as resp_factory
 
 
 class BadHttpHeaderError(Exception):
@@ -73,8 +73,8 @@ class CrawlmiHTTPClient(HTTPClient):
     def timeout(self):
         self.transport.loseConnection()
         self.factory.noPage(
-                defer.TimeoutError('Getting %s took longer than %s seconds.' %
-                                   (self.factory.url, self.factory.timeout)))
+            defer.TimeoutError('Getting %s took longer than %s seconds.' %
+                               (self.factory.url, self.factory.timeout)))
 
 
 class CrawlmiHTPPClientFactory(HTTPClientFactory):
@@ -120,8 +120,11 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
             raise BadHttpHeaderError('Invalid headers received: %s' %
                                      self.invalid_headers)
 
-        response = Response(url=self.url, status=self.status,
-            headers=self.response_headers, body=body, request=request)
+        response_cls = resp_factory.from_args(headers=self.response_headers,
+                                              url=self.url)
+        response = response_cls(
+            url=self.url, status=self.status, headers=self.response_headers,
+            body=body, request=request)
         response.download_latency = self.headers_time - self.start_time
         return response
 
