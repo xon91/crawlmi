@@ -3,7 +3,7 @@ import codecs
 from twisted.trial import unittest
 
 from crawlmi.utils.encoding import (_read_bom, get_encoding_from_headers,
-        get_encoding_from_content, _norm_encoding, get_unicode_from_response)
+        get_encoding_from_content, normalize_encoding, get_unicode_from_response)
 from crawlmi.http.headers import Headers
 
 
@@ -60,10 +60,10 @@ class EncodingDetectionTest(unittest.TestCase):
 
 class CodecsEncodingTest(unittest.TestCase):
     def test_resolve_encoding(self):
-        self.assertEqual(_norm_encoding('latin1'), 'cp1252')
-        self.assertEqual(_norm_encoding(' Latin-1'), 'cp1252')
-        self.assertEqual(_norm_encoding('gb_2312-80'), 'gb18030')
-        self.assertEqual(_norm_encoding('unknown encoding'), None)
+        self.assertEqual(normalize_encoding('latin1'), 'cp1252')
+        self.assertEqual(normalize_encoding(' Latin-1'), 'cp1252')
+        self.assertEqual(normalize_encoding('gb_2312-80'), 'gb18030')
+        self.assertEqual(normalize_encoding('unknown encoding'), None)
 
 
 class UnicodeDecodingTest(unittest.TestCase):

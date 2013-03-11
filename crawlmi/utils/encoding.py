@@ -30,9 +30,9 @@ def get_encoding_from_content(content):
     chunk = content[:2048]
     match = _body_encoding_re.search(chunk)
     if match:
-        return _norm_encoding(match.group('charset') or
-                              match.group('charset2') or
-                              match.group('xmlcharset'))
+        return normalize_encoding(match.group('charset') or
+                                  match.group('charset2') or
+                                  match.group('xmlcharset'))
 
 
 def get_encoding_from_headers(headers):
@@ -48,7 +48,7 @@ def get_encoding_from_headers(headers):
     elif 'text' in content_type:
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
         encoding = 'iso-8859-1'
-    return _norm_encoding(encoding)
+    return normalize_encoding(encoding)
 
 
 # map some encodings to the supersets, for faster and more robust resolution
@@ -73,7 +73,7 @@ _default_encoding_translation = {
     'zh_cn': 'gb18030'
 }
 
-def _norm_encoding(encoding):
+def normalize_encoding(encoding):
     '''Return the normalize form of the encoding.
     '''
     if not encoding:
