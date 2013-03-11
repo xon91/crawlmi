@@ -42,6 +42,7 @@ LOG_STATS_INTERVAL = 60.0
 
 PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.default_headers.DefaultHeaders': 550,
+    'crawlmi.middleware.pipelines.http_compression.HttpCompression': 800,
     'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
 }
 PIPELINE = {}
