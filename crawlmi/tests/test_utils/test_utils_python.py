@@ -1,6 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.utils.python import to_unicode, to_str, is_binary
+from crawlmi.utils.python import to_unicode, to_str, is_binary, get_func_args
 
 
 class UtilsPythonTest(unittest.TestCase):
@@ -28,3 +28,36 @@ class UtilsPythonTest(unittest.TestCase):
         self.assertFalse(is_binary("<div>Price \xa3</div>"))
         # finally some real binary bytes
         self.assertTrue(is_binary("\x02\xa3"))
+
+    def test_get_func_args(self):
+        def f1(a, b, c):
+            pass
+
+        def f2(a, b=None, c=None):
+            pass
+
+        class A(object):
+            def __init__(self, a, b, c):
+                pass
+
+            def method(self, a, b, c):
+                pass
+
+        class Callable(object):
+
+            def __call__(self, a, b, c):
+                pass
+
+        a = A(1, 2, 3)
+        cal = Callable()
+
+        self.assertEqual(get_func_args(f1), ['a', 'b', 'c'])
+        self.assertEqual(get_func_args(f2), ['a', 'b', 'c'])
+        self.assertEqual(get_func_args(A), ['a', 'b', 'c'])
+        self.assertEqual(get_func_args(a.method), ['a', 'b', 'c'])
+        self.assertEqual(get_func_args(cal), ['a', 'b', 'c'])
+        self.assertEqual(get_func_args(object), [])
+
+        # TODO: how do we fix this to return the actual argument names?
+        self.assertEqual(get_func_args(unicode.split), [])
+        self.assertEqual(get_func_args(" ".join), [])

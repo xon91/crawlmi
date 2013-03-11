@@ -1,3 +1,6 @@
+import inspect
+
+
 def to_unicode(value, encoding='utf-8', errors='strict'):
     if isinstance(value, unicode):
         return value
@@ -23,3 +26,25 @@ def is_binary(data):
     otherwise, by looking for binary bytes.
     '''
     return any(c in _binarychars for c in data)
+
+
+def get_func_args(func, stripself=False):
+    '''Return the argument name list of a callable.'''
+    if inspect.isfunction(func):
+        func_args, _, _, _ = inspect.getargspec(func)
+    elif inspect.isclass(func):
+        return get_func_args(func.__init__, True)
+    elif inspect.ismethod(func):
+        return get_func_args(func.__func__, True)
+    elif inspect.ismethoddescriptor(func):
+        return []
+    elif hasattr(func, '__call__'):
+        if inspect.isroutine(func):
+            return []
+        else:
+            return get_func_args(func.__call__, True)
+    else:
+        raise TypeError('%s is not callable' % type(func))
+    if stripself:
+        func_args.pop(0)
+    return func_args
