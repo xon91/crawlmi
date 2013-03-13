@@ -12,8 +12,7 @@ class XPathSelector(object):
     def __init__(self, response=None, text=None, namespaces=None, _root=None,
                  _expr=None):
         if text is not None:
-            response = TextResponse(url='about:blank', body=to_str(text),
-                                    encoding='utf-8')
+            response = TextResponse(url='about:blank', body=to_str(text))
         if response is not None:
             _root = self._get_root(response)
 
@@ -30,7 +29,12 @@ class XPathSelector(object):
 
     def select(self, xpath):
         try:
-            result = self._root.xpath(xpath, namespaces=self.namespaces)
+            xpath_call = self._root.xpath
+        except AttributeError:
+            return XPathSelectorList([])
+
+        try:
+            result = xpath_call(xpath, namespaces=self.namespaces)
         except etree.XPathError:
             raise ValueError('Invalid XPath: %s' % xpath)
 
