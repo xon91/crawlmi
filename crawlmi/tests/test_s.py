@@ -4,7 +4,7 @@ import urlparse
 from twisted.trial import unittest
 
 from crawlmi.http.response import HtmlResponse
-from crawlmi.parser.s import SValidationError, S
+from crawlmi.parser import SValidationError, S
 from crawlmi.parser.selectors import HtmlXPathSelector
 from crawlmi.tests import get_testdata
 
@@ -22,7 +22,7 @@ class STest(unittest.TestCase):
 
         body = get_testdata('pages', 'ip_page.html')
         response = HtmlResponse(url='http://myip.com/list', body=body)
-        hxs = HtmlXPathSelector(response)
+        hxs = response.selector
 
         # test valid parsing
         valid_ts = S('_', '//div[@id="main"]', quant='1', children=[
