@@ -1,7 +1,7 @@
 import os
 
-
-tests_datadir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sample_data')
+tests_dir = os.path.dirname(os.path.abspath(__file__))
+tests_datadir = os.path.join(tests_dir, 'sample_data')
 
 
 def get_testdata(*paths):
