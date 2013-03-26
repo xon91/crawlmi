@@ -1,5 +1,7 @@
 # General settings
 
+COMMANDS_MODULE = ''
+
 STATS_CLASS = 'crawlmi.stats.MemoryStats'
 STATS_DUMP = True
 
