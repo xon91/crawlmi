@@ -1,4 +1,4 @@
-class Settings(dict):
+class Settings(object):
     '''Settings is a dictionary-like data structure with some additional
     conveninent get methods for data conversions.
     '''
@@ -13,8 +13,22 @@ class Settings(dict):
         args = filter(lambda x: not x.startswith('_'), dir(module_or_path))
         return cls(dict((k, getattr(module_or_path, k)) for k in args))
 
+    def __init__(self, values=None):
+        if values is None:
+            values = {}
+        self.values = values.copy()
+
+    def __getitem__(self, name):
+        return self.values[name]
+
+    def __contains__(self, name):
+        return name in self.values
+
+    def get(self, name, default=None):
+        return self.values.get(name, default)
+
     def __copy__(self):
-        return self.__class__(self)
+        return self.__class__(self.values)
     copy = __copy__
 
     def get_bool(self, name, default=False):
@@ -22,19 +36,19 @@ class Settings(dict):
         True is: 1, '1', True
         False is: 0, '0', False, None
         '''
-        value = dict.get(self, name, default)
+        value = self.get(name, default)
         if value is None:
             return False
         return bool(int(value))
 
     def get_int(self, name, default=0):
-        return int(dict.get(self, name, default))
+        return int(self.get(name, default))
 
     def get_float(self, name, default=0.0):
-        return float(dict.get(self, name, default))
+        return float(self.get(name, default))
 
     def get_list(self, name, default=None):
-        value = dict.get(self, name)
+        value = self.get(name)
         if value is None:
             return default if default is not None else []
         elif hasattr(value, '__iter__'):

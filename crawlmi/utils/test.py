@@ -10,9 +10,10 @@ from crawlmi.utils.clock import Clock
 def get_engine(custom_settings=None, **kwargs):
     '''Return the engine initialized with the custom settings.
     '''
-    custom_settings = Settings(custom_settings or {})
-    custom_settings.update(kwargs)
-    engine = Engine(BaseSpider('dummy'), custom_settings=custom_settings,
+    settings = custom_settings or {}
+    settings.update(kwargs)
+    settings = Settings(settings)
+    engine = Engine(BaseSpider('dummy'), custom_settings=settings,
                     clock=Clock())
     # disable stopping engine when idle
     engine.is_idle = lambda: False

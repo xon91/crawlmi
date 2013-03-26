@@ -170,18 +170,17 @@ class DownloaderSlotTest(unittest.TestCase):
 
 class DownloaderTest(unittest.TestCase):
 
-    default_settings = Settings({
+    default_settings = {
         'CONCURRENT_REQUESTS': 2,
         'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
         'DOWNLOAD_DELAY': 0,
-        'RANDOMIZE_DOWNLOAD_DELAY': False
-    })
+        'RANDOMIZE_DOWNLOAD_DELAY': False}
 
     def setUp(self):
         self.clock = Clock()
         self.inq = MemoryQueue()
         self.outq = MemoryQueue()
-        self.dwn = Downloader(self.default_settings, self.inq,
+        self.dwn = Downloader(Settings(self.default_settings), self.inq,
                               self.outq,
                               download_handler=MockDownloaderHandler(Settings()),
                               clock=self.clock)
@@ -190,10 +189,10 @@ class DownloaderTest(unittest.TestCase):
     def _update_dwn(self, **kwargs):
         '''Update downloader with the new settings.
         '''
-        settings = self.default_settings.copy()
-        settings.update(**kwargs)
+        new_settings = self.default_settings.copy()
+        new_settings.update(**kwargs)
         self.dwn.processing.cancel()
-        self.dwn = Downloader(settings, self.inq, self.outq,
+        self.dwn = Downloader(Settings(new_settings), self.inq, self.outq,
                               download_handler=MockDownloaderHandler(Settings()),
                               clock=self.clock)
         self.handler = self.dwn.download_handler

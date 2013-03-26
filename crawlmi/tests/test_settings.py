@@ -46,7 +46,7 @@ class SettingsTest(unittest.TestCase):
         s2 = s1.copy()
         self.assertIsInstance(s2, Settings)
         self.assertIsNot(s1, s2)
-        self.assertDictEqual(s1, s2)
+        self.assertDictEqual(s1.values, s2.values)
 
     def _get_answers(self, prefix):
         result = []

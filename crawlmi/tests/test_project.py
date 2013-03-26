@@ -35,5 +35,5 @@ class ProjectTest(unittest.TestCase):
         self.assertIsNone(project.cfg_path)
         self.assertIsNone(project.cfg)
         self.assertIsNone(project.project_dir)
-        self.assertDictEqual(project.settings, {})
+        self.assertDictEqual(project.settings.values, {})
         self.assertRaises(NotConfigured, project._get_data_dir)
