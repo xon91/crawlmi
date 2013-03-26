@@ -7,7 +7,7 @@ from crawlmi.tests import tests_dir
 from crawlmi.utils.project import Project
 
 
-sample_project_dir = os.path.join(tests_dir, 'sample_project')
+sample_project_dir = os.path.join(tests_dir, 'test_project', 'sample_project')
 
 
 class ProjectTest(unittest.TestCase):
