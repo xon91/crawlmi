@@ -8,7 +8,7 @@ from crawlmi.http.response import Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
-from crawlmi.settings import Settings
+from crawlmi.settings import EngineSettings, Settings
 from crawlmi.signal_manager import SignalManager
 from crawlmi.utils.defer import LoopingCall, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
@@ -23,7 +23,7 @@ class Engine(object):
     # how many seconds to wait between the checks of outq
     QUEUE_CHECK_FREQUENCY = 0.1
 
-    def __init__(self, spider, user_settings=None, custom_settings=None,
+    def __init__(self, spider, module_settings=None, custom_settings=None,
                  clock=None):
         '''Constructor of Engine should be very lightweight, so that things
         can be easily unittested. For any more complicated initialization
@@ -33,17 +33,13 @@ class Engine(object):
         self.pending_requests = 0
 
         # initialize settings
-        # 1. Crawlmi default settings
-        self.settings = Settings.from_module(
+        default_settings = Settings.from_module(
             'crawlmi.settings.default_settings')
-        # 2. user settings (e.g. from settings module)
-        if user_settings:
-            self.settings.update(user_settings)
-        # 3. spider-specific settings
-        self.settings.update(spider.settings)
-        # 4. custom settings (e.g. from command line)
-        if custom_settings:
-            self.settings.update(custom_settings)
+        self.settings = EngineSettings(
+            default_settings=default_settings,
+            module_settings=module_settings,
+            spider_settings=spider.settings,
+            custom_settings=custom_settings)
 
         self.running = False
         self.paused = False

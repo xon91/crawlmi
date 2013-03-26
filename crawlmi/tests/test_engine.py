@@ -7,7 +7,7 @@ from crawlmi.http.response import Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
-from crawlmi.settings import Settings
+from crawlmi.settings import EngineSettings, Settings
 from crawlmi.signal_manager import SignalManager
 from crawlmi.spider import BaseSpider
 from crawlmi.stats import MemoryStats
@@ -73,7 +73,7 @@ class EngineTest(unittest.TestCase):
 
     def test_init(self):
         self.assertIsInstance(self.engine.spider, BaseSpider)
-        self.assertIsInstance(self.engine.settings, Settings)
+        self.assertIsInstance(self.engine.settings, EngineSettings)
         self.assertFalse(self.engine.running)
         self.assertFalse(self.engine.paused)
         self.assertIsInstance(self.engine.signals, SignalManager)
