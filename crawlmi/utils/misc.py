@@ -1,3 +1,6 @@
+from pkgutil import iter_modules
+
+
 def arg_to_iter(arg):
     '''Convert an argument to an iterable. The argument can be a None, single
     value, or an iterable.
@@ -35,3 +38,25 @@ def load_object(path):
         raise NameError('Module `%s` doesn\'t define any object named `%s`' %
                         (module, name))
     return obj
+
+
+def iter_submodules(path):
+    '''Loads a module and all its submodules from a the given module path and
+    returns them. If *any* module throws an exception while importing, that
+    exception is thrown back.
+
+    For example: iter_submodules('crawlmi.utils')
+    '''
+
+    mods = []
+    mod = __import__(path, {}, {}, [''])
+    mods.append(mod)
+    if hasattr(mod, '__path__'):
+        for _, subpath, ispkg in iter_modules(mod.__path__):
+            fullpath = path + '.' + subpath
+            if ispkg:
+                mods += iter_submodules(fullpath)
+            else:
+                submod = __import__(fullpath, {}, {}, [''])
+                mods.append(submod)
+    return mods
