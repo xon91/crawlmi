@@ -1,10 +1,10 @@
-from twisted.internet import defer
+from twisted.internet import reactor, defer
 from twisted.python import log as txlog
 from twisted.python.failure import Failure
 from twisted.trial import unittest
 
 from crawlmi import log
-from crawlmi.signal_manager import SignalManager
+from crawlmi.core.signal_manager import SignalManager
 from crawlmi.xlib.pydispatch import dispatcher
 
 

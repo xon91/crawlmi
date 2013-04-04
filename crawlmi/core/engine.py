@@ -3,6 +3,7 @@ from twisted.python.failure import Failure
 
 from crawlmi import log, signals
 from crawlmi.core.downloader import Downloader
+from crawlmi.core.signal_manager import SignalManager
 from crawlmi.exceptions import NotConfigured
 from crawlmi.http.request import Request
 from crawlmi.http.response import Response
@@ -10,7 +11,6 @@ from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
 from crawlmi.settings import EngineSettings, Settings
-from crawlmi.signal_manager import SignalManager
 from crawlmi.utils.defer import LoopingCall, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
 

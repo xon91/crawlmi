@@ -2,13 +2,13 @@ from twisted.python.failure import Failure
 from twisted.trial import unittest
 
 from crawlmi import signals
+from crawlmi.core.signal_manager import SignalManager
 from crawlmi.http.request import Request
 from crawlmi.http.response import Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
-from crawlmi.settings import EngineSettings, Settings
-from crawlmi.signal_manager import SignalManager
+from crawlmi.settings import EngineSettings
 from crawlmi.spiders import BaseSpider
 from crawlmi.stats import MemoryStats
 from crawlmi.utils.test import get_engine
