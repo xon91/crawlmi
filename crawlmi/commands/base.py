@@ -4,7 +4,7 @@ from crawlmi import log
 from crawlmi.core.process import Process
 from crawlmi.exceptions import UsageError
 from crawlmi.settings import Settings
-from crawlmi.spiders import BaseSpider
+from crawlmi.spider import BaseSpider
 
 
 class BaseCommand(object):
