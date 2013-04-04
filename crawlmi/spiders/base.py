@@ -3,7 +3,8 @@ class BaseSpider(object):
     settings = {}  # spider-specific settings to override the default ones
 
     def __init__(self, name=None):
-        self.name = name
+        if name is not None:
+            self.name = name
 
     def start_requests(self):
         pass

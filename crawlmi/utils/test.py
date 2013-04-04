@@ -3,7 +3,7 @@ from cStringIO import StringIO
 from crawlmi import log
 from crawlmi.core.engine import Engine
 from crawlmi.settings import Settings
-from crawlmi.spider import BaseSpider
+from crawlmi.spiders import BaseSpider
 from crawlmi.utils.clock import Clock
 
 

@@ -1,7 +1,7 @@
 from optparse import make_option
 
 from crawlmi import log
-from crawlmi.spider import BaseSpider
+from crawlmi.spiders import BaseSpider
 from crawlmi.settings import Settings
 
 

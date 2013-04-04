@@ -9,7 +9,7 @@ from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
 from crawlmi.settings import EngineSettings, Settings
 from crawlmi.signal_manager import SignalManager
-from crawlmi.spider import BaseSpider
+from crawlmi.spiders import BaseSpider
 from crawlmi.stats import MemoryStats
 from crawlmi.utils.test import get_engine
 
