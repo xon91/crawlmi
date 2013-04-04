@@ -32,6 +32,14 @@ class ResponseTest(unittest.TestCase):
         self.assertEqual(r.status, 301)
         self.assertRaises(ValueError, Response, 'http://example.com', status='lala200')
 
+    def test_repr(self):
+        resp_200 = Response('', status=200)
+        self.assertEqual(repr(resp_200), '<Response [200 (OK)]>')
+        resp_301 = Response('', status=301)
+        self.assertEqual(repr(resp_301), '<Response [301 (Moved Permanently)]>')
+        resp_999 = Response('', status=999)
+        self.assertEqual(repr(resp_999), '<Response [999]>')
+
     def test_properties(self):
         r = Response('', body='hey')
 
