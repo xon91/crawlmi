@@ -2,9 +2,9 @@ import os
 
 from twisted.trial import unittest
 
+from crawlmi.core.project import Project
 from crawlmi.exceptions import NotConfigured
 from crawlmi.tests import tests_dir
-from crawlmi.utils.project import Project
 
 
 sample_project_dir = os.path.join(tests_dir, 'test_project', 'sample_project')

@@ -2,10 +2,10 @@ from cStringIO import StringIO
 
 from crawlmi import log
 from crawlmi.core.engine import Engine
+from crawlmi.core.project import Project
 from crawlmi.settings import Settings
 from crawlmi.spiders import BaseSpider
 from crawlmi.utils.clock import Clock
-from crawlmi.utils.project import Project
 
 
 def get_engine(custom_settings=None, **kwargs):
