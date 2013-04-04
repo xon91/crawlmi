@@ -1,9 +1,17 @@
 from twisted.trial import unittest
 
-from crawlmi.utils.url import is_url_from_any_domain
+from crawlmi.utils.url import is_url, is_url_from_any_domain
 
 
 class UrlTest(unittest.TestCase):
+    def test_is_url(self):
+        self.assertTrue(is_url('http://github.com'))
+        self.assertTrue(is_url('https://github.com/'))
+        self.assertTrue(is_url('file://localhost/etc/fstab'))
+
+        self.assertFalse(is_url('github.com'))
+        self.assertFalse(is_url('/etc/conf'))
+
     def test_is_url_from_any_domain(self):
         url = 'http://www.wheele-bin-art.co.uk/get/product/123'
         self.assertTrue(is_url_from_any_domain(url, ['wheele-bin-art.co.uk']))

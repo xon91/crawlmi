@@ -68,6 +68,12 @@ def file_uri_to_path(uri):
     return urllib.url2pathname(urlparse.urlparse(uri).path)
 
 
+def is_url(url):
+    '''Return `True` if url has a correct scheme.
+    '''
+    return url.partition('://')[0] in ('file', 'http', 'https')
+
+
 def is_url_from_any_domain(url, domains):
     '''Return `True` if given url matches any of the `domains`.
     '''
