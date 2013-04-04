@@ -3,20 +3,18 @@ import signal
 from twisted.internet import reactor
 
 from crawlmi import log, signals
-from crawlmi.core.engine import Engine
 from crawlmi.utils.ossignal import install_shutdown_handlers, signal_names
 
 
 class Process(object):
-    '''Process is a wrapper around the engine that runs the engine inside the
-    process, with ability, to kill it cleanly.
+    '''Process is a wrapper around the engine. It starts the reactor and
+    catches kill signals from OS.
     '''
 
-    def __init__(self, spider, user_settings=None, custom_settings=None):
-        self.engine = Engine(spider, user_settings, custom_settings)
+    def __init__(self, engine):
+        self.engine = engine
 
     def start(self):
-        self.engine.setup()
         self.engine.signals.connect(self.stop, signal=signals.engine_stopped)
         self.engine.start()
         install_shutdown_handlers(self._signal_shutdown)
