@@ -8,12 +8,17 @@ from crawlmi.settings import Settings
 
 
 class Project(object):
+    '''Project provides the project-specific information.
+
+    To initialize a dummy project pass `path=None`.
+    '''
+
     def __init__(self, path='.'):
         self.inside_project = False
         self.cfg_path = self.get_closest_cfg(path=path)
         self.cfg = None
         self.project_dir = None
-        self.settings = Settings()
+        self.module_settings = Settings()  # user-defined settings file
         self._data_dir = None
 
         if self.cfg_path:
@@ -34,7 +39,7 @@ class Project(object):
                         'Cannot import crawlmi settings module %s: %s' %
                         (settings_module_path, exc))
                 else:
-                    self.settings = Settings.from_module(settings_module)
+                    self.module_settings = Settings.from_module(settings_module)
                     self.inside_project = True
 
     @property
@@ -55,12 +60,12 @@ class Project(object):
             data_dir = '.crawlmi'
         return os.path.join(self.project_dir, data_dir)
 
-    def get_closest_cfg(self, path='.', prev_path=None):
+    def get_closest_cfg(self, path, prev_path=None):
         '''Return the path to the closest crawlmi.cfg file by traversing the current
         directory and its parents.
         '''
         if path == prev_path:
-            return None
+            return
         path = os.path.abspath(path)
         cfgfile = os.path.join(path, 'crawlmi.cfg')
         if os.path.exists(cfgfile):

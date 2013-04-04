@@ -21,7 +21,7 @@ class ProjectTest(unittest.TestCase):
             project = Project(path=project_dir)
             self.assertTrue(project.inside_project)
             self.assertEqual(project.project_dir, sample_project_dir)
-            self.assertEqual(project.settings.get_int('TEST'), 42)
+            self.assertEqual(project.module_settings.get_int('TEST'), 42)
 
     def test_datadir(self):
         project = Project(path=sample_project_dir)
@@ -35,5 +35,14 @@ class ProjectTest(unittest.TestCase):
         self.assertIsNone(project.cfg_path)
         self.assertIsNone(project.cfg)
         self.assertIsNone(project.project_dir)
-        self.assertDictEqual(project.settings.values, {})
+        self.assertDictEqual(project.module_settings.values, {})
+        self.assertRaises(NotConfigured, project._get_data_dir)
+
+    def test_dummy_project(self):
+        project = Project(path=None)
+        self.assertFalse(project.inside_project)
+        self.assertIsNone(project.cfg_path)
+        self.assertIsNone(project.cfg)
+        self.assertIsNone(project.project_dir)
+        self.assertDictEqual(project.module_settings.values, {})
         self.assertRaises(NotConfigured, project._get_data_dir)
