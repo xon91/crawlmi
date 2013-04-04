@@ -49,7 +49,7 @@ class Engine(object):
 
     def set_spider(self, spider):
         self.spider = spider
-        self.settings.spider_settings = spider.settings
+        self.settings.spider_settings = spider.spider_settings
 
     def setup(self):
         if self.spider is None:

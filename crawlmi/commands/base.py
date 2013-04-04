@@ -19,7 +19,7 @@ class BaseCommand(object):
         that this is possible before proceeding. Default value is
         `False`.
 
-    `default_settings`
+    `command_settings`
         Command specific settings to be applied and override the project
         settings. By default, these settings are overriden through coommand
         line `-s` option.
@@ -33,7 +33,7 @@ class BaseCommand(object):
     '''
 
     requires_project = False
-    default_settings = {}
+    command_settings = {}
 
     def syntax(self):
         '''Command syntax. Do not include command name. Don't use newlines.
@@ -64,11 +64,11 @@ class BaseCommand(object):
 
     def get_settings(self, args, options):
         '''Return command specific settings. Default behavior is to combine
-        `default_settings` with the settings received from command line.
+        `command_settings` with the settings received from command line.
 
         `self.engine` is still not initialized, so don't use it.
         '''
-        custom_settings = self.default_settings.copy()
+        custom_settings = self.command_settings.copy()
 
         try:
             cmdline_settings = dict(x.split('=', 1) for x in options.set)

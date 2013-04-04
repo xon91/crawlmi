@@ -1,6 +1,7 @@
 class BaseSpider(object):
     name = None
-    settings = {}  # spider-specific settings to override the default ones
+    # spider-specific settings to override the default and module settings
+    spider_settings = {}
 
     def __init__(self, name=None):
         if name is not None:
@@ -11,14 +12,11 @@ class BaseSpider(object):
 
     def set_engine(self, engine):
         self.engine = engine
-        # overwrite spider-specific settings with the global settings
         self.settings = self.engine.settings
-
-    def init_crawl(self):
-        pass
-
-    def resume_crawl(self):
-        pass
 
     def parse(self, response):
         pass
+
+    def __str__(self):
+        return '<%s %r at 0x%0x>' % (type(self).__name__, self.name, id(self))
+    __repr__ = __str__
