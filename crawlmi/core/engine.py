@@ -3,6 +3,7 @@ from twisted.python.failure import Failure
 
 from crawlmi import log, signals
 from crawlmi.core.downloader import Downloader
+from crawlmi.exceptions import NotConfigured
 from crawlmi.http.request import Request
 from crawlmi.http.response import Response
 from crawlmi.middleware.extension_manager import ExtensionManager
@@ -23,23 +24,22 @@ class Engine(object):
     # how many seconds to wait between the checks of outq
     QUEUE_CHECK_FREQUENCY = 0.1
 
-    def __init__(self, spider, module_settings=None, custom_settings=None,
-                 clock=None):
+    def __init__(self, project, clock=None):
         '''Constructor of Engine should be very lightweight, so that things
         can be easily unittested. For any more complicated initialization
         use `setup()`.
         '''
-        self.spider = spider
+        self.spider = None
         self.pending_requests = 0
+
+        self.project = project
 
         # initialize settings
         default_settings = Settings.from_module(
             'crawlmi.settings.default_settings')
         self.settings = EngineSettings(
             default_settings=default_settings,
-            module_settings=module_settings,
-            spider_settings=spider.settings,
-            custom_settings=custom_settings)
+            module_settings=project.module_settings)
 
         self.running = False
         self.paused = False
@@ -47,7 +47,14 @@ class Engine(object):
         self.clock = clock or reactor
         self.processing = LoopingCall(self._process_queue, clock=self.clock)
 
+    def set_spider(self, spider):
+        self.spider = spider
+        self.settings.spider_settings = spider.settings
+
     def setup(self):
+        if self.spider is None:
+            raise NotConfigured('Spider is not set in Engine.')
+
         # IMPORTANT: order of the following initializations is very important
         # so please, think twice about any changes to it
 
