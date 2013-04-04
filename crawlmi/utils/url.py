@@ -66,3 +66,13 @@ def file_uri_to_path(uri):
     http://en.wikipedia.org/wiki/File_URI_scheme
     '''
     return urllib.url2pathname(urlparse.urlparse(uri).path)
+
+
+def is_url_from_any_domain(url, domains):
+    '''Return `True` if given url matches any of the `domains`.
+    '''
+    host = urlparse.urlparse(url).netloc
+    if host:
+        return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
+    else:
+        return False
