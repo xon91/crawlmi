@@ -4,7 +4,6 @@ from twisted.python.failure import Failure
 from crawlmi import log, signals
 from crawlmi.core.downloader import Downloader
 from crawlmi.core.signal_manager import SignalManager
-from crawlmi.exceptions import NotConfigured
 from crawlmi.http.request import Request
 from crawlmi.http.response import Response
 from crawlmi.middleware.extension_manager import ExtensionManager
@@ -34,6 +33,7 @@ class Engine(object):
         self.spiders = SpiderManager(settings)
 
         self.close_if_idle = True
+        self.initialized = False  # True, when `setup()` has been called
 
         self.spider = None
         self.pending_requests = 0
@@ -48,8 +48,7 @@ class Engine(object):
         self.settings.spider_settings = spider.spider_settings
 
     def setup(self):
-        if self.spider is None:
-            raise NotConfigured('Spider is not set in Engine.')
+        assert self.spider is not None, 'Spider is not set in Engine.'
 
         # IMPORTANT: order of the following initializations is very important
         # so please, think twice about any changes to it
@@ -80,10 +79,14 @@ class Engine(object):
         # initialize downloader pipeline
         self.pipeline = PipelineManager(self)
 
+        self.initialized = True
+
         # now that everything is ready, set the spider's engine
         self.spider.set_engine(self)
 
     def start(self):
+        assert self.initialized, 'Engine is not initialized. Call `setup()` to initialize it.'
+
         self.running = True
         self.signals.send(signal=signals.engine_started)
         self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
@@ -97,6 +100,8 @@ class Engine(object):
             log.err(Failure(), 'Error when processing start requests.')
 
     def stop(self, reason=''):
+        assert self.running, 'Engine is not running. Why stopping it?'
+
         self.signals.send(signal=signals.engine_stopping)
         self.running = False
         self.processing.cancel()
