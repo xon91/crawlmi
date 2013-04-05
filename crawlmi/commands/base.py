@@ -104,7 +104,7 @@ class BaseCommand(object):
             spider = spiders.create_spider_by_url(args[0])
             if spider:
                 return spider
-        return BaseSpider('')
+        return BaseSpider('default')
 
     def handle(self, args, options):
         '''The actual logic of the command. Subclasses must implement this
