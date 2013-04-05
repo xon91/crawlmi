@@ -10,7 +10,6 @@ from crawlmi.http.response import Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
-from crawlmi.settings import EngineSettings, Settings
 from crawlmi.utils.defer import LoopingCall, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
 
@@ -24,23 +23,16 @@ class Engine(object):
     # how many seconds to wait between the checks of outq
     QUEUE_CHECK_FREQUENCY = 0.1
 
-    def __init__(self, project, clock=None):
+    def __init__(self, settings, project, clock=None):
         '''Constructor of Engine should be very lightweight, so that things
         can be easily unittested. For any more complicated initialization
         use `setup()`.
         '''
-        self.spider = None
-        self.pending_requests = 0
-
+        self.settings = settings
         self.project = project
 
-        # initialize settings
-        default_settings = Settings.from_module(
-            'crawlmi.settings.default_settings')
-        self.settings = EngineSettings(
-            default_settings=default_settings,
-            module_settings=project.module_settings)
-
+        self.spider = None
+        self.pending_requests = 0
         self.running = False
         self.paused = False
         # clock is used in unittests

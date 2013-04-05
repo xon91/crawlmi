@@ -3,7 +3,7 @@ from cStringIO import StringIO
 from crawlmi import log
 from crawlmi.core.engine import Engine
 from crawlmi.core.project import Project
-from crawlmi.settings import Settings
+from crawlmi.settings import EngineSettings
 from crawlmi.spider import BaseSpider
 from crawlmi.utils.clock import Clock
 
@@ -13,8 +13,8 @@ def get_engine(custom_settings=None, **kwargs):
     '''
     custom_settings = custom_settings or {}
     custom_settings.update(kwargs)
-    engine = Engine(Project(path=None), clock=Clock())
-    engine.settings.custom_settings = Settings(custom_settings)
+    settings = EngineSettings(custom_settings=custom_settings)
+    engine = Engine(settings, Project(path=None), clock=Clock())
     engine.set_spider(BaseSpider('dummy'))
     # disable stopping engine when idle
     engine.is_idle = lambda: False

@@ -7,6 +7,7 @@ from crawlmi.commands.base import BaseCommand
 from crawlmi.core.engine import Engine
 from crawlmi.core.project import Project
 from crawlmi.exceptions import UsageError
+from crawlmi.settings import EngineSettings
 from crawlmi.utils.misc import iter_submodules
 
 
@@ -99,9 +100,9 @@ def execute(argv=None):
         argv = sys.argv
 
     project = Project()
-    engine = Engine(project=project)
+    settings = EngineSettings(module_settings=project.module_settings)
     inside_project = project.inside_project
-    cmds = get_commands(engine.settings, inside_project)
+    cmds = get_commands(settings, inside_project)
     cmd_name = pop_command_name(argv)
     if not cmd_name:
         print_commands(cmds, inside_project)
@@ -119,9 +120,11 @@ def execute(argv=None):
     parser.description = cmd.short_desc()
     cmd.add_options(parser)
     options, args = parser.parse_args(args=argv[1:])
-    # initialize engine
+    # initialize custom settings
     custom_settings = run_print_help(parser, cmd.get_settings, args, options)
-    engine.settings.custom_settings = custom_settings
+    settings.custom_settings = custom_settings
+    # initialize engine
+    engine = Engine(settings, project)
     cmd.set_engine(engine)
     spider = run_print_help(parser, cmd.get_spider, args, options)
     engine.set_spider(spider)
