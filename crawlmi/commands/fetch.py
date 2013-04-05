@@ -1,7 +1,7 @@
 from crawlmi.commands.base import BaseCommand
 from crawlmi.exceptions import UsageError
 from crawlmi.http.request import Request
-from crawlmi.utils.url import is_url
+from crawlmi.utils.url import any_to_uri
 
 
 class Command(BaseCommand):
@@ -41,10 +41,11 @@ class Command(BaseCommand):
         print
 
     def handle(self, args, options):
-        if len(args) != 1 or not is_url(args[0]):
+        if len(args) != 1:
             raise UsageError()
         cb = lambda x: self._print_response(x, options)
-        request = Request(args[0], callback=cb)
+        url = any_to_uri(args[0])
+        request = Request(url, callback=cb)
 
         self.engine.download(request)
         self.process.start()
