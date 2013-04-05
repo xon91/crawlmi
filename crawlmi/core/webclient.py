@@ -98,7 +98,7 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
 
         # Fixes Twisted 11.1.0+ support as HTTPClientFactory is expected
         # to have _disconnectedDeferred. See Twisted r32329.
-        # As Scrapy implements it's own logic to handle redirects is not
+        # As Crawlmi implements it's own logic to handle redirects is not
         # needed to add the callback _waitForDisconnect.
         # Specifically this avoids the AttributeError exception when
         # clientConnectionFailed method is called.

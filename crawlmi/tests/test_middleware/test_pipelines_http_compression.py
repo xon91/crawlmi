@@ -78,7 +78,7 @@ class HttpCompressionTest(unittest.TestCase):
         self.assertNotIn('Content-Encoding', new_response.headers)
 
     def test_process_response_plain(self):
-        response = Response('http://scrapytest.org', body='<!DOCTYPE...')
+        response = Response('http://crawlmitest.org', body='<!DOCTYPE...')
         self.assertFalse(response.headers.get('Content-Encoding'))
         new_response = self.mw.process_response(response)
         self.assertIs(new_response, response)

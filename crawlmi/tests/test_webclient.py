@@ -44,7 +44,7 @@ class ParseUrlTest(unittest.TestCase):
             ('https://127.0.0.1/?param=value', ('https', lip, lip, 443, '/?param=value')),
             ('https://127.0.0.1:12345/',      ('https', lip + ':12345', lip, 12345, '/')),
 
-            ('http://scrapytest.org/foo ',    ('http', 'scrapytest.org', 'scrapytest.org', 80, '/foo')),
+            ('http://crawlmitest.org/foo ',    ('http', 'crawlmitest.org', 'crawlmitest.org', 80, '/foo')),
             ('http://egg:7890 ',              ('http', 'egg:7890', 'egg', 7890, '/')),
         ]
 

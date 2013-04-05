@@ -11,11 +11,11 @@ class Command(BaseCommand):
         return '[options] <url>'
 
     def short_desc(self):
-        return 'Fetch a URL using the Scrapy downloader.'
+        return 'Fetch a URL using the Crawlmi downloader.'
 
     def help(self):
         return (
-            'Fetch a URL using the Scrapy downloader and print its content '
+            'Fetch a URL using the Crawlmi downloader and print its content '
             'to stdout. You may want to use --nolog to disable logging')
 
     def add_options(self, parser):

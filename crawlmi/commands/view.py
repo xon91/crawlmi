@@ -12,11 +12,11 @@ class Command(BaseCommand):
         return '[options] <url>'
 
     def short_desc(self):
-        return 'Open URL in browser, as seen by Scrapy.'
+        return 'Open URL in browser, as seen by Crawlmi.'
 
     def help(self):
         return (
-            'Fetch a URL using the Scrapy downloader and show its '
+            'Fetch a URL using the Crawlmi downloader and show its '
             'contents in a browser')
 
     def handle(self, args, options):
