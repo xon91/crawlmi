@@ -32,5 +32,5 @@ class UrlTest(unittest.TestCase):
 
     def test_any_to_uri(self):
         self.assertEqual(any_to_uri(r'C:\a\b\c'), 'file:///C:/a/b/c')
-        self.assertEqual(any_to_uri('www.google.com'), path_to_file_uri('www.google.com'))
+        self.assertEqual(any_to_uri('www.google.com'), 'http://www.google.com')
         self.assertEqual(any_to_uri('http://www.google.com'), 'http://www.google.com')

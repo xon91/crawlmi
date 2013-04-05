@@ -69,13 +69,22 @@ def file_uri_to_path(uri):
 
 
 def any_to_uri(uri_or_path):
-    '''If given a path name, return its File URI, otherwise return it
-    unmodified.
+    '''Return an intelligently created valid URI.
+
+    - if given an uri with a scheme, return it unmodified
+    - if given a path name, return its File URI
+    - otherwise append `http://` scheme.
     '''
     if os.path.splitdrive(uri_or_path)[0]:
         return path_to_file_uri(uri_or_path)
     u = urlparse.urlparse(uri_or_path)
-    return uri_or_path if u.scheme else path_to_file_uri(uri_or_path)
+    if u.scheme:
+        return uri_or_path
+    if os.path.exists(uri_or_path):
+        return path_to_file_uri(uri_or_path)
+    # supposing the simplified url was given (e.g. www.google.com), simply
+    # append 'http://' and see what happens
+    return 'http://' + uri_or_path
 
 
 def is_url(url):
