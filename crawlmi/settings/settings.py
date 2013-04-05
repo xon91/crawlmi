@@ -55,3 +55,7 @@ class Settings(object):
             return value
         else:
             return str(value).split(',')
+
+    def __str__(self):
+        return '<%s at 0x%0x>' % (type(self).__name__, id(self))
+    __repr__ = __str__
