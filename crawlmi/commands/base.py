@@ -5,6 +5,7 @@ from crawlmi.core.process import Process
 from crawlmi.exceptions import UsageError
 from crawlmi.settings import Settings
 from crawlmi.spider import BaseSpider
+from crawlmi.utils.url import is_url
 
 
 class BaseCommand(object):
@@ -60,6 +61,7 @@ class BaseCommand(object):
         group.add_option('-L', '--loglevel', metavar='LEVEL', default=log.DEBUG, help='log level (default: DEBUG)')
         group.add_option('--nolog', action='store_true', help='disable logging completely')
         group.add_option('-s', '--set', action='append', default=[], metavar='NAME=VALUE', help='set/override setting (may be repeated)')
+        group.add_option('--spider', dest='spider', help='use this spider')
         parser.add_option_group(group)
 
     def get_settings(self, args, options):
@@ -95,6 +97,13 @@ class BaseCommand(object):
         self.process = Process(engine)
 
     def get_spider(self, args, options):
+        spiders = self.engine.spiders
+        if options.spider:
+            return spiders.create_spider_by_name(options.spider)
+        if len(args) == 1 and is_url(args[0]):
+            spider = spiders.create_spider_by_url(args[0])
+            if spider:
+                return spider
         return BaseSpider('')
 
     def handle(self, args, options):

@@ -10,6 +10,7 @@ from crawlmi.http.response import Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
+from crawlmi.spider.spider_manager import SpiderManager
 from crawlmi.utils.defer import LoopingCall, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
 
@@ -30,6 +31,7 @@ class Engine(object):
         '''
         self.settings = settings
         self.project = project
+        self.spiders = SpiderManager(settings)
 
         self.spider = None
         self.pending_requests = 0
