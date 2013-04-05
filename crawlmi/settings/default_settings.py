@@ -5,6 +5,8 @@ COMMANDS_MODULE = ''
 STATS_CLASS = 'crawlmi.stats.MemoryStats'
 STATS_DUMP = True
 
+SPIDER_MODULES = []
+
 
 # Log settings
 
