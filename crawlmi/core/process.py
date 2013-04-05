@@ -13,11 +13,12 @@ class Process(object):
 
     def __init__(self, engine):
         self.engine = engine
+        install_shutdown_handlers(self._signal_shutdown)
 
     def start(self):
+        assert self.engine.initialized, 'Engine was not initialzied. Call `setup()` to initialize it.'
         self.engine.signals.connect(self.stop, signal=signals.engine_stopped)
         self.engine.start()
-        install_shutdown_handlers(self._signal_shutdown)
         reactor.addSystemEventTrigger('before', 'shutdown', self.stop)
         reactor.run(installSignalHandlers=False)  # blocking call
 
