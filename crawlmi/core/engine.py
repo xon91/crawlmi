@@ -33,6 +33,8 @@ class Engine(object):
         self.project = project
         self.spiders = SpiderManager(settings)
 
+        self.close_if_idle = True
+
         self.spider = None
         self.pending_requests = 0
         self.running = False
@@ -146,7 +148,7 @@ class Engine(object):
             dfd.addBoth(self._finalize_download)
 
         # check stopping condition
-        if self.is_idle():
+        if self.close_if_idle and self.is_idle():
             self.stop('finished')
 
     def _finalize_download(self, _):
