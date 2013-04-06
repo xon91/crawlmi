@@ -40,6 +40,7 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 # Extensions
 
 EXTENSIONS_BASE = {
+    'crawlmi.middleware.extensions.core_stats.CoreStats': 0,
     'crawlmi.middleware.extensions.log_stats.LogStats': 0,
 }
 EXTENSIONS = {}
