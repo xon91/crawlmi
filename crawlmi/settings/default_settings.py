@@ -1,3 +1,8 @@
+import os
+
+from crawlmi.utils.settings import read_list_data_file
+
+
 # General settings
 
 COMMANDS_MODULE = ''
@@ -45,6 +50,7 @@ LOG_STATS_INTERVAL = 60.0
 # Downloader pipeline
 
 PIPELINE_BASE = {
+    'crawlmi.middleware.pipelines.random_user_agent.RandomUserAgent': 400,
     'crawlmi.middleware.pipelines.default_headers.DefaultHeaders': 550,
     'crawlmi.middleware.pipelines.http_compression.HttpCompression': 800,
     'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
@@ -56,3 +62,6 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en',
 }
+
+
+RANDOM_USER_AGENT_LIST = read_list_data_file(os.path.join(os.path.dirname(__file__), 'user_agents.txt'))
