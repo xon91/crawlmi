@@ -58,7 +58,7 @@ class BaseCommand(object):
         '''
         group = OptionGroup(parser, "Global Options")
         group.add_option('--logfile', metavar='FILE', help='log file. if omitted stderr will be used')
-        group.add_option('-L', '--loglevel', metavar='LEVEL', default=log.DEBUG, help='log level (default: DEBUG)')
+        group.add_option('-L', '--loglevel', metavar='LEVEL', help='log level (default: DEBUG)')
         group.add_option('--nolog', action='store_true', help='disable logging completely')
         group.add_option('-s', '--set', action='append', default=[], metavar='NAME=VALUE', help='set/override setting (may be repeated)')
         group.add_option('--spider', dest='spider', help='use this spider')
