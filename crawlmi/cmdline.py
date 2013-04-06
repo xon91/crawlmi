@@ -65,6 +65,9 @@ def print_commands(commands, inside_project):
     print 'Available commands:'
     for cmd_name, cmd_class in sorted(commands.iteritems()):
         print '  %-13s %s' % (cmd_name, cmd_class().short_desc())
+    if not inside_project:
+        print
+        print 'More commands when inside the project...'
     print
     print 'Use "crawlmi <command> -h" to see more info about a command.'
 
