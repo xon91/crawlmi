@@ -19,7 +19,7 @@ class Command(BaseCommand):
             'Fetch a URL using the Crawlmi downloader and show its '
             'contents in a browser')
 
-    def handle(self, args, options):
+    def run(self, args, options):
         if len(args) != 1:
             raise UsageError()
         url = any_to_uri(args[0])

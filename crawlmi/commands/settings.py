@@ -24,7 +24,7 @@ class Command(BaseCommand):
         parser.add_option('--getlist', dest='getlist', metavar='SETTING',
             help='print setting value, intepreted as an float')
 
-    def handle(self, args, options):
+    def run(self, args, options):
         settings = self.engine.settings
         if options.get:
             print settings.get(options.get)

@@ -26,7 +26,7 @@ class Command(BaseCommand):
         available in the shell.
         '''
 
-    def handle(self, args, options):
+    def run(self, args, options):
         if len(args) > 1:
             raise UsageError()
 

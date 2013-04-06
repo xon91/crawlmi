@@ -130,7 +130,7 @@ def execute(argv=None):
     engine.set_spider(spider)
     engine.setup()
     # run command
-    run_print_help(parser, cmd.handle, args, options)
+    run_print_help(parser, cmd.run, args, options)
 
 
 if __name__ == '__main__':

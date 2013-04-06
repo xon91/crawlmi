@@ -22,7 +22,7 @@ class Command(BaseCommand):
         parser.add_option('--verbose', '-v', dest='verbose', action='store_true',
             help='also display twisted/python/platform info (useful for bug reports)')
 
-    def handle(self, args, options):
+    def run(self, args, options):
         if options.verbose:
             try:
                 import lxml.etree

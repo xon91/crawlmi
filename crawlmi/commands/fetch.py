@@ -40,7 +40,7 @@ class Command(BaseCommand):
             print response.body
         print
 
-    def handle(self, args, options):
+    def run(self, args, options):
         if len(args) != 1:
             raise UsageError()
         cb = lambda x: self._print_response(x, options)

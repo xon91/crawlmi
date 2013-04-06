@@ -29,7 +29,7 @@ class BaseCommand(object):
         1. `get_settings()` is called to receive the command specific settings.
         2. `set_engine()` is called. Spider is still uninitialized.
         3. `get_spider()` is called.
-        4. `handle()` is called. Engine is fully initialized. To start
+        4. `run()` is called. Engine is fully initialized. To start
            crawlnig process, call `self.process.start()`.
     '''
 
@@ -106,7 +106,7 @@ class BaseCommand(object):
                 return spider
         return BaseSpider('default')
 
-    def handle(self, args, options):
+    def run(self, args, options):
         '''The actual logic of the command. Subclasses must implement this
         method.
         '''
