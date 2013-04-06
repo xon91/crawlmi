@@ -4,8 +4,7 @@ from os.path import join
 
 from twisted.trial import unittest
 
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response, HtmlResponse
+from crawlmi.http import Request, Response, HtmlResponse
 from crawlmi.middleware.pipelines.http_compression import HttpCompression
 from crawlmi.tests import tests_datadir
 from crawlmi.utils.encoding import normalize_encoding

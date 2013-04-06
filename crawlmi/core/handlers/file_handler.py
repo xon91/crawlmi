@@ -2,7 +2,7 @@
 
 from twisted.internet import defer
 
-from crawlmi.http.response.response import Response
+from crawlmi.http import Response
 from crawlmi.utils.url import file_uri_to_path
 
 

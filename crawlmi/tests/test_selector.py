@@ -1,6 +1,6 @@
 import re
 
-from crawlmi.http.response import TextResponse, HtmlResponse, XmlResponse
+from crawlmi.http import TextResponse, HtmlResponse, XmlResponse
 
 
 class XpathSelectorTest(object):

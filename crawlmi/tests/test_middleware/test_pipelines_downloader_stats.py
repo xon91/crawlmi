@@ -1,8 +1,7 @@
 from twisted.python.failure import Failure
 from twisted.trial import unittest
 
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response
+from crawlmi.http import Request, Response
 from crawlmi.middleware.pipelines.downloader_stats import DownloaderStats
 from crawlmi.stats import MemoryStats
 from crawlmi.utils.test import get_engine

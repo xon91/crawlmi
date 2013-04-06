@@ -3,7 +3,7 @@ from twisted.trial import unittest
 from crawlmi import signals
 from crawlmi.core.signal_manager import SignalManager
 from crawlmi.exceptions import NotConfigured
-from crawlmi.http.response import Response
+from crawlmi.http import Response
 from crawlmi.middleware.extensions.log_stats import LogStats
 from crawlmi.utils.clock import Clock
 from crawlmi.utils.test import get_engine, LogWrapper

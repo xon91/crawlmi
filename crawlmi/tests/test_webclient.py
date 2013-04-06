@@ -12,8 +12,7 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
 
 from crawlmi.core.webclient import (BadHttpHeaderError, CrawlmiHTTPClient,
         CrawlmiHTPPClientFactory)
-from crawlmi.http.headers import Headers
-from crawlmi.http.request import Request
+from crawlmi.http import Headers, Request
 
 
 class ParseUrlTest(unittest.TestCase):

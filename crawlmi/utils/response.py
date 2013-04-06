@@ -4,7 +4,7 @@ import webbrowser
 
 from twisted.web.http import RESPONSES
 
-from crawlmi.http.response import HtmlResponse, TextResponse
+from crawlmi.http import HtmlResponse, TextResponse
 
 
 def response_http_repr(response):

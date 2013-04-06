@@ -1,6 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.http.response.html_response import HtmlResponse
+from crawlmi.http import HtmlResponse
 from crawlmi.parser.selectors import HtmlXPathSelector
 
 

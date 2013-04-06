@@ -6,8 +6,7 @@ from twisted.python.failure import Failure
 from crawlmi import log, signals
 from crawlmi.core.downloader import Downloader
 from crawlmi.core.signal_manager import SignalManager
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response
+from crawlmi.http import Request, Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue

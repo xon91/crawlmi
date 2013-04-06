@@ -1,6 +1,6 @@
 from lxml import etree
 
-from crawlmi.http.response import TextResponse
+from crawlmi.http import TextResponse
 from crawlmi.parser.selectors.selector_list import XPathSelectorList
 from crawlmi.utils.python import to_str
 

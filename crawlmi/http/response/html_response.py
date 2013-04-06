@@ -1,7 +1,7 @@
 import re
 from urlparse import urljoin
 
-from crawlmi.http.response import TextResponse
+from crawlmi.http import TextResponse
 from crawlmi.parser.selectors import HtmlXPathSelector
 from crawlmi.utils.url import requote_url
 

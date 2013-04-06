@@ -2,8 +2,7 @@ from urlparse import urlparse
 
 from twisted.trial import unittest
 
-from crawlmi.http.headers import Headers
-from crawlmi.http.request import Request
+from crawlmi.http import Headers, Request
 
 
 gh_url = 'http://www.github.com/'

@@ -1,8 +1,7 @@
 from twisted.python.failure import Failure
 
 from crawlmi.exceptions import RestartPipeline
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response
+from crawlmi.http import Request, Response
 from crawlmi.middleware.middleware_manager import MiddlewareManager
 from crawlmi.utils.conf import build_component_list
 

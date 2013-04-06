@@ -1,6 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.http.request import Request
+from crawlmi.http import Request
 from crawlmi.middleware.pipelines.default_headers import DefaultHeaders
 from crawlmi.utils.test import get_engine
 

@@ -1,6 +1,6 @@
 from twisted.web.http import RESPONSES
 
-from crawlmi.http.headers import Headers
+from crawlmi.http import Headers
 
 
 _no_request_error = 'Response is not tied to any request.'

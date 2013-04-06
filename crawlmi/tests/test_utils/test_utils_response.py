@@ -3,7 +3,7 @@ import urlparse
 
 from twisted.trial import unittest
 
-from crawlmi.http.response import Response, HtmlResponse
+from crawlmi.http import Response, HtmlResponse
 from crawlmi.utils.response import open_in_browser, response_http_repr
 
 

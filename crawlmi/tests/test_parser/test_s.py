@@ -3,7 +3,7 @@ import urlparse
 
 from twisted.trial import unittest
 
-from crawlmi.http.response import HtmlResponse
+from crawlmi.http import HtmlResponse
 from crawlmi.parser import SValidationError, S
 from crawlmi.parser.selectors import HtmlXPathSelector
 from crawlmi.tests import get_testdata

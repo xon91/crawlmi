@@ -2,8 +2,7 @@ import signal
 
 from twisted.internet import reactor, threads
 
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response
+from crawlmi.http import Request, Response
 from crawlmi.parser.selectors import XPathSelector
 from crawlmi.settings import Settings
 from crawlmi.spider import BaseSpider

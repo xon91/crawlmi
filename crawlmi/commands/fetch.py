@@ -1,6 +1,6 @@
 from crawlmi.commands.base import BaseCommand
 from crawlmi.exceptions import UsageError
-from crawlmi.http.request import Request
+from crawlmi.http import Request
 from crawlmi.utils.url import any_to_uri
 
 

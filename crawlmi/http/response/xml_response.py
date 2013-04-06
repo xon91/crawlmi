@@ -1,4 +1,4 @@
-from crawlmi.http.response import TextResponse
+from crawlmi.http import TextResponse
 from crawlmi.parser.selectors import XmlXPathSelector
 
 

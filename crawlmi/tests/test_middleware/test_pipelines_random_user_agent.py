@@ -1,7 +1,7 @@
 from twisted.trial import unittest
 
 from crawlmi.exceptions import NotConfigured
-from crawlmi.http.request import Request
+from crawlmi.http import Request
 from crawlmi.middleware.pipelines.random_user_agent import RandomUserAgent
 from crawlmi.utils.test import get_engine
 

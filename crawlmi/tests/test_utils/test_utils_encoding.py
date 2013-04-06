@@ -2,9 +2,10 @@ import codecs
 
 from twisted.trial import unittest
 
+from crawlmi.http import Headers
 from crawlmi.utils.encoding import (_read_bom, get_encoding_from_headers,
-        get_encoding_from_content, normalize_encoding, get_unicode_from_response)
-from crawlmi.http.headers import Headers
+        get_encoding_from_content, normalize_encoding,
+        get_unicode_from_response)
 
 
 class EncodingDetectionTest(unittest.TestCase):

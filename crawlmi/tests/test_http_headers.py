@@ -2,7 +2,7 @@ import copy
 
 from twisted.trial import unittest
 
-from crawlmi.http.headers import Headers
+from crawlmi.http import Headers
 
 
 class HeadersTest(unittest.TestCase):

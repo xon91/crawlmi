@@ -6,7 +6,7 @@ from twisted.web.http import HTTPClient
 from twisted.internet import defer
 
 from crawlmi.compat import optional_features
-from crawlmi.http.headers import Headers
+from crawlmi.http import Headers
 from crawlmi.http.response import factory as resp_factory
 
 

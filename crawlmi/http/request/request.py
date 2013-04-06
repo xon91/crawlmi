@@ -1,7 +1,7 @@
 from urlparse import urlparse, urlunparse
 from urllib import urlencode
 
-from crawlmi.http.headers import Headers
+from crawlmi.http import Headers
 from crawlmi.utils.python import to_str
 from crawlmi.utils.url import requote_url, requote_ajax
 

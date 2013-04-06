@@ -1,6 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.http.request import Request
+from crawlmi.http import Request
 from crawlmi.utils.request import request_http_repr
 
 

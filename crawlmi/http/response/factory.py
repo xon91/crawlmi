@@ -1,8 +1,7 @@
 from mimetypes import MimeTypes
 from os import path
 
-from crawlmi.http.response import (Response, TextResponse, XmlResponse,
-                                   HtmlResponse)
+from crawlmi.http import Response, TextResponse, XmlResponse, HtmlResponse
 from crawlmi.utils.python import is_binary
 
 

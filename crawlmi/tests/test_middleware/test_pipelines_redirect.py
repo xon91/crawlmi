@@ -1,7 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response
+from crawlmi.http import Request, Response
 from crawlmi.middleware.pipelines.redirect import Redirect
 from crawlmi.utils.test import get_engine
 

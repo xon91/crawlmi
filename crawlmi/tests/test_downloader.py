@@ -3,8 +3,7 @@ from twisted.python.failure import Failure
 from twisted.trial import unittest
 
 from crawlmi.core.downloader import Slot, Downloader
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response
+from crawlmi.http import Request, Response
 from crawlmi.queue import MemoryQueue
 from crawlmi.settings import Settings
 from crawlmi.utils.clock import Clock

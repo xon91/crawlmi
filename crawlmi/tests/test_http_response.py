@@ -1,8 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.http.headers import Headers
-from crawlmi.http.request import Request
-from crawlmi.http.response import Response
+from crawlmi.http import Headers, Request, Response
 
 
 class ResponseTest(unittest.TestCase):

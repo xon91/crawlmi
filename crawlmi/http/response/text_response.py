@@ -1,4 +1,4 @@
-from crawlmi.http.response import Response
+from crawlmi.http import Response
 from crawlmi.utils.encoding import get_unicode_from_response
 
 

@@ -1,8 +1,7 @@
 from twisted.trial import unittest
 
-from crawlmi.http.headers import Headers
-from crawlmi.http.response import (Response, TextResponse, XmlResponse,
-                                   HtmlResponse)
+from crawlmi.http import (Headers, Response, TextResponse, XmlResponse,
+                          HtmlResponse)
 from crawlmi.http.response.factory import (from_mime_type, from_filename,
         from_content_disposition, from_content_type, from_body, from_headers,
         from_args, _mime_types)
