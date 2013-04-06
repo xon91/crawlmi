@@ -16,8 +16,7 @@ def get_engine(custom_settings=None, **kwargs):
     settings = EngineSettings(custom_settings=custom_settings)
     engine = Engine(settings, Project(path=None), clock=Clock())
     engine.set_spider(BaseSpider('dummy'))
-    # disable stopping engine when idle
-    engine.is_idle = lambda: False
+    engine.close_if_idle = False
     return engine
 
 
