@@ -1,4 +1,4 @@
-import httplib
+from twisted.web.http import RESPONSES
 
 from crawlmi.http.headers import Headers
 
@@ -17,7 +17,7 @@ class Response(object):
         self._body = body or ''
 
     def __repr__(self):
-        msg = httplib.responses.get(self.status)
+        msg = RESPONSES.get(self.status)
         if msg:
             return '<%s [%s (%s)]>' % (self.__class__.__name__, self.status, msg)
         else:
