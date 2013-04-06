@@ -55,6 +55,7 @@ PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.redirect.Redirect': 600,
     'crawlmi.middleware.pipelines.http_compression.HttpCompression': 800,
     'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
+    'crawlmi.middleware.pipelines.downloader_stats.DownloaderStats': 850,
 }
 PIPELINE = {}
 
