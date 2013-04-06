@@ -2,6 +2,7 @@ import signal
 
 from twisted.internet import reactor, threads
 
+from crawlmi.core.engine import Engine
 from crawlmi.http import Request, Response
 from crawlmi.parser.selectors import XPathSelector
 from crawlmi.settings import Settings
@@ -13,7 +14,8 @@ from crawlmi.utils.url import any_to_uri
 
 
 class Shell(object):
-    relevant_classes = (BaseSpider, Request, Response, XPathSelector, Settings)
+    relevant_classes = (Engine, BaseSpider, Request, Response, XPathSelector,
+                        Settings)
 
     def __init__(self, engine, update_vars=None):
         self.engine = engine
@@ -52,6 +54,7 @@ class Shell(object):
         return d
 
     def populate_vars(self, request=None, response=None):
+        self.vars['engine'] = self.engine
         self.vars['settings'] = self.engine.settings
         self.vars['spider'] = self.engine.spider
         self.vars['request'] = request

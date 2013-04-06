@@ -192,3 +192,7 @@ class Engine(object):
         failure.request = request
         self.signals.send(signal=signals.spider_error, failure=failure)
         log.err(failure, 'Error when downloading %s' % request)
+
+    def __str__(self):
+        return '<%s at 0x%0x>' % (type(self).__name__, id(self))
+    __repr__ = __str__
