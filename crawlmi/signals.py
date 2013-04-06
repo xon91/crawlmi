@@ -10,10 +10,10 @@ class Signal(object):
 # args:
 engine_started = Signal('engine_started')
 # invoked when engine is about to be stopped. Engine is still running, though.
-# args:
+# args: reason
 engine_stopping = Signal('engine_stopping')
 # invoked when engine stopped and is not running anymore.
-# args:
+# args: reason
 engine_stopped = Signal('engine_stopped')
 
 # invoked when the request successfully passes through downloader pipeline.

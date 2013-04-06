@@ -1,3 +1,5 @@
+from time import time
+
 from twisted.internet import reactor
 from twisted.python.failure import Failure
 
@@ -87,6 +89,7 @@ class Engine(object):
     def start(self):
         assert self.initialized, 'Engine is not initialized. Call `setup()` to initialize it.'
 
+        self.start_time = time()
         self.running = True
         self.signals.send(signal=signals.engine_started)
         self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
@@ -102,15 +105,15 @@ class Engine(object):
     def stop(self, reason=''):
         assert self.running, 'Engine is not running. Why stopping it?'
 
-        self.signals.send(signal=signals.engine_stopping)
+        self.signals.send(signal=signals.engine_stopping, reason=reason)
         self.running = False
         self.processing.cancel()
         self.downloader.close()
         self.inq.close()
         self.outq.close()
         log.msg(format='Engine stopped (%(reason)s)', reason=reason)
+        self.signals.send(signal=signals.engine_stopped, reason=reason)
         self.stats.dump_stats()
-        self.signals.send(signal=signals.engine_stopped)
 
     def pause(self):
         self.paused = True
