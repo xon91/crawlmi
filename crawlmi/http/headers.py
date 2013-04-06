@@ -70,3 +70,15 @@ class Headers(dict):
 
     def iteritems(self):
         return ((k, self.getlist(k)) for k in self.keys())
+
+    def to_string(self):
+        '''Returns a raw HTTP headers representation of headers.
+        '''
+        raw_lines = []
+        for key, value in self.iteritems():
+            if isinstance(value, (str, unicode)):
+                raw_lines.append('%s: %s' % (key, value))
+            elif isinstance(value, (list, tuple)):
+                for v in value:
+                    raw_lines.append('%s: %s' % (key, v))
+        return '\r\n'.join(raw_lines)

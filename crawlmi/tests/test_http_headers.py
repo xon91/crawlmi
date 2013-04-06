@@ -111,3 +111,9 @@ class HeadersTest(unittest.TestCase):
         self.assertIn('a', h)
         h.clear()
         self.assertNotIn('a', h)
+
+    def test_to_string(self):
+        h = Headers({'Content-type': 'text/html', 'Accept': 'gzip'})
+        self.assertEqual(h.to_string(), 'Content-Type: text/html\r\nAccept: gzip')
+        h = Headers({'Content-type': ['text/html'], 'Accept': ['gzip']})
+        self.assertEqual(h.to_string(), 'Content-Type: text/html\r\nAccept: gzip')
