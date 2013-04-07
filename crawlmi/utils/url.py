@@ -1,6 +1,9 @@
 import os
+import re
 import urllib
-import urlparse
+from urlparse import urlparse, urlunparse, parse_qsl
+
+from crawlmi.utils.python import to_str
 
 
 # The unreserved URL characters (RFC 3986)
@@ -21,7 +24,7 @@ def _unquote_unreserved(url):
             if c in UNRESERVED_SET:
                 parts[i] = c + parts[i][2:]
             else:
-                parts[i] = '%' + parts[i]
+                parts[i] = '%' + h.upper() + parts[i][2:]
         else:
             parts[i] = '%' + parts[i]
     return ''.join(parts)
@@ -33,7 +36,8 @@ def requote_url(url):
     This function passes the given URL through an unquote/quote cycle to
     ensure that it is fully and consistently quoted.
 
-    Calling this function multiple times on the url doesn't have any effect.
+    Calling this function multiple times on the url doesn't have any
+    additional effect.
     '''
     # Unquote only the unreserved characters
     # Then quote only illegal characters (do not quote reserved, unreserved,
@@ -65,7 +69,7 @@ def file_uri_to_path(uri):
     '''Convert File URI to local filesystem path according to:
     http://en.wikipedia.org/wiki/File_URI_scheme
     '''
-    return urllib.url2pathname(urlparse.urlparse(uri).path)
+    return urllib.url2pathname(urlparse(uri).path)
 
 
 def any_to_uri(uri_or_path):
@@ -77,7 +81,7 @@ def any_to_uri(uri_or_path):
     '''
     if os.path.splitdrive(uri_or_path)[0]:
         return path_to_file_uri(uri_or_path)
-    u = urlparse.urlparse(uri_or_path)
+    u = urlparse(uri_or_path)
     if u.scheme:
         return uri_or_path
     if os.path.exists(uri_or_path):
@@ -96,8 +100,50 @@ def is_url(url):
 def is_url_from_any_domain(url, domains):
     '''Return `True` if given url matches any of the `domains`.
     '''
-    host = urlparse.urlparse(url).netloc
+    host = urlparse(url).netloc
     if host:
         return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
     else:
         return False
+
+
+_utm_tags_re = re.compile('|'.join(['utm_source', 'utm_medium', 'utm_campaign',
+                                    'utm_term', 'utm_content']))
+
+def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
+                     strip_utm_tags=True, encoding=None):
+    '''Canonicalize the given url by applying the following procedures:
+
+    - sort query arguments, first by key, then by value
+    - percent encode paths and query arguments. non-ASCII characters are
+      percent-encoded using UTF-8 (RFC-3986)
+    - normalize all spaces (in query arguments) '+' (plus symbol)
+    - normalize percent encodings case (%2f -> %2F)
+    - remove query arguments with blank values (unless keep_blank_values is True)
+    - remove fragments (unless keep_fragments is True)
+    '''
+    def _strip_tags(keyvals):
+        return filter(lambda (k, v): not _utm_tags_re.match(k), keyvals)
+
+    if isinstance(url, basestring):
+        url = to_str(url, encoding)
+    else:
+        raise TypeError('Bad type for `url` object: %s' % type(url))
+
+    scheme, netloc, path, params, query, fragment = urlparse(url)
+    keyvals = parse_qsl(query, keep_blank_values)
+    keyvals.sort()
+    if strip_utm_tags:
+        keyvals = _strip_tags(keyvals)
+    query = urllib.urlencode(keyvals)
+    if not path:
+        path = '/'
+    fragment = '' if not keep_fragments else fragment
+    # sometimes utm tags are inside fragment
+    if fragment and strip_utm_tags:
+        try:
+            parsed_fragment = parse_qsl(fragment, keep_blank_values=True, strict_parsing=True)
+            fragment = urllib.urlencode(_strip_tags(parsed_fragment))
+        except ValueError:
+            pass
+    return requote_url(urlunparse([scheme, netloc.lower(), path, params, query, fragment]))
