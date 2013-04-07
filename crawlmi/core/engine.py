@@ -85,14 +85,7 @@ class Engine(object):
         # now that everything is ready, set the spider's engine
         self.spider.set_engine(self)
 
-    def start(self):
-        assert self.initialized, 'Engine is not initialized. Call `setup()` to initialize it.'
-
-        self.start_time = time()
-        self.running = True
-        self.signals.send(signal=signals.engine_started)
-        self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
-
+    def crawl_start_requests(self):
         # process start requests from spider
         try:
             requests = self.spider.start_requests()
@@ -100,6 +93,14 @@ class Engine(object):
                 self.download(req)
         except:
             log.err(Failure(), 'Error when processing start requests.')
+
+    def start(self):
+        assert self.initialized, 'Engine is not initialized. Call `setup()` to initialize it.'
+
+        self.start_time = time()
+        self.running = True
+        self.signals.send(signal=signals.engine_started)
+        self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
 
     def stop(self, reason=''):
         assert self.running, 'Engine is not running. Why stopping it?'
