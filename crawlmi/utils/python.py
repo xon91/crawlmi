@@ -1,7 +1,9 @@
 import inspect
 
 
-def to_unicode(value, encoding='utf-8', errors='strict'):
+def to_unicode(value, encoding=None, errors='strict'):
+    if encoding is None:
+        encoding = 'utf-8'
     if isinstance(value, unicode):
         return value
     elif isinstance(value, str):
@@ -10,7 +12,9 @@ def to_unicode(value, encoding='utf-8', errors='strict'):
         return unicode(value)
 
 
-def to_str(value, encoding='utf-8', errors='strict'):
+def to_str(value, encoding=None, errors='strict'):
+    if encoding is None:
+        encoding = 'utf-8'
     if isinstance(value, str):
         return value
     elif isinstance(value, unicode):
