@@ -70,6 +70,9 @@ class Shell(object):
         self.vars['fetch'] = self.fetch
         self.vars['view'] = open_in_browser
         self.vars['shelp'] = self.print_help
+        # some useful objects
+        self.vars['Request'] = Request
+        self.vars['Response'] = Response
         self.update_vars(self.vars)
         self.print_help()
 
