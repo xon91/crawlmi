@@ -1,4 +1,5 @@
 import signal
+import traceback
 
 from twisted.internet import reactor, threads
 
@@ -45,7 +46,12 @@ class Shell(object):
         else:
             url = any_to_uri(request_or_url)
             request = Request(url)
-        response = threads.blockingCallFromThread(reactor, self._schedule, request)
+
+        response = None
+        try:
+            response = threads.blockingCallFromThread(reactor, self._schedule, request)
+        except:
+            traceback.print_exc()
         self.populate_vars(request, response)
 
     def _schedule(self, request):
