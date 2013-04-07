@@ -4,6 +4,7 @@ from crawlmi.core.process import Process
 from crawlmi.exceptions import UsageError
 from crawlmi.settings import Settings
 from crawlmi.spider import BaseSpider
+from crawlmi.utils.conf import arglist_to_dict
 from crawlmi.utils.url import is_url
 
 
@@ -73,8 +74,7 @@ class BaseCommand(object):
 
         if hasattr(options, 'set'):
             try:
-                cmdline_settings = dict(x.split('=', 1) for x in options.set)
-                custom_settings.update(cmdline_settings)
+                custom_settings.update(arglist_to_dict(options.set))
             except ValueError:
                 raise UsageError('Invalid -s value, use -s NAME=VALUE',
                                  print_help=False)

@@ -1,6 +1,6 @@
 from twisted.trial import unittest
 
-from crawlmi.utils.conf import build_component_list
+from crawlmi.utils.conf import build_component_list, arglist_to_dict
 
 
 class UtilsConfTest(unittest.TestCase):
@@ -13,3 +13,8 @@ class UtilsConfTest(unittest.TestCase):
 
         custom = ['a', 'b', 'c']
         self.assertEqual(build_component_list(base, custom), custom)
+
+    def test_arglist_to_dict(self):
+        self.assertEqual(
+            arglist_to_dict(['arg1=val1', 'arg2=val2']),
+            {'arg1': 'val1', 'arg2': 'val2'})
