@@ -1,6 +1,5 @@
 from optparse import OptionGroup
 
-from crawlmi import log
 from crawlmi.core.process import Process
 from crawlmi.exceptions import UsageError
 from crawlmi.settings import Settings
@@ -72,21 +71,22 @@ class BaseCommand(object):
         '''
         custom_settings = self.command_settings.copy()
 
-        try:
-            cmdline_settings = dict(x.split('=', 1) for x in options.set)
-            custom_settings.update(cmdline_settings)
-        except ValueError:
-            raise UsageError('Invalid -s value, use -s NAME=VALUE',
-                             print_help=False)
+        if hasattr(options, 'set'):
+            try:
+                cmdline_settings = dict(x.split('=', 1) for x in options.set)
+                custom_settings.update(cmdline_settings)
+            except ValueError:
+                raise UsageError('Invalid -s value, use -s NAME=VALUE',
+                                 print_help=False)
 
         # logging behavior
-        if options.logfile:
+        if hasattr(options, 'logfile') and options.logfile:
             custom_settings['LOG_ENABLED'] = True
             custom_settings['LOG_FILE'] = options.logfile
-        if options.loglevel:
+        if hasattr(options, 'loglevel') and options.loglevel:
             custom_settings['LOG_ENABLED'] = True
             custom_settings['LOG_LEVEL'] = options.loglevel
-        if options.nolog:
+        if hasattr(options, 'nolog') and options.nolog:
             custom_settings['LOG_ENABLED'] = False
 
         return Settings(custom_settings)
@@ -98,7 +98,7 @@ class BaseCommand(object):
 
     def get_spider(self, args, options):
         spiders = self.engine.spiders
-        if options.spider:
+        if hasattr(options, 'spider') and options.spider:
             return spiders.create_spider_by_name(options.spider)
         if len(args) == 1 and is_url(args[0]):
             spider = spiders.create_spider_by_url(args[0])

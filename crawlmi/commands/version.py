@@ -18,7 +18,6 @@ class Command(BaseCommand):
         return 'Print Crawlmi version'
 
     def add_options(self, parser):
-        BaseCommand.add_options(self, parser)
         parser.add_option('--verbose', '-v', dest='verbose', action='store_true',
             help='also display twisted/python/platform info (useful for bug reports)')
 

@@ -12,7 +12,6 @@ class Command(BaseCommand):
         return 'Get settings values'
 
     def add_options(self, parser):
-        BaseCommand.add_options(self, parser)
         parser.add_option('--get', dest='get', metavar='SETTING',
             help='print raw setting value')
         parser.add_option('--getbool', dest='getbool', metavar='SETTING',

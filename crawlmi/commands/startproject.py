@@ -31,6 +31,9 @@ class Command(BaseCommand):
     def short_desc(self):
         return 'Create new project'
 
+    def add_options(self, parser):
+        pass
+
     def run(self, args, options):
         if len(args) != 1:
             raise UsageError()
