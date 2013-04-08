@@ -1,10 +1,61 @@
 from twisted.trial import unittest
 
 from crawlmi.http import Request
-from crawlmi.utils.request import request_http_repr
+from crawlmi.utils.request import (request_http_repr, request_fingerprint,
+    _fingerprint_cache)
 
 
 class UtilsRequestTest(unittest.TestCase):
+    def test_request_fingerprint(self):
+        r1 = Request('http://www.example.com/query?id=111&cat=222')
+        r2 = Request('http://www.example.com/query?cat=222&id=111')
+        self.assertEqual(request_fingerprint(r1), request_fingerprint(r1))
+        self.assertEqual(request_fingerprint(r1), request_fingerprint(r2))
+
+        r1 = Request('http://www.example.com/hnnoticiaj1.aspx?78132,199')
+        r2 = Request('http://www.example.com/hnnoticiaj1.aspx?78160,199')
+        self.assertNotEqual(request_fingerprint(r1), request_fingerprint(r2))
+
+        # make sure caching is working
+        self.assertEqual(request_fingerprint(r1), _fingerprint_cache[r1][None])
+
+        r1 = Request('http://www.example.com/members/offers.html')
+        r2 = Request('http://www.example.com/members/offers.html')
+        r2.headers['SESSIONID'] = 'somehash'
+        self.assertEqual(request_fingerprint(r1), request_fingerprint(r2))
+
+        r1 = Request('http://www.example.com/')
+        r2 = Request('http://www.example.com/')
+        r2.headers['Accept-Language'] = 'en'
+        r3 = Request('http://www.example.com/')
+        r3.headers['Accept-Language'] = 'en'
+        r3.headers['SESSIONID'] = 'somehash'
+
+        self.assertEqual(request_fingerprint(r1), request_fingerprint(r2), request_fingerprint(r3))
+
+        self.assertEqual(request_fingerprint(r1),
+                         request_fingerprint(r1, include_headers=['Accept-Language']))
+
+        self.assertNotEqual(request_fingerprint(r1),
+            request_fingerprint(r2, include_headers=['Accept-Language']))
+
+        self.assertEqual(request_fingerprint(r3, include_headers=['accept-language', 'sessionid']),
+                         request_fingerprint(r3, include_headers=['SESSIONID', 'Accept-Language']))
+
+        r1 = Request('http://www.example.com')
+        r2 = Request('http://www.example.com', method='POST')
+        r3 = Request('http://www.example.com', method='POST', body='request body')
+
+        self.assertNotEqual(request_fingerprint(r1), request_fingerprint(r2))
+        self.assertNotEqual(request_fingerprint(r2), request_fingerprint(r3))
+
+        # cached fingerprint must be cleared on request copy
+        r1 = Request('http://www.example.com')
+        fp1 = request_fingerprint(r1)
+        r2 = r1.replace(url = 'http://www.example.com/other')
+        fp2 = request_fingerprint(r2)
+        self.assertNotEqual(fp1, fp2)
+
     def test_request_http_repr(self):
         r1 = Request('http://www.example.com')
         self.assertEqual(request_http_repr(r1), 'GET / HTTP/1.1\r\nHost: www.example.com\r\n\r\n')
