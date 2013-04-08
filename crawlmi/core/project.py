@@ -50,6 +50,16 @@ class Project(object):
                 os.makedirs(self._data_dir)
         return self._data_dir
 
+    def data_path(self, path, create_dir=False):
+        '''If path is relative, return the given path inside the project data
+        dir, otherwise return the path unmodified.
+        '''
+        if not os.path.isabs(path):
+            path = os.path.join(self.data_dir, path)
+        if create_dir and not os.path.exists(path):
+            os.makedirs(path)
+        return path
+
     def _get_data_dir(self):
         if not self.inside_project:
             raise NotConfigured('Not inside a project.')

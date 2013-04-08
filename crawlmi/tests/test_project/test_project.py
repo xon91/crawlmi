@@ -23,10 +23,29 @@ class ProjectTest(unittest.TestCase):
             self.assertEqual(project.project_dir, sample_project_dir)
             self.assertEqual(project.module_settings.get_int('TEST'), 42)
 
-    def test_datadir(self):
+    def test_data_dir(self):
         project = Project(path=sample_project_dir)
         self.assertEqual(project.data_dir, os.path.join(sample_project_dir, 'crawlmi_data'))
         self.assertTrue(os.path.exists(project.data_dir))
+        os.rmdir(project.data_dir)
+
+    def test_data_path(self):
+        project = Project(path=sample_project_dir)
+        # relative path
+        expected = os.path.join(sample_project_dir, 'crawlmi_data', 'a', 'b')
+        relative = project.data_path(os.path.join('a', 'b'), create_dir=False)
+        self.assertEqual(relative, expected)
+        self.assertFalse(os.path.exists(expected))
+        # create dir
+        project.data_path(os.path.join('a', 'b'), create_dir=True)
+        self.assertTrue(os.path.exists(expected))
+        os.rmdir(os.path.join(sample_project_dir, 'crawlmi_data', 'a', 'b'))
+        os.rmdir(os.path.join(sample_project_dir, 'crawlmi_data', 'a'))
+        # absolute path
+        expected = os.path.abspath(__file__)
+        absolute = project.data_path(expected, create_dir=False)
+        self.assertEqual(absolute, expected)
+
         os.rmdir(project.data_dir)
 
     def test_bad_project(self):
