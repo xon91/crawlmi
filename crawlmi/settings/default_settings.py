@@ -68,6 +68,7 @@ PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.http_compression.HttpCompression': 800,
     'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
     'crawlmi.middleware.pipelines.downloader_stats.DownloaderStats': 850,
+    'crawlmi.middleware.pipelines.httpcache.HttpCache': 900,
 }
 PIPELINE = {}
 
@@ -81,6 +82,16 @@ FILTER_NONTEXT_RESPONSE = False  # filter all binary responses (images, pdfs, et
 FILTER_URL_LENGTH_LIMIT = 2083  # uses IE limit
 FILTER_NON_200_RESPONSE_STATUS = False  # filter all non-200 responses
 FILTER_RESPONSE_STATUS = lambda status_code: False  # if True, filter the response
+
+HTTPCACHE_DIR = 'httpcache'
+HTTPCACHE_IGNORE_MISSING = False
+HTTPCACHE_STORAGE = 'crawlmi.middleware.pipelines.httpcache.storage.DbmCacheStorage'
+HTTPCACHE_EXPIRATION_SECS = 0
+HTTPCACHE_IGNORE_NON_200_STATUS = True
+HTTPCACHE_IGNORE_STATUS = lambda status_code: False  # if True, don't cache the response
+HTTPCACHE_IGNORE_SCHEMES = ['file']
+HTTPCACHE_DBM_MODULE = 'anydbm'
+HTTPCACHE_POLICY = 'crawlmi.middleware.pipelines.httpcache.policy.DummyPolicy'
 
 RANDOM_USER_AGENT_LIST = read_list_data_file(os.path.join(os.path.dirname(__file__), 'user_agents.txt'))
 
