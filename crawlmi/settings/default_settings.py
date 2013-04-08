@@ -42,10 +42,14 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 EXTENSIONS_BASE = {
     'crawlmi.middleware.extensions.core_stats.CoreStats': 0,
     'crawlmi.middleware.extensions.log_stats.LogStats': 0,
+    'crawlmi.middleware.extensions.telnet.TelnetConsole': 0,
 }
 EXTENSIONS = {}
 
 LOG_STATS_INTERVAL = 60.0
+
+TELNET_CONSOLE_PORT = [6023, 6073]
+TELNET_CONSOLE_HOST = '0.0.0.0'
 
 
 # Downloader pipeline
