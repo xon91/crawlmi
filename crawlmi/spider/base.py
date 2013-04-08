@@ -1,4 +1,7 @@
-class BaseSpider(object):
+from crawlmi.utils.trackref import object_ref
+
+
+class BaseSpider(object_ref):
     name = None
     # spider-specific settings to override the default and module settings
     spider_settings = {}

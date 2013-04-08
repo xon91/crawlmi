@@ -3,10 +3,11 @@ from urllib import urlencode
 
 from crawlmi.http import Headers
 from crawlmi.utils.python import to_str
+from crawlmi.utils.trackref import object_ref
 from crawlmi.utils.url import requote_url, requote_ajax
 
 
-class Request(object):
+class Request(object_ref):
     def __init__(self, url, callback=None, method='GET', headers={},
                  params={}, body='', meta={}, errback=None, proxy=None,
                  priority=0, history=[], encoding='utf-8'):

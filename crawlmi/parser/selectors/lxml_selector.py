@@ -3,9 +3,10 @@ from lxml import etree
 from crawlmi.http import TextResponse
 from crawlmi.parser.selectors.selector_list import XPathSelectorList
 from crawlmi.utils.python import to_str
+from crawlmi.utils.trackref import object_ref
 
 
-class XPathSelector(object):
+class XPathSelector(object_ref):
     _parser = etree.HTMLParser
     _tostring_method = 'html'
 

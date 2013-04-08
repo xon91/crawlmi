@@ -1,12 +1,13 @@
 from twisted.web.http import RESPONSES
 
 from crawlmi.http import Headers
+from crawlmi.utils.trackref import object_ref
 
 
 _no_request_error = 'Response is not tied to any request.'
 
 
-class Response(object):
+class Response(object_ref):
     def __init__(self, url, status=200, headers={}, body=None, request=None):
         self.url = url
         self.status = int(status)
