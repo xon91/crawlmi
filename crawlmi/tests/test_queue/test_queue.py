@@ -1,6 +1,9 @@
 from twisted.trial import unittest
 
-from crawlmi.queue import MemoryQueue
+from crawlmi.queue import MemoryQueue, ResponseQueue
+
+
+test_queues = [MemoryQueue, ResponseQueue]
 
 
 class QueueTest(unittest.TestCase):
@@ -37,5 +40,6 @@ class QueueTest(unittest.TestCase):
         self.assertRaises(RuntimeError, q.close)
         self.assertRaises(RuntimeError, len, q)
 
-    def test_memory_queue(self):
-        self._test(MemoryQueue)
+    def test_queues(self):
+        for q in test_queues:
+            self._test(q)
