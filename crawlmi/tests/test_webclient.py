@@ -10,8 +10,8 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
         ErrorResource, NoLengthResource, HostHeaderResource,
         PayloadResource, BrokenDownloadResource)
 
-from crawlmi.core.webclient import (BadHttpHeaderError, CrawlmiHTTPClient,
-        CrawlmiHTPPClientFactory)
+from crawlmi.core.webclient import (BadHttpHeaderError, DownloadSizeError,
+        CrawlmiHTTPClient, CrawlmiHTPPClientFactory)
 from crawlmi.http import Headers, Request
 
 
@@ -211,7 +211,9 @@ class WebClientTest(unittest.TestCase):
         '''Adapted version of twisted.web.client.getPage'''
         def _clientfactory(*args, **kwargs):
             timeout = kwargs.pop('timeout', 0)
-            f = CrawlmiHTPPClientFactory(Request(*args, **kwargs), timeout=timeout)
+            download_size = kwargs.pop('download_size', 0)
+            f = CrawlmiHTPPClientFactory(Request(*args, **kwargs),
+                timeout=timeout, download_size=download_size)
             f.deferred.addCallback(lambda r: r.body)
             return f
         from twisted.web.client import _makeGetterFactory
@@ -221,6 +223,12 @@ class WebClientTest(unittest.TestCase):
     def test_payload(self):
         s = '0123456789' * 10
         return self.get_page(self.get_url('payload'), body=s).addCallback(self.assertEquals, s)
+
+    def test_size_limit(self):
+        s = 'x' * 100
+        return self.assertFailure(
+            self.get_page(self.get_url('payload'), body=s, download_size=10),
+            DownloadSizeError)
 
     def test_host_header(self):
         # if we pass Host header explicitly, it should be used, otherwise

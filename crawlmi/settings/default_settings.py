@@ -30,6 +30,9 @@ DOWNLOAD_HANDLERS = {
     'https': 'crawlmi.core.handlers.HttpDownloadHandler',
 }
 
+DOWNLOAD_TIMEOUT = 180  # 3mins
+DOWNLOAD_SIZE_LIMIT = 0  # size limit of object to download (600KB is good option)
+
 CONCURRENT_REQUESTS = 16
 CONCURRENT_REQUESTS_PER_DOMAIN = 8  # use 0 not to limit requests per domain
 

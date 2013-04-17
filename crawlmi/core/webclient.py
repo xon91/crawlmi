@@ -15,9 +15,17 @@ class BadHttpHeaderError(Exception):
     '''
 
 
+class DownloadSizeError(Exception):
+    '''Raised when response's body size exceed the limit.
+    '''
+
+
 class CrawlmiHTTPClient(HTTPClient):
 
     delimiter = '\n'
+
+    def __init__(self):
+        self.body_size = 0
 
     def connectionMade(self):
         self.headers = Headers()
@@ -76,6 +84,16 @@ class CrawlmiHTTPClient(HTTPClient):
             defer.TimeoutError('Getting %s took longer than %s seconds.' %
                                (self.factory.url, self.factory.timeout)))
 
+    def handleResponsePart(self, data):
+        HTTPClient.handleResponsePart(self, data)
+        self.body_size += len(data)
+        if (self.factory.download_size and
+                self.body_size > self.factory.download_size):
+            self.transport.loseConnection()
+            self.factory.noPage(
+                DownloadSizeError('Size of %s exceeded %s bytes.' %
+                    (self.factory.url, self.factory.download_size)))
+
 
 class CrawlmiHTPPClientFactory(HTTPClientFactory):
     protocol = CrawlmiHTTPClient
@@ -84,17 +102,18 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
     followRedirect = False
     afterFoundGet = False
 
-    def __init__(self, request, timeout=180):
+    def __init__(self, request, timeout=180, download_size=0):
         self.url = urldefrag(request.url)[0]
         self.method = request.method
         self.body = request.body or None
         self.headers = Headers(request.headers)
         self.response_headers = None
-        self.timeout = timeout
+        self.timeout = request.meta.get('download_timeout', timeout)
         self.start_time = time()
         self.deferred = defer.Deferred()
         self.deferred.addCallback(self._build_response, request)
         self.invalid_headers = []
+        self.download_size = request.meta.get('download_size', download_size)
 
         # Fixes Twisted 11.1.0+ support as HTTPClientFactory is expected
         # to have _disconnectedDeferred. See Twisted r32329.
