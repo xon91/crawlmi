@@ -11,7 +11,7 @@ from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue
 from crawlmi.spider.spider_manager import SpiderManager
-from crawlmi.utils.defer import LoopingCall, defer_result
+from crawlmi.utils.defer import ScheduledCall, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
 
 
@@ -42,7 +42,7 @@ class Engine(object):
         self.paused = False
         # clock is used in unittests
         self.clock = clock or reactor
-        self.processing = LoopingCall(self._process_queue, clock=self.clock)
+        self.processing = ScheduledCall(self._process_queue, clock=self.clock)
 
     def set_spider(self, spider):
         self.spider = spider
@@ -117,11 +117,9 @@ class Engine(object):
 
     def pause(self):
         self.paused = True
-        self.processing.schedule(5)
 
     def unpause(self):
         self.paused = False
-        self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
 
     def download(self, request):
         '''"Download" the given request. First pass it through the downloader
@@ -146,7 +144,7 @@ class Engine(object):
         return self.pending_requests == 0 and len(self.outq) == 0
 
     def _process_queue(self):
-        while self.running and not self.paused and self.outq:
+        if self.running and not self.paused and self.outq:
             response = self.outq.pop()
             self.signals.send(signal=signals.response_downloaded,
                               response=response)
@@ -154,13 +152,17 @@ class Engine(object):
             dfd.addBoth(self.pipeline.process_response)
             dfd.addBoth(self._handle_pipeline_result)
             dfd.addBoth(self._finalize_download)
-
         # check stopping condition
-        if self.close_if_idle and self.is_idle():
+        elif self.close_if_idle and self.is_idle():
             self.stop('finished')
+        elif self.paused:
+            self.processing.schedule(5)
+        else:
+            self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
 
     def _finalize_download(self, _):
         self.pending_requests -= 1
+        self.processing.schedule(0)
 
     def _handle_pipeline_result(self, result):
         if result is None:

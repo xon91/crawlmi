@@ -137,8 +137,7 @@ class EngineTest(unittest.TestCase):
         fail.request = req
         self.engine.outq.push(fail)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
-        self.clock.advance(0)
-        self.clock.advance(0)
+        self.clock.pump([0, 0, 0])
         self.check_signals([signals.response_downloaded,
                             signals.response_received,
                             signals.spider_error])
