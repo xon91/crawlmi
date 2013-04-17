@@ -6,18 +6,6 @@ from crawlmi.utils.test import get_engine
 
 
 class FilterUrlLengthTest(unittest.TestCase):
-    def test_body_limit(self):
-        mw = Filter(get_engine(FILTER_BODY_LENGTH_LIMIT=50))
-        req = Request('http://github.com/')
-
-        good1 = Response('', request=req, body='a' * 50)
-        good2 = mw.process_response(good1)
-        self.assertIs(good1, good2)
-
-        bad1 = Response('', request=req, body='a' * 51)
-        bad2 = mw.process_response(bad1)
-        self.assertIsNone(bad2)
-
     def test_nontext_response(self):
         mw = Filter(get_engine(FILTER_NONTEXT_RESPONSE=True))
         req = Request('http://github.com/')

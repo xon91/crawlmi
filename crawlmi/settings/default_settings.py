@@ -72,7 +72,6 @@ DEFAULT_REQUEST_HEADERS = {
 }
 
 FILTER_NONTEXT_RESPONSE = False  # filter all binary responses (images, pdfs, etc.)
-FILTER_BODY_LENGTH_LIMIT = 0  # good size can be 600KB
 FILTER_URL_LENGTH_LIMIT = 2083  # uses IE limit
 FILTER_NON_200_RESPONSE_STATUS = False  # filter all non-200 responses
 FILTER_RESPONSE_STATUS = lambda status_code: False  # if True, filter the response
