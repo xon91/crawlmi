@@ -4,7 +4,7 @@ from twisted.trial import unittest
 
 from crawlmi.core.downloader import Slot, Downloader
 from crawlmi.http import Request, Response
-from crawlmi.queue import MemoryQueue
+from crawlmi.queue import MemoryQueue, ResponseQueue
 from crawlmi.settings import Settings
 from crawlmi.utils.clock import Clock
 
@@ -178,7 +178,7 @@ class DownloaderTest(unittest.TestCase):
     def setUp(self):
         self.clock = Clock()
         self.request_queue = MemoryQueue()
-        self.response_queue = MemoryQueue()
+        self.response_queue = ResponseQueue()
         self.dwn = Downloader(Settings(self.default_settings), self.request_queue,
                               self.response_queue,
                               download_handler=MockDownloaderHandler(Settings()),

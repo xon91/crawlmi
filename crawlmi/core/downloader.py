@@ -144,7 +144,8 @@ class Downloader(object):
         return self.num_in_progress == 0
 
     def process(self):
-        while self.running and self.request_queue and self.free_slots > 0:
+        while (self.running and not self.response_queue.needs_backout() and
+                self.request_queue and self.free_slots > 0):
             request = self.request_queue.pop()
             key, slot = self._get_slot(request)
 

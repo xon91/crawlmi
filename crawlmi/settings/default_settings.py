@@ -33,6 +33,9 @@ DOWNLOAD_HANDLERS = {
 DOWNLOAD_TIMEOUT = 180  # 3mins
 DOWNLOAD_SIZE_LIMIT = 0  # size limit of object to download (600KB is good option)
 
+# sum of sizes of active responses. When exceeded, downloader holds back
+RESPONSE_ACTIVE_SIZE_LIMIT = 10000000
+
 CONCURRENT_REQUESTS = 16
 CONCURRENT_REQUESTS_PER_DOMAIN = 8  # use 0 not to limit requests per domain
 

@@ -9,7 +9,7 @@ from crawlmi.core.signal_manager import SignalManager
 from crawlmi.http import Request, Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
-from crawlmi.queue import PriorityQueue, MemoryQueue
+from crawlmi.queue import PriorityQueue, MemoryQueue, ResponseQueue
 from crawlmi.spider.spider_manager import SpiderManager
 from crawlmi.utils.defer import ScheduledCall, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
@@ -71,7 +71,8 @@ class Engine(object):
 
         # initialize downloader
         self.request_queue = PriorityQueue(lambda _: MemoryQueue())
-        self.response_queue = MemoryQueue()
+        self.response_queue = ResponseQueue(
+            self.settings.get_int('RESPONSE_ACTIVE_SIZE_LIMIT'))
         self.downloader = Downloader(self.settings, self.request_queue,
                                      self.response_queue, clock=self.clock)
 
