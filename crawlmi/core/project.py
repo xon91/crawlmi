@@ -3,7 +3,6 @@ import os
 import sys
 import warnings
 
-from crawlmi.exceptions import NotConfigured
 from crawlmi.settings import Settings
 
 
@@ -62,7 +61,7 @@ class Project(object):
 
     def _get_data_dir(self):
         if not self.inside_project:
-            raise NotConfigured('Not inside a project.')
+            return '.crawlmi'
 
         if self.cfg.has_option('crawlmi', 'datadir'):
             data_dir = self.cfg.get('crawlmi', 'datadir')

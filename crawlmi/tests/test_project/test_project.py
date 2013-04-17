@@ -3,7 +3,6 @@ import os
 from twisted.trial import unittest
 
 from crawlmi.core.project import Project
-from crawlmi.exceptions import NotConfigured
 from crawlmi.tests import tests_dir
 
 
@@ -55,7 +54,7 @@ class ProjectTest(unittest.TestCase):
         self.assertIsNone(project.cfg)
         self.assertIsNone(project.project_dir)
         self.assertDictEqual(project.module_settings.values, {})
-        self.assertRaises(NotConfigured, project._get_data_dir)
+        self.assertEqual(project.data_dir, '.crawlmi')
 
     def test_dummy_project(self):
         project = Project(path=None)
@@ -64,4 +63,4 @@ class ProjectTest(unittest.TestCase):
         self.assertIsNone(project.cfg)
         self.assertIsNone(project.project_dir)
         self.assertDictEqual(project.module_settings.values, {})
-        self.assertRaises(NotConfigured, project._get_data_dir)
+        self.assertEqual(project.data_dir, '.crawlmi')
