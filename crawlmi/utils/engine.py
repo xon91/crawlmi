@@ -7,8 +7,8 @@ def get_engine_status(engine):
         'engine.running',
         'engine.paused',
         'engine.pending_requests',
-        'len(engine.inq)',
-        'len(engine.outq)',
+        'len(engine.request_queue)',
+        'len(engine.response_queue)',
         'len(downloader.slots)',
         'downloader.num_in_progress',
     ]

@@ -77,10 +77,10 @@ class EngineTest(unittest.TestCase):
         self.assertFalse(self.engine.paused)
         self.assertIsInstance(self.engine.signals, SignalManager)
         self.assertIsInstance(self.engine.stats, MemoryStats)
-        self.assertIsInstance(self.engine.inq, PriorityQueue)
-        self.assertEqual(len(self.engine.inq), 0)
-        self.assertIsInstance(self.engine.outq, MemoryQueue)
-        self.assertEqual(len(self.engine.outq), 0)
+        self.assertIsInstance(self.engine.request_queue, PriorityQueue)
+        self.assertEqual(len(self.engine.request_queue), 0)
+        self.assertIsInstance(self.engine.response_queue, MemoryQueue)
+        self.assertEqual(len(self.engine.response_queue), 0)
         self.assertIsInstance(self.engine.extensions, ExtensionManager)
         self.assertIsInstance(self.engine.pipeline, PipelineManager)
         self.assertEqual(self.engine.spider.engine, self.engine)
@@ -98,8 +98,8 @@ class EngineTest(unittest.TestCase):
         self.engine.stop('finished')
         self.check_signals([signals.engine_stopping, signals.engine_stopped])
         self.assertFalse(self.engine.running)
-        self.assertTrue(self.engine.inq._closed)
-        self.assertTrue(self.engine.outq._closed)
+        self.assertTrue(self.engine.request_queue._closed)
+        self.assertTrue(self.engine.response_queue._closed)
 
     def test_download(self):
         self.engine.start()
@@ -107,17 +107,17 @@ class EngineTest(unittest.TestCase):
         req = Request('http://github.com/')
         self.engine.download(req)
         self.check_signals([signals.request_received])
-        self.assertEqual(len(self.engine.inq), 1)
+        self.assertEqual(len(self.engine.request_queue), 1)
 
         # pipeline None
         self.pipeline.req = lambda req: None
         self.engine.download(req)
-        self.assertEqual(len(self.engine.inq), 1)
+        self.assertEqual(len(self.engine.request_queue), 1)
 
         # pipeline response
         self.pipeline.req = lambda req: Response('')
         self.engine.download(req)
-        self.assertEqual(len(self.engine.outq), 1)
+        self.assertEqual(len(self.engine.response_queue), 1)
 
     def test_processing(self):
         self.engine.start()
@@ -126,7 +126,7 @@ class EngineTest(unittest.TestCase):
         # normal behavior
         req = Request('http://github.com/')
         resp = Response('', request=req)
-        self.engine.outq.push(resp)
+        self.engine.response_queue.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
         self.clock.advance(0)
         self.check_signals([signals.response_downloaded,
@@ -135,7 +135,7 @@ class EngineTest(unittest.TestCase):
         # download error
         fail = Failure(Exception())
         fail.request = req
-        self.engine.outq.push(fail)
+        self.engine.response_queue.push(fail)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
         self.clock.pump([0, 0, 0])
         self.check_signals([signals.response_downloaded,
@@ -144,24 +144,24 @@ class EngineTest(unittest.TestCase):
 
         # pipeline None
         self.pipeline.resp = lambda req: None
-        self.engine.outq.push(resp)
+        self.engine.response_queue.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
         self.clock.advance(0)
         self.check_signals([signals.response_downloaded])
 
         # pipeline request
         self.pipeline.resp = lambda req: Request('http://github.com/')
-        self.engine.outq.push(resp)
+        self.engine.response_queue.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
         self.clock.advance(0)
         self.check_signals([signals.response_downloaded,
                             signals.request_received])
-        self.assertEqual(len(self.engine.inq), 1)
-        self.engine.inq.pop()
+        self.assertEqual(len(self.engine.request_queue), 1)
+        self.engine.request_queue.pop()
 
         # pipeline failure
         self.pipeline.resp = lambda req: Failure(Exception())
-        self.engine.outq.push(resp)
+        self.engine.response_queue.push(resp)
         self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
         self.clock.advance(0)
         self.clock.advance(0)

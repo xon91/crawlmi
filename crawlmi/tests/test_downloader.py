@@ -177,10 +177,10 @@ class DownloaderTest(unittest.TestCase):
 
     def setUp(self):
         self.clock = Clock()
-        self.inq = MemoryQueue()
-        self.outq = MemoryQueue()
-        self.dwn = Downloader(Settings(self.default_settings), self.inq,
-                              self.outq,
+        self.request_queue = MemoryQueue()
+        self.response_queue = MemoryQueue()
+        self.dwn = Downloader(Settings(self.default_settings), self.request_queue,
+                              self.response_queue,
                               download_handler=MockDownloaderHandler(Settings()),
                               clock=self.clock)
         self.handler = self.dwn.download_handler
@@ -191,7 +191,7 @@ class DownloaderTest(unittest.TestCase):
         new_settings = self.default_settings.copy()
         new_settings.update(**kwargs)
         self.dwn.processing.cancel()
-        self.dwn = Downloader(Settings(new_settings), self.inq, self.outq,
+        self.dwn = Downloader(Settings(new_settings), self.request_queue, self.response_queue,
                               download_handler=MockDownloaderHandler(Settings()),
                               clock=self.clock)
         self.handler = self.dwn.download_handler
@@ -242,7 +242,7 @@ class DownloaderTest(unittest.TestCase):
     def test_basic(self):
         # create 5 requests with slot ids: a, b, a, a, c
         requests = [get_request(id)[0] for id in 'abaac']
-        map(lambda r: self.inq.push(r), requests)
+        map(lambda r: self.request_queue.push(r), requests)
         self.assertEqual(self.dwn.free_slots, 2)
         self.assertTrue(self.dwn.is_idle())
 
@@ -252,12 +252,12 @@ class DownloaderTest(unittest.TestCase):
         self.assertFalse(self.dwn.is_idle())
         # no more requests are scheduled, until download is finished
         self.clock.advance(20)
-        self.assertEqual(len(self.inq), 3)
+        self.assertEqual(len(self.request_queue), 3)
         # download the first request
         self.handler.call(requests[0], Response('hello'))
         self.assertEqual(self.dwn.free_slots, 1)  # slot is immediately available
         # result is also available
-        result = self.outq.peek()
+        result = self.response_queue.peek()
         self.assertIs(result.request, requests[0])
         self.assertEqual(result.url, 'hello')
         # enqueue third request
@@ -277,15 +277,15 @@ class DownloaderTest(unittest.TestCase):
         self.handler.call(requests[4], Response(''))
         # final checks
         self.clock.pump([1] * 10)
-        self.assertEqual(len(self.outq), 5)
+        self.assertEqual(len(self.response_queue), 5)
         self.assertTrue(self.dwn.is_idle())
 
     def test_close(self):
         req1 = get_request('a')[0]
         req2 = get_request('b')[0]
-        self.inq.push(req1)
+        self.request_queue.push(req1)
         self.clock.advance(20)
-        self.inq.push(req2)
+        self.request_queue.push(req2)
         # test basic attributes, before and after closing
         self.assertTrue(self.dwn.running)
         self.assertTrue(self.dwn.processing.is_scheduled())
@@ -294,17 +294,17 @@ class DownloaderTest(unittest.TestCase):
         self.assertFalse(self.dwn.processing.is_scheduled())
 
         self.clock.advance(20)
-        self.assertEqual(len(self.inq), 1)  # request 2 remains unqueued
+        self.assertEqual(len(self.request_queue), 1)  # request 2 remains unqueued
 
         # downloader behavior after closing
-        self.assertEqual(len(self.outq), 0)
+        self.assertEqual(len(self.response_queue), 0)
         self.handler.call(req1, Response(''))
-        self.assertEqual(len(self.outq), 0)
+        self.assertEqual(len(self.response_queue), 0)
 
     def test_fail(self):
         self._update_dwn(CONCURRENT_REQUESTS=3, CONCURRENT_REQUESTS_PER_DOMAIN=2)
         requests = [get_request(id)[0] for id in 'aab']
-        map(lambda r: self.inq.push(r), requests)
+        map(lambda r: self.request_queue.push(r), requests)
 
         # enqueue requests
         self.clock.advance(0)
@@ -312,24 +312,24 @@ class DownloaderTest(unittest.TestCase):
         err = ValueError('my bad')
         self.handler.fail(requests[0], err)
         self.assertEqual(self.dwn.free_slots, 1)
-        fail = self.outq.pop()
+        fail = self.response_queue.pop()
         self.assertIs(fail.request, requests[0])
         self.assertIs(fail.value, err)
         # fail 3rd request
         self.handler.fail(requests[2], err)
-        fail = self.outq.pop()
+        fail = self.response_queue.pop()
         self.assertIs(fail.request, requests[2])
         self.assertIs(fail.value, err)
         # succeed 2nd request
         self.handler.call(requests[1], Response('nice!', request=requests[1]))
-        resp = self.outq.pop()
+        resp = self.response_queue.pop()
         self.assertIs(resp.request, requests[1])
         self.assertEqual(resp.url, 'nice!')
 
     def test_clear_slots(self):
         requests = [get_request(id)[0] for id in xrange(30)]
         for r in requests:
-            self.inq.push(r)
+            self.request_queue.push(r)
             self.clock.advance(Downloader.QUEUE_CHECK_FREQUENCY)
             self.handler.call(r, Response(''))
         self.assertLessEqual(len(self.dwn.slots), 2 * self.dwn.total_concurrency)

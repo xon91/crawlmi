@@ -21,7 +21,7 @@ class Engine(object):
     instead.
     '''
 
-    # how many seconds to wait between the checks of outq
+    # how many seconds to wait between the checks of response_queue
     QUEUE_CHECK_FREQUENCY = 0.1
 
     def __init__(self, settings, project, clock=None):
@@ -70,10 +70,10 @@ class Engine(object):
         self.stats = stats_cls(self)
 
         # initialize downloader
-        self.inq = PriorityQueue(lambda _: MemoryQueue())
-        self.outq = MemoryQueue()
-        self.downloader = Downloader(self.settings, self.inq, self.outq,
-                                     clock=self.clock)
+        self.request_queue = PriorityQueue(lambda _: MemoryQueue())
+        self.response_queue = MemoryQueue()
+        self.downloader = Downloader(self.settings, self.request_queue,
+                                     self.response_queue, clock=self.clock)
 
         # initialize extensions
         self.extensions = ExtensionManager(self)
@@ -109,8 +109,8 @@ class Engine(object):
         self.running = False
         self.processing.cancel()
         self.downloader.close()
-        self.inq.close()
-        self.outq.close()
+        self.request_queue.close()
+        self.response_queue.close()
         log.msg(format='Engine stopped (%(reason)s)', reason=reason)
         self.signals.send(signal=signals.engine_stopped, reason=reason)
         self.stats.dump_stats()
@@ -124,8 +124,8 @@ class Engine(object):
     def download(self, request):
         '''"Download" the given request. First pass it through the downloader
         pipeline.
-            - if the request is received from the pipeline, push it to inq
-            - if the response is received from the pipeline, push it to outq
+            - if the request is received from the pipeline, push it to request_queue
+            - if the response is received from the pipeline, push it to response_queue
         '''
         request_or_response = self.pipeline.process_request(request)
         if request_or_response is None:
@@ -135,17 +135,18 @@ class Engine(object):
             self.pending_requests += 1
             self.signals.send(signal=signals.request_received,
                               request=request_or_response)
-            self.inq.push(request_or_response.priority, request_or_response)
+            self.request_queue.push(request_or_response.priority,
+                                    request_or_response)
         elif isinstance(request_or_response, Response):
             request_or_response.request = request
-            self.outq.push(request_or_response)
+            self.response_queue.push(request_or_response)
 
     def is_idle(self):
-        return self.pending_requests == 0 and len(self.outq) == 0
+        return self.pending_requests == 0 and len(self.response_queue) == 0
 
     def _process_queue(self):
-        if self.running and not self.paused and self.outq:
-            response = self.outq.pop()
+        if self.running and not self.paused and self.response_queue:
+            response = self.response_queue.pop()
             self.signals.send(signal=signals.response_downloaded,
                               response=response)
             dfd = defer_result(response, clock=self.clock)

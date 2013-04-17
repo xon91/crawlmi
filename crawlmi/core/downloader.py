@@ -93,17 +93,19 @@ class Slot(object):
 
 
 class Downloader(object):
-    '''Fetch requests from `inq` queue. When downloaded, put the results into
-    `outq` queue. Respect CONCURRENT_REQUESTS setting.
+    '''Fetch requests from `request_queue` queue. When downloaded,
+    put the results into `response_queue` queue. Respect CONCURRENT_REQUESTS
+    setting.
     Requests are further divided into specific slots, based on their domains.
     '''
 
-    # how many seconds to wait between the checks of inq
+    # how many seconds to wait between the checks of request_queue
     QUEUE_CHECK_FREQUENCY = 0.1
 
-    def __init__(self, settings, inq, outq, download_handler=None, clock=None):
-        self.inq = inq  # queue of requests
-        self.outq = outq  # queue of responses
+    def __init__(self, settings, request_queue, response_queue,
+                 download_handler=None, clock=None):
+        self.request_queue = request_queue
+        self.response_queue = response_queue  # queue of responses
         self.download_handler = download_handler or GeneralHandler(settings)
         self.slots = {}
         self.num_in_progress = 0
@@ -142,8 +144,8 @@ class Downloader(object):
         return self.num_in_progress == 0
 
     def process(self):
-        while self.running and self.inq and self.free_slots > 0:
-            request = self.inq.pop()
+        while self.running and self.request_queue and self.free_slots > 0:
+            request = self.request_queue.pop()
             key, slot = self._get_slot(request)
 
             def remove_in_progress(response):
@@ -154,9 +156,9 @@ class Downloader(object):
             def enqueue_result(request, result):
                 # in a case, result is actually a Failure
                 result.request = request
-                # make sure not to modify outq, after stopping the downloader
+                # make sure not to modify response_queue, after stopping the downloader
                 if self.running:
-                    self.outq.push(result)
+                    self.response_queue.push(result)
                 # don't return anything from here, in a case an error occured -
                 # we don't want it to be logged
 

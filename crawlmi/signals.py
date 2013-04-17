@@ -19,7 +19,7 @@ engine_stopped = Signal('engine_stopped')
 # invoked when the request successfully passes through downloader pipeline.
 # args: request
 request_received = Signal('request_received')
-# invoked when the response is popped out of the outq
+# invoked when the response is popped out of the response_queue
 # args: response (either Response or Failure)
 response_downloaded = Signal('response_downloaded')
 # invoked when the response successfully passes through downloader pipeline
