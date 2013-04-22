@@ -21,6 +21,10 @@ class UsageError(Exception):
 
 # Downloader pipeline
 
+class RequestDropped(Exception):
+    '''Raised when pipeline processing drops the request.'''
+    pass
+
 class RestartPipeline(Exception):
     '''Indicates that the pipeline processing should be restarted with the
     new value.

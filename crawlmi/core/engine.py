@@ -11,7 +11,7 @@ from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue, ResponseQueue
 from crawlmi.spider.spider_manager import SpiderManager
-from crawlmi.utils.defer import ScheduledCall, defer_result
+from crawlmi.utils.defer import ScheduledCall, defer_succeed, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
 
 
@@ -128,19 +128,24 @@ class Engine(object):
             - if the request is received from the pipeline, push it to request_queue
             - if the response is received from the pipeline, push it to response_queue
         '''
-        request_or_response = self.pipeline.process_request(request)
-        if request_or_response is None:
-            return
+        def _success(request_or_response):
+            if isinstance(request_or_response, Request):
+                self.pending_requests += 1
+                self.signals.send(signal=signals.request_received,
+                                  request=request_or_response)
+                self.request_queue.push(request_or_response.priority,
+                                        request_or_response)
+            elif isinstance(request_or_response, Response):
+                request_or_response.request = request
+                self.response_queue.push(request_or_response)
 
-        if isinstance(request_or_response, Request):
-            self.pending_requests += 1
-            self.signals.send(signal=signals.request_received,
-                              request=request_or_response)
-            self.request_queue.push(request_or_response.priority,
-                                    request_or_response)
-        elif isinstance(request_or_response, Response):
-            request_or_response.request = request
-            self.response_queue.push(request_or_response)
+        def _failure(failure):
+            failure.request = request
+            return self._handle_pipeline_result(failure)
+
+        d = defer_succeed(request, clock=self.clock)
+        d.addCallback(self.pipeline.process_request)
+        d.addCallbacks(_success, _failure)
 
     def is_idle(self):
         return self.pending_requests == 0 and len(self.response_queue) == 0

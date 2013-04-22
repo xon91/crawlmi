@@ -87,7 +87,7 @@ class EngineTest(unittest.TestCase):
 
     def check_signals(self, signals=None):
         if signals is not None:
-            self.assertEqual(len(self.sp.received), len(signals))
+            self.assertEqual(len(self.sp.received), len(signals), str(self.sp.received))
             for i in xrange(len(signals)):
                 self.assertEqual(self.sp.received[i], signals[i])
         del self.sp.received[:]
@@ -103,20 +103,24 @@ class EngineTest(unittest.TestCase):
 
     def test_download(self):
         self.engine.start()
-        self.check_signals()
+        del self.sp.received[:]
+
         req = Request('http://github.com/')
         self.engine.download(req)
+        self.clock.advance(0)
         self.check_signals([signals.request_received])
         self.assertEqual(len(self.engine.request_queue), 1)
 
         # pipeline None
         self.pipeline.req = lambda req: None
         self.engine.download(req)
+        self.clock.advance(0)
         self.assertEqual(len(self.engine.request_queue), 1)
 
         # pipeline response
         self.pipeline.req = lambda req: Response('')
         self.engine.download(req)
+        self.clock.advance(0)
         self.assertEqual(len(self.engine.response_queue), 1)
 
     def test_processing(self):
@@ -127,8 +131,7 @@ class EngineTest(unittest.TestCase):
         req = Request('http://github.com/')
         resp = Response('', request=req)
         self.engine.response_queue.push(resp)
-        self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
-        self.clock.advance(0)
+        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0])
         self.check_signals([signals.response_downloaded,
                             signals.response_received])
 
@@ -136,8 +139,7 @@ class EngineTest(unittest.TestCase):
         fail = Failure(Exception())
         fail.request = req
         self.engine.response_queue.push(fail)
-        self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
-        self.clock.pump([0, 0, 0])
+        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0, 0])
         self.check_signals([signals.response_downloaded,
                             signals.response_received,
                             signals.spider_error])
@@ -145,15 +147,15 @@ class EngineTest(unittest.TestCase):
         # pipeline None
         self.pipeline.resp = lambda req: None
         self.engine.response_queue.push(resp)
-        self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
-        self.clock.advance(0)
-        self.check_signals([signals.response_downloaded])
+        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])
+        self.check_signals([signals.response_downloaded,
+                            signals.response_received,
+                            signals.spider_error])
 
         # pipeline request
         self.pipeline.resp = lambda req: Request('http://github.com/')
         self.engine.response_queue.push(resp)
-        self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
-        self.clock.advance(0)
+        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])
         self.check_signals([signals.response_downloaded,
                             signals.request_received])
         self.assertEqual(len(self.engine.request_queue), 1)
@@ -162,9 +164,7 @@ class EngineTest(unittest.TestCase):
         # pipeline failure
         self.pipeline.resp = lambda req: Failure(Exception())
         self.engine.response_queue.push(resp)
-        self.clock.advance(2 * self.engine.QUEUE_CHECK_FREQUENCY)
-        self.clock.advance(0)
-        self.clock.advance(0)
+        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])
         self.check_signals([signals.response_downloaded,
                             signals.response_received,
                             signals.spider_error])
