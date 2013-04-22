@@ -20,11 +20,14 @@ class Response(object_ref):
         self._body = body or ''
 
     def __repr__(self):
-        msg = RESPONSES.get(self.status)
-        msg = ' (%s)' % msg if msg else ''
+        msg = ' (%s)' % self.status_message if self.status_message else ''
         flags = ' %s' % self.flags if self.flags else ''
         return '<%s %s [%s%s]>%s' % (self.__class__.__name__, self.url,
                                      self.status, msg, flags)
+
+    @property
+    def status_message(self):
+        return RESPONSES.get(self.status, '')
 
     @property
     def body(self):
