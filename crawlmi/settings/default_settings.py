@@ -64,6 +64,7 @@ PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.filter.Filter': 50,
     'crawlmi.middleware.pipelines.random_user_agent.RandomUserAgent': 400,
     'crawlmi.middleware.pipelines.retry.Retry': 500,
+    'crawlmi.middleware.pipelines.tor.Tor': 510,
     'crawlmi.middleware.pipelines.default_headers.DefaultHeaders': 550,
     'crawlmi.middleware.pipelines.redirect.Redirect': 600,
     'crawlmi.middleware.pipelines.http_compression.HttpCompression': 800,
@@ -102,3 +103,8 @@ REDIRECT_PRIORITY_ADJUST = +2
 RETRY_TIMES = 2  # initial response + 2 retries = 3 requests
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408]
 RETRY_PRIORITY_ADJUST = -1  # it is better to wait a little
+
+TOR_HTTP_PROXY = 'http://127.0.0.1:8118/'
+# following settings are used to set new tor identity and are not required
+TOR_CONNECTION = ('127.0.0.1', 9051)  # connection parameters for tor, not privoxy!
+TOR_PASSWORD = None  # use empty string if no password is usedt
