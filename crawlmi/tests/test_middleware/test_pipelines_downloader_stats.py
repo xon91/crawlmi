@@ -3,14 +3,12 @@ from twisted.trial import unittest
 
 from crawlmi.http import Request, Response
 from crawlmi.middleware.pipelines.downloader_stats import DownloaderStats
-from crawlmi.stats import MemoryStats
 from crawlmi.utils.test import get_engine
 
 
 class DownloaderStatsTest(unittest.TestCase):
     def setUp(self):
         engine = get_engine()
-        engine.stats = MemoryStats(engine)
         self.stats = engine.stats
         self.mw = DownloaderStats(engine)
 

@@ -3,8 +3,10 @@ from cStringIO import StringIO
 from crawlmi import log
 from crawlmi.core.engine import Engine
 from crawlmi.core.project import Project
+from crawlmi.core.signal_manager import SignalManager
 from crawlmi.settings import EngineSettings
 from crawlmi.spider import BaseSpider
+from crawlmi.stats import MemoryStats
 from crawlmi.utils.clock import Clock
 
 
@@ -17,6 +19,10 @@ def get_engine(custom_settings=None, **kwargs):
     engine = Engine(settings, Project(path=None), clock=Clock())
     engine.set_spider(BaseSpider('dummy'))
     engine.close_if_idle = False
+    # it is common to use stats and signals in unittests, without full
+    # initialization of the engine
+    engine.stats = MemoryStats(engine)
+    engine.signals = SignalManager(engine)
     return engine
 
 

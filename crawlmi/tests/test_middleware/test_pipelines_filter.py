@@ -2,14 +2,12 @@ from twisted.trial import unittest
 
 from crawlmi.http import Request, Response, TextResponse
 from crawlmi.middleware.pipelines.filter import Filter
-from crawlmi.stats import MemoryStats
 from crawlmi.utils.test import get_engine
 
 
 class FilterUrlLengthTest(unittest.TestCase):
     def _get_engine(self, **kwargs):
         engine = get_engine(**kwargs)
-        engine.stats = MemoryStats(engine)
         self.stats = engine.stats
         return engine
 
