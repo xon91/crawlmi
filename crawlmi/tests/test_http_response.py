@@ -17,13 +17,17 @@ class ResponseTest(unittest.TestCase):
         self.assertEqual(r.status, 200)
         self.assertIsInstance(r.headers, Headers)
         self.assertEqual(r.headers, {})
+        self.assertEqual(r.flags, [])
 
         headers = {'caca': 'coco'}
         body = 'a body'
-        r = Response('http://www.example.com', headers=headers, body=body)
+        flags = ['cached']
+        r = Response('http://www.example.com', headers=headers, body=body, flags=flags)
         self.assertIsInstance(r.headers, Headers)
         self.assertIsNot(r.headers, headers)
         self.assertEqual(r.headers['caca'], 'coco')
+        self.assertIsNot(r.flags, flags)
+        self.assertListEqual(r.flags, flags)
         r = Response('http://www.example.com', status=301)
         self.assertEqual(r.status, 301)
         r = Response('http://www.example.com', status='301')
@@ -31,12 +35,12 @@ class ResponseTest(unittest.TestCase):
         self.assertRaises(ValueError, Response, 'http://example.com', status='lala200')
 
     def test_repr(self):
-        resp_200 = Response('', status=200)
-        self.assertEqual(repr(resp_200), '<Response [200 (OK)]>')
-        resp_301 = Response('', status=301)
-        self.assertEqual(repr(resp_301), '<Response [301 (Moved Permanently)]>')
-        resp_999 = Response('', status=999)
-        self.assertEqual(repr(resp_999), '<Response [999]>')
+        resp_200 = Response('a', status=200)
+        self.assertEqual(repr(resp_200), '<Response a [200 (OK)]>')
+        resp_301 = Response('a', status=301, flags=['cached'])
+        self.assertEqual(repr(resp_301), '<Response a [301 (Moved Permanently)]> [\'cached\']')
+        resp_999 = Response('a', status=999)
+        self.assertEqual(repr(resp_999), '<Response a [999]>')
 
     def test_properties(self):
         r = Response('', body='hey')
@@ -63,7 +67,7 @@ class ResponseTest(unittest.TestCase):
     def test_copy(self):
         req = Request('http://gh.com/')
         r1 = Response(url='http://hey.com/', status=201, headers={'a': 'b'},
-                      body='hey', request=req)
+                      body='hey', request=req, flags=['cached'])
         r2 = r1.copy()
 
         self.assertEqual(r1.url, r2.url)
@@ -72,6 +76,7 @@ class ResponseTest(unittest.TestCase):
         self.assertIs(r1.request, r2.request)
         self.assertIsInstance(r2.headers, Headers)
         self.assertDictEqual(r1.headers, r2.headers)
+        self.assertListEqual(r1.flags, r2.flags)
 
     def test_copy_inherited_classes(self):
         class CustomResponse(Response):

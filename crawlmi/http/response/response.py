@@ -8,21 +8,23 @@ _no_request_error = 'Response is not tied to any request.'
 
 
 class Response(object_ref):
-    def __init__(self, url, status=200, headers={}, body=None, request=None):
+    def __init__(self, url, status=200, headers={}, body=None, request=None,
+                 flags=None):
         self.url = url
         self.status = int(status)
         self.headers = Headers(headers)
         self.request = request
+        self.flags = [] if flags is None else list(flags)
 
         # following attributes are immutable
         self._body = body or ''
 
     def __repr__(self):
         msg = RESPONSES.get(self.status)
-        if msg:
-            return '<%s [%s (%s)]>' % (self.__class__.__name__, self.status, msg)
-        else:
-            return '<%s [%s]>' % (self.__class__.__name__, self.status)
+        msg = ' (%s)' % msg if msg else ''
+        flags = ' %s' % self.flags if self.flags else ''
+        return '<%s %s [%s%s]>%s' % (self.__class__.__name__, self.url,
+                                     self.status, msg, flags)
 
     @property
     def body(self):
@@ -60,7 +62,7 @@ class Response(object_ref):
         '''Create a new Response with the same attributes except for those
         given new values.
         '''
-        for x in ['url', 'status', 'headers', 'request', 'body']:
+        for x in ['url', 'status', 'headers', 'request', 'body', 'flags']:
             kwargs.setdefault(x, getattr(self, x))
         cls = kwargs.pop('cls', self.__class__)
         return cls(*args, **kwargs)
