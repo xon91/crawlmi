@@ -6,14 +6,14 @@ import time
 
 from twisted.trial import unittest
 from crawlmi.http import Request, Response, HtmlResponse
-from crawlmi.middleware.pipelines.httpcache import HttpCache
+from crawlmi.middleware.pipelines.http_cache import HttpCache
 from crawlmi.utils.test import get_engine
 
 
 class BaseTest(unittest.TestCase):
 
-    storage_class = 'crawlmi.middleware.pipelines.httpcache.storage.DbmCacheStorage'
-    policy_class = 'crawlmi.middleware.pipelines.httpcache.policy.RFC2616Policy'
+    storage_class = 'crawlmi.middleware.pipelines.http_cache.storage.DbmCacheStorage'
+    policy_class = 'crawlmi.middleware.pipelines.http_cache.policy.RFC2616Policy'
 
     def setUp(self):
         self.yesterday = email.utils.formatdate(time.time() - 86400)
@@ -33,12 +33,12 @@ class BaseTest(unittest.TestCase):
 
     def _get_settings(self, **new_settings):
         settings = {
-            'HTTPCACHE_ENABLED': True,
-            'HTTPCACHE_DIR': self.tmpdir,
-            'HTTPCACHE_EXPIRATION_SECS': 1,
-            'HTTPCACHE_IGNORE_NON_200_STATUS': False,
-            'HTTPCACHE_POLICY': self.policy_class,
-            'HTTPCACHE_STORAGE': self.storage_class,
+            'HTTP_CACHE_ENABLED': True,
+            'HTTP_CACHE_DIR': self.tmpdir,
+            'HTTP_CACHE_EXPIRATION_SECS': 1,
+            'HTTP_CACHE_IGNORE_NON_200_STATUS': False,
+            'HTTP_CACHE_POLICY': self.policy_class,
+            'HTTP_CACHE_STORAGE': self.storage_class,
         }
         settings.update(new_settings)
         return settings
@@ -100,7 +100,7 @@ class DbmStorageTest(BaseTest):
             self.assertIsNone(storage.retrieve_response(request2))
 
     def test_storage_never_expire(self):
-        with self._storage(HTTPCACHE_EXPIRATION_SECS=0) as storage:
+        with self._storage(HTTP_CACHE_EXPIRATION_SECS=0) as storage:
             self.assertIsNone(storage.retrieve_response(self.request))
             storage.store_response(self.request, self.response)
             time.sleep(0.5)  # give the chance to expire
@@ -111,7 +111,7 @@ class DbmStorageWithCustomDbmModuleTest(DbmStorageTest):
     db_module = 'crawlmi.tests.mocks.dummy_dbm'
 
     def _get_settings(self, **new_settings):
-        new_settings.setdefault('HTTPCACHE_DBM_MODULE', self.db_module)
+        new_settings.setdefault('HTTP_CACHE_DBM_MODULE', self.db_module)
         return super(DbmStorageWithCustomDbmModuleTest, self)._get_settings(**new_settings)
 
     def test_custom_dbm_module_loaded(self):
@@ -121,7 +121,7 @@ class DbmStorageWithCustomDbmModuleTest(DbmStorageTest):
 
 
 class DummyPolicyTest(BaseTest):
-    policy_class = 'crawlmi.middleware.pipelines.httpcache.policy.DummyPolicy'
+    policy_class = 'crawlmi.middleware.pipelines.http_cache.policy.DummyPolicy'
 
     def test_middleware(self):
         with self._middleware() as mw:
@@ -144,7 +144,7 @@ class DummyPolicyTest(BaseTest):
             self.assertIn('cached', cached.flags)
 
     def test_middleware_ignore_missing(self):
-        with self._middleware(HTTPCACHE_IGNORE_MISSING=True) as mw:
+        with self._middleware(HTTP_CACHE_IGNORE_MISSING=True) as mw:
             self.assertIsNone(mw.process_request(self.request))
             mw.process_response(self.response)
             response = mw.process_request(self.request)
@@ -190,7 +190,7 @@ class DummyPolicyTest(BaseTest):
         # ignore s3 scheme
         req = Request('s3://bucket/key2')
         res = Response('http://bucket/key2', request=req)
-        with self._middleware(HTTPCACHE_IGNORE_SCHEMES=['s3']) as mw:
+        with self._middleware(HTTP_CACHE_IGNORE_SCHEMES=['s3']) as mw:
             self.assertIs(mw.process_request(req), req)
             mw.process_response(res)
 
@@ -199,14 +199,14 @@ class DummyPolicyTest(BaseTest):
 
     def test_middleware_ignore_http_codes(self):
         # test response is not cached
-        with self._middleware(HTTPCACHE_IGNORE_STATUS=lambda x: x == 202) as mw:
+        with self._middleware(HTTP_CACHE_IGNORE_STATUS=lambda x: x == 202) as mw:
             self.assertIs(mw.process_request(self.request), self.request)
             mw.process_response(self.response)
             self.assertIsNone(mw.storage.retrieve_response(self.request))
             self.assertIs(mw.process_request(self.request), self.request)
 
         # test response is cached
-        with self._middleware(HTTPCACHE_IGNORE_STATUS=lambda x: x == 203) as mw:
+        with self._middleware(HTTP_CACHE_IGNORE_STATUS=lambda x: x == 203) as mw:
             mw.process_response(self.response)
             response = mw.process_request(self.request)
             self.assertIsInstance(response, HtmlResponse)
@@ -215,7 +215,7 @@ class DummyPolicyTest(BaseTest):
 
 
 class RFC2616PolicyTest(BaseTest):
-    policy_class = 'crawlmi.middleware.pipelines.httpcache.policy.RFC2616Policy'
+    policy_class = 'crawlmi.middleware.pipelines.http_cache.policy.RFC2616Policy'
 
     def _process_requestresponse(self, mw, request, response):
         try:

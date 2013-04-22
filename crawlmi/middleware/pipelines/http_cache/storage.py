@@ -14,10 +14,10 @@ class DbmCacheStorage(object):
         settings = engine.settings
 
         self.engine = engine
-        self.cache_dir = project.data_path(settings['HTTPCACHE_DIR'],
+        self.cache_dir = project.data_path(settings['HTTP_CACHE_DIR'],
                                            create_dir=True)
-        self.expiration_secs = settings.get_int('HTTPCACHE_EXPIRATION_SECS')
-        self.db_module = __import__(settings['HTTPCACHE_DBM_MODULE'], {}, {}, [''])
+        self.expiration_secs = settings.get_int('HTTP_CACHE_EXPIRATION_SECS')
+        self.db_module = __import__(settings['HTTP_CACHE_DBM_MODULE'], {}, {}, [''])
         self.db = None
 
     def open(self):

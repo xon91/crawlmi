@@ -6,9 +6,9 @@ from weakref import WeakKeyDictionary
 
 class DummyPolicy(object):
     def __init__(self, settings):
-        self.ignore_schemes = settings.get_list('HTTPCACHE_IGNORE_SCHEMES')
-        self.ignore_non_200 = settings.get_bool('HTTPCACHE_IGNORE_NON_200_STATUS')
-        self.ignore_status = settings.get('HTTPCACHE_IGNORE_STATUS')
+        self.ignore_schemes = settings.get_list('HTTP_CACHE_IGNORE_SCHEMES')
+        self.ignore_non_200 = settings.get_bool('HTTP_CACHE_IGNORE_NON_200_STATUS')
+        self.ignore_status = settings.get('HTTP_CACHE_IGNORE_STATUS')
 
     def should_cache_request(self, request):
         return urlparse(request.url).scheme not in self.ignore_schemes
@@ -29,7 +29,7 @@ class RFC2616Policy(object):
     MAXAGE = 3600 * 24 * 365  # one year
 
     def __init__(self, settings):
-        self.ignore_schemes = settings.get_list('HTTPCACHE_IGNORE_SCHEMES')
+        self.ignore_schemes = settings.get_list('HTTP_CACHE_IGNORE_SCHEMES')
         self._cc_parsed = WeakKeyDictionary()
 
     def _parse_cachecontrol(self, r):

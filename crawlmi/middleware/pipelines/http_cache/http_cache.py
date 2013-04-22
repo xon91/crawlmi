@@ -8,9 +8,9 @@ class HttpCache(object):
 
     def __init__(self, engine):
         settings = engine.settings
-        self.policy = load_object(settings['HTTPCACHE_POLICY'])(settings)
-        self.storage = load_object(settings['HTTPCACHE_STORAGE'])(engine)
-        self.ignore_missing = settings.get_bool('HTTPCACHE_IGNORE_MISSING')
+        self.policy = load_object(settings['HTTP_CACHE_POLICY'])(settings)
+        self.storage = load_object(settings['HTTP_CACHE_STORAGE'])(engine)
+        self.ignore_missing = settings.get_bool('HTTP_CACHE_IGNORE_MISSING')
         self.stats = engine.stats
 
         engine.signals.connect(self.engine_started, signal=signals.engine_started)
