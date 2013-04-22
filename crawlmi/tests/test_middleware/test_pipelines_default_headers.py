@@ -5,7 +5,7 @@ from crawlmi.middleware.pipelines.default_headers import DefaultHeaders
 from crawlmi.utils.test import get_engine
 
 
-class TestDefaultHeaders(unittest.TestCase):
+class DefaultHeadersTest(unittest.TestCase):
     def setUp(self):
         self.dh = DefaultHeaders(get_engine())
         self.defaults = {}
