@@ -63,6 +63,7 @@ TELNET_CONSOLE_HOST = '0.0.0.0'
 PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.filter.Filter': 50,
     'crawlmi.middleware.pipelines.random_user_agent.RandomUserAgent': 400,
+    'crawlmi.middleware.pipelines.retry.Retry': 500,
     'crawlmi.middleware.pipelines.default_headers.DefaultHeaders': 550,
     'crawlmi.middleware.pipelines.redirect.Redirect': 600,
     'crawlmi.middleware.pipelines.http_compression.HttpCompression': 800,
@@ -97,3 +98,7 @@ RANDOM_USER_AGENT_LIST = read_list_data_file(os.path.join(os.path.dirname(__file
 
 REDIRECT_MAX_TIMES = 20  # uses Firefox default setting
 REDIRECT_PRIORITY_ADJUST = +2
+
+RETRY_TIMES = 2  # initial response + 2 retries = 3 requests
+RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408]
+RETRY_PRIORITY_ADJUST = -1  # it is better to wait a little
