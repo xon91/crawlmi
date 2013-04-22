@@ -172,7 +172,11 @@ class Engine(object):
         elif isinstance(result, Request):
             self.download(result)
         else:
+            assert isinstance(result, (Response, Failure))
             request = result.request
+            if isinstance(result, Response):
+                log.msg(format='Crawled %(response)s', level=log.DEBUG,
+                        response=result)
             self.signals.send(signal=signals.response_received,
                               response=result)
             dfd = defer_result(result, clock=self.clock)
