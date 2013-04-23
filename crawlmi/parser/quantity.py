@@ -10,16 +10,18 @@ Q_2D = 5
 
 
 class Quantity(object):
-    '''Class Quantity provides a conveniet way to specify a quantity by using
-    very simple syntax.
+    '''Quantity provides a conveniet way to verify value of a number.
+    With a regexp-like syntax specify, what value do you expect. Later you can
+    verify whether the number matches the value, by calling
+    `check_quantity()` method.
 
     Syntax:
         * - zero or more items
         + - one or more items
         ? - zero or one item
         num - specified number of items
-        num1, num2 - number of items in interval <num1, num2>
-    When the number is used as for quantity, its maximum value is 9999.
+        num1, num2 - number of items in interval [num1, num2]
+    When the number is used for quantity, its maximum value is 9999.
     '''
 
     _quant_re = re.compile(
@@ -29,11 +31,11 @@ class Quantity(object):
         self.raw_quant = quant
         self.quant = self._parse_quant(quant)
         if self.quant == Q_INVALID:
-            raise ValueError('Invalid quant syntax: %s' % quant)
+            raise ValueError('Invalid quantity syntax: %s' % quant)
 
     def check_quantity(self, n):
         if not isinstance(n, int):
-            raise ValueError('Invalid argument to check_quantity.'
+            raise ValueError('Invalid argument for `check_quantity()`.'
                 'Integer expected, %s received: %s' % (type(n), n))
         if self.quant == Q_STAR:
             return n >= 0
