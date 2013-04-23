@@ -21,6 +21,7 @@ class SignalProcessor(object):
         signals.request_received,
         signals.response_downloaded,
         signals.response_received,
+        signals.failure_received,
         signals.spider_error,
     ]
 
@@ -140,8 +141,7 @@ class EngineTest(unittest.TestCase):
         fail.request = req
         self.engine.response_queue.push(fail)
         self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0, 0])
-        self.check_signals([signals.response_downloaded,
-                            signals.response_received,
+        self.check_signals([signals.failure_received,
                             signals.spider_error])
 
         # pipeline None
@@ -149,7 +149,7 @@ class EngineTest(unittest.TestCase):
         self.engine.response_queue.push(resp)
         self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])
         self.check_signals([signals.response_downloaded,
-                            signals.response_received,
+                            signals.failure_received,
                             signals.spider_error])
 
         # pipeline request
@@ -166,5 +166,5 @@ class EngineTest(unittest.TestCase):
         self.engine.response_queue.push(resp)
         self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])
         self.check_signals([signals.response_downloaded,
-                            signals.response_received,
+                            signals.failure_received,
                             signals.spider_error])

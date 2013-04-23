@@ -153,8 +153,9 @@ class Engine(object):
     def _process_queue(self):
         if self.running and not self.paused and self.response_queue:
             response = self.response_queue.pop()
-            self.signals.send(signal=signals.response_downloaded,
-                              response=response)
+            if isinstance(response, Response):
+                self.signals.send(signal=signals.response_downloaded,
+                                  response=response)
             dfd = defer_result(response, clock=self.clock)
             dfd.addBoth(self.pipeline.process_response)
             dfd.addBoth(self._handle_pipeline_result)
@@ -182,8 +183,11 @@ class Engine(object):
             if isinstance(result, Response):
                 log.msg(format='Crawled %(response)s', level=log.DEBUG,
                         response=result)
-            self.signals.send(signal=signals.response_received,
-                              response=result)
+                self.signals.send(signal=signals.response_received,
+                                  response=result)
+            else:
+                self.signals.send(signal=signals.failure_received,
+                                  failure=result)
             dfd = defer_result(result, clock=self.clock)
             dfd.addCallbacks(request.callback or self.spider.parse,
                              request.errback)
