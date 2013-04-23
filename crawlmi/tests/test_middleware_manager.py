@@ -11,6 +11,8 @@ class M1(object):
 
 
 class M2(object):
+    enabled_setting = 'M2_OFF'
+
     def __init__(self, engine):
         pass
 
@@ -46,3 +48,15 @@ class MiddlewareManagerTest(unittest.TestCase):
         mw = TestMiddlewareManager(get_engine(), mw_classes=[M1, M2, MOff])
         active = [x.__class__ for x in mw.middlewares]
         self.assertListEqual(active, [M1, M2])
+
+    def test_enabled_setting(self):
+        mw = TestMiddlewareManager(get_engine(), mw_classes=[M1, M2, MOff])
+        active = [x.__class__ for x in mw.middlewares]
+        self.assertListEqual(active, [M1, M2])
+        self.assertEqual(mw.middlewares[0].enabled_setting, 'M1_ENABLED')
+        self.assertEqual(mw.middlewares[1].enabled_setting, 'M2_OFF')
+
+        mw = TestMiddlewareManager(get_engine(M1_ENABLED=False, M2_OFF=False),
+                                   mw_classes=[M1, M2, MOff])
+        active = [x.__class__ for x in mw.middlewares]
+        self.assertListEqual(active, [])

@@ -85,6 +85,7 @@ FILTER_URL_LENGTH_LIMIT = 2083  # uses IE limit
 FILTER_NON_200_RESPONSE_STATUS = False  # filter all non-200 responses
 FILTER_RESPONSE_STATUS = lambda status_code: False  # if True, filter the response
 
+HTTP_CACHE_ENABLED = False
 HTTP_CACHE_DIR = 'httpcache'
 HTTP_CACHE_IGNORE_MISSING = False
 HTTP_CACHE_STORAGE = 'crawlmi.middleware.pipelines.http_cache.storage.DbmCacheStorage'
@@ -104,6 +105,7 @@ RETRY_TIMES = 2  # initial response + 2 retries = 3 requests
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408]
 RETRY_PRIORITY_ADJUST = -1  # it is better to wait a little
 
+TOR_ENABLED = False
 TOR_HTTP_PROXY = 'http://127.0.0.1:8118/'
 # following settings are used to set new tor identity and are not required
 TOR_CONNECTION = ('127.0.0.1', 9051)  # connection parameters for tor, not privoxy!

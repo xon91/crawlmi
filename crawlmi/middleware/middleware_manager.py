@@ -1,5 +1,6 @@
 from crawlmi import log
 from crawlmi.exceptions import NotConfigured
+from crawlmi.utils.middleware import camelcase_to_capital
 from crawlmi.utils.misc import load_object
 
 
@@ -25,10 +26,21 @@ class MiddlewareManager(object):
         else:
             mwlist = mw_classes
 
+        self.mwlist = mwlist
         middlewares = []
         for mwcls in mwlist:
             try:
+                # middlewares disabled through enabled_setting
+                if hasattr(mwcls, 'enabled_setting'):
+                    enabled_setting = mwcls.enabled_setting
+                else:
+                    enabled_setting = ('%s_ENABLED' %
+                                       camelcase_to_capital(mwcls.__name__))
+                if not self.settings.get_bool(enabled_setting, True):
+                    raise NotConfigured()
+
                 mw = mwcls(self.engine)
+                mw.enabled_setting = enabled_setting
                 middlewares.append(mw)
             except NotConfigured as e:
                 log.msg(format='Disabled %(clsname)s: %(error)s',
