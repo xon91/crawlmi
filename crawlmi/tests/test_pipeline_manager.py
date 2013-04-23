@@ -11,6 +11,10 @@ class PipelineManagerTest(unittest.TestCase):
     def setUp(self):
         self.mws = []
         self.actions = []
+        self.req = Request('http://gh.com/')
+        self.resp = Response('http://gh.com/', request=self.req)
+        self.fail = Failure(Exception())
+        self.fail.request = self.req
 
     def _build(self, name, preq=None, presp=None, pexc=None):
         funcs = {}
@@ -39,23 +43,22 @@ class PipelineManagerTest(unittest.TestCase):
         pm = self._get_pm(
             self._build('M1'),
             self._build('M2', preq=True))
-        req = Request(url='http://gh.com/')
-        result = pm.process_request(req)
-        self.assertIs(result, req)
+        result = pm.process_request(self.req)
+        self.assertIs(result, self.req)
         self.assertListEqual(self.mws, ['M2'])
 
     def test_process_request_none(self):
         pm = self._get_pm(
             self._build('M1', preq=lambda x: None),
             self._build('M2', preq=True))
-        self.assertRaises(RequestDropped, pm.process_request, Request(url='http://gh.com/'))
+        self.assertRaises(RequestDropped, pm.process_request, self.req)
         self.assertListEqual(self.mws, ['M1'])
 
     def test_process_request_response(self):
         pm = self._get_pm(
             self._build('M1', preq=lambda x: Response('')),
             self._build('M2', preq=True))
-        result = pm.process_request(Request(url='http://gh.com/'))
+        result = pm.process_request(self.req)
         self.assertIsInstance(result, Response)
         self.assertListEqual(self.mws, ['M1'])
 
@@ -77,17 +80,17 @@ class PipelineManagerTest(unittest.TestCase):
 
     def test_process_request_invalid(self):
         pm = self._get_pm(self._build('M1', preq=lambda x: 10))
-        self.assertRaises(AssertionError, pm.process_request, Request('http://gh.com/'))
+        self.assertRaises(AssertionError, pm.process_request, self.req)
 
         def preq(r):
             raise RestartPipeline(Response(''))
         pm = self._get_pm(self._build('M1', preq=preq))
-        self.assertRaises(AssertionError, pm.process_request, Request('http://gh.com/'))
+        self.assertRaises(AssertionError, pm.process_request, self.req)
 
         def preq2(r):
             raise ValueError
         pm = self._get_pm(self._build('M1', preq=preq2))
-        self.assertRaises(ValueError, pm.process_request, Request('http://gh.com/'))
+        self.assertRaises(ValueError, pm.process_request, self.req)
 
     # careful when testing process_response - middlewares are in reversed order
 
@@ -96,9 +99,8 @@ class PipelineManagerTest(unittest.TestCase):
             self._build('M3', presp=True),
             self._build('M2', presp=True),
             self._build('M1'))
-        resp = Response('')
-        result = pm.process_response(resp)
-        self.assertIs(resp, result)
+        result = pm.process_response(self.resp)
+        self.assertIs(self.resp, result)
         self.assertListEqual(self.mws, ['M2', 'M3'])
         self.assertListEqual(self.actions, ['process_response', 'process_response'])
 
@@ -106,27 +108,24 @@ class PipelineManagerTest(unittest.TestCase):
         pm = self._get_pm(
             self._build('M2', pexc=True),
             self._build('M1'))
-        fail = Failure(Exception())
-        fail.request = None
-        result = pm.process_response(fail)
-        self.assertIs(fail, result)
+        result = pm.process_response(self.fail)
+        self.assertIs(self.fail, result)
         self.assertListEqual(self.mws, ['M2'])
         self.assertListEqual(self.actions, ['process_failure'])
 
     def test_process_response_request(self):
-        req = Request('http://gh.com/')
         pm = self._get_pm(
             self._build('M2', presp=True),
-            self._build('M1', presp=lambda x: req))
-        result = pm.process_response(Response(''))
-        self.assertIs(req, result)
+            self._build('M1', presp=lambda x: self.req))
+        result = pm.process_response(self.resp)
+        self.assertIs(result, self.req)
         self.assertListEqual(self.mws, ['M1'])
 
     def test_process_response_none(self):
         pm = self._get_pm(
             self._build('M2', presp=True),
             self._build('M1', presp=lambda x: None))
-        result = pm.process_response(Response(''))
+        result = pm.process_response(self.resp)
         self.assertIsInstance(result, Failure)
         self.assertIsInstance(result.value, RequestDropped)
         self.assertListEqual(self.mws, ['M1'])
@@ -137,7 +136,7 @@ class PipelineManagerTest(unittest.TestCase):
         pm = self._get_pm(
             self._build('M2', pexc=True),
             self._build('M1', presp=presp))
-        result = pm.process_response(Response(''))
+        result = pm.process_response(self.resp)
         self.assertIsInstance(result, Failure)
         self.assertIsInstance(result.value, ValueError)
         self.assertListEqual(self.mws, ['M1', 'M2'])
@@ -146,14 +145,20 @@ class PipelineManagerTest(unittest.TestCase):
     def test_process_failure_to_response(self):
         pm = self._get_pm(
             self._build('M2', presp=True),
-            self._build('M1', pexc=lambda x: Response('')))
-        fail = Failure(Exception())
-        fail.request = None
-        result = pm.process_response(fail)
+            self._build('M1', pexc=lambda x: self.resp))
+        result = pm.process_response(self.fail)
         self.assertIsInstance(result, Response)
         self.assertListEqual(self.mws, ['M1', 'M2'])
         self.assertListEqual(self.actions, ['process_failure', 'process_response'])
 
     def test_process_response_invalid(self):
         pm = self._get_pm(self._build('M1', presp=lambda x: 10))
-        self.assertRaises(AssertionError, pm.process_response, Response(''))
+        self.assertRaises(AssertionError, pm.process_response, self.resp)
+
+    def test_enabled_setting(self):
+        pm = self._get_pm(self._build('M1', preq=True, presp=True, pexc=True))
+        self.req.meta['M1_ENABLED'] = False
+        pm.process_request(self.req)
+        pm.process_response(self.resp)
+        pm.process_response(self.fail)
+        self.assertListEqual(self.actions, [])

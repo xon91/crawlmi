@@ -22,9 +22,11 @@ class PipelineManager(MiddlewareManager):
             name = mw.__class__.__name__
             self._process_request.append((
                 name,
+                mw.enabled_setting,
                 getattr(mw, 'process_request', passthru)))
             self._process_response.append((
                 name,
+                mw.enabled_setting,
                 getattr(mw, 'process_response', passthru),
                 getattr(mw, 'process_failure', passthru)))
         self._process_response.reverse()
@@ -36,7 +38,10 @@ class PipelineManager(MiddlewareManager):
     def process_request(self, request):
         while True:
             try:
-                for name, method in self._process_request:
+                for name, enabled_setting, method in self._process_request:
+                    # skip disabled mw through meta
+                    if not request.meta.get(enabled_setting, True):
+                        continue
                     request = method(request)
                     assert request is None or isinstance(request, (Request, Response)), \
                         'Middleware %s.process_request must return None, Response or Request, got %s' % \
@@ -59,7 +64,10 @@ class PipelineManager(MiddlewareManager):
         # we can be sure that response.request is set from the downloader
         request = response.request
 
-        for name, pr, pf in self._process_response:
+        for name, enabled_setting, pr, pf in self._process_response:
+            # skip disabled mw through meta
+            if not request.meta.get(enabled_setting, True):
+                continue
             method = pr if isinstance(response, Response) else pf
             try:
                 response = method(response)
