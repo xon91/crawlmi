@@ -1,6 +1,5 @@
 from email.utils import mktime_tz, parsedate_tz
 from time import time
-from urlparse import urlparse
 from weakref import WeakKeyDictionary
 
 
@@ -11,7 +10,7 @@ class DummyPolicy(object):
         self.ignore_status = settings.get('HTTP_CACHE_IGNORE_STATUS')
 
     def should_cache_request(self, request):
-        return urlparse(request.url).scheme not in self.ignore_schemes
+        return request.parsed_url.scheme not in self.ignore_schemes
 
     def should_cache_response(self, response, request):
         if self.ignore_non_200 and response.status != 200:
@@ -39,7 +38,7 @@ class RFC2616Policy(object):
         return self._cc_parsed[r]
 
     def should_cache_request(self, request):
-        if urlparse(request.url).scheme in self.ignore_schemes:
+        if request.parsed_url.scheme in self.ignore_schemes:
             return False
         cc = self._parse_cachecontrol(request)
         # obey user-agent directive 'Cache-Control: no-store'

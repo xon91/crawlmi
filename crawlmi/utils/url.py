@@ -2,7 +2,7 @@ import os
 import posixpath
 import re
 import urllib
-from urlparse import urlparse, urlunparse, parse_qsl
+from urlparse import ParseResult, urlparse, urlunparse, parse_qsl
 
 from crawlmi.utils.python import to_str
 
@@ -98,10 +98,17 @@ def is_url(url):
     return url.partition('://')[0] in ('file', 'http', 'https')
 
 
+def safe_urlparse(url):
+    '''Return urlparsed url from the given argument (which could be an already
+    parsed url).
+    '''
+    return url if isinstance(url, ParseResult) else urlparse(url)
+
+
 def is_url_from_any_domain(url, domains):
     '''Return `True` if given url matches any of the `domains`.
     '''
-    host = urlparse(url).netloc
+    host = safe_urlparse(url).netloc
     if host:
         return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
     else:
@@ -109,7 +116,7 @@ def is_url_from_any_domain(url, domains):
 
 
 def has_url_any_extension(url, extensions):
-    return posixpath.splitext(urlparse(url).path)[1].lower() in extensions
+    return posixpath.splitext(safe_urlparse(url).path)[1].lower() in extensions
 
 
 _utm_tags_re = re.compile('|'.join(['utm_source', 'utm_medium', 'utm_campaign',
