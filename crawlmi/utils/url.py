@@ -1,4 +1,5 @@
 import os
+import posixpath
 import re
 import urllib
 from urlparse import urlparse, urlunparse, parse_qsl
@@ -105,6 +106,10 @@ def is_url_from_any_domain(url, domains):
         return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
     else:
         return False
+
+
+def has_url_any_extension(url, extensions):
+    return posixpath.splitext(urlparse(url).path)[1].lower() in extensions
 
 
 _utm_tags_re = re.compile('|'.join(['utm_source', 'utm_medium', 'utm_campaign',

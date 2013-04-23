@@ -1,7 +1,7 @@
 from twisted.trial import unittest
 
 from crawlmi.utils.url import (is_url, is_url_from_any_domain, any_to_uri,
-                               canonicalize_url)
+                               has_url_any_extension, canonicalize_url)
 
 
 class UrlTest(unittest.TestCase):
@@ -29,6 +29,22 @@ class UrlTest(unittest.TestCase):
         url = 'javascript:%20document.orderform_2581_1190810811.mode.value=%27add%27;%20javascript:%20document.orderform_2581_1190810811.submit%28%29'
         self.assertFalse(is_url_from_any_domain(url, ['testdomain.com']))
         self.assertFalse(is_url_from_any_domain(url+'.testdomain.com', ['testdomain.com']))
+
+    def test_has_url_any_extension(self):
+        url = 'http://www.feedreader.com/releases/FeedReader314Setup.exe'
+        self.assertTrue(has_url_any_extension(url, ['.exe', '.pdf']))
+        self.assertFalse(has_url_any_extension(url, ['.pdf']))
+
+        url = 'http://servis.idnes.cz/GetFile.aspx?type=idneskindle'
+        self.assertTrue(has_url_any_extension(url, ['.aspx']))
+        self.assertFalse(has_url_any_extension(url, []))
+
+        url = 'http://www.feedreader.com/blog'
+        self.assertFalse(has_url_any_extension(url, ['.com']))
+
+        url = 'http://www.feedreader.com/testimonials.php'
+        self.assertTrue(has_url_any_extension(url, ['.php']))
+        self.assertFalse(has_url_any_extension(url, ['php']))
 
     def test_any_to_uri(self):
         self.assertEqual(any_to_uri(r'C:\a\b\c'), 'file:///C:/a/b/c')
