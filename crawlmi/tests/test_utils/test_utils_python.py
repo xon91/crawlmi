@@ -1,6 +1,7 @@
 from twisted.trial import unittest
 
-from crawlmi.utils.python import to_unicode, to_str, is_binary, get_func_args
+from crawlmi.utils.python import (to_unicode, to_str, is_binary, get_func_args,
+                                  flatten, unique_list)
 
 
 class UtilsPythonTest(unittest.TestCase):
@@ -61,3 +62,21 @@ class UtilsPythonTest(unittest.TestCase):
         # TODO: how do we fix this to return the actual argument names?
         self.assertEqual(get_func_args(unicode.split), [])
         self.assertEqual(get_func_args(" ".join), [])
+
+    def test_flatten(self):
+        self.assertListEqual(
+            flatten([1, 2, [3, 4], (5, 6)]),
+            [1, 2, 3, 4, 5, 6])
+        self.assertListEqual(
+            flatten([[[1, 2, 3], (42, None)], [4, 5], [6], 7, (8, 9, 10)]),
+            [1, 2, 3, 42, None, 4, 5, 6, 7, 8, 9, 10])
+
+    def test_unique_list(self):
+        x = [1, 2, 3, 4, 5, 6, 7]
+        self.assertListEqual(unique_list(x), [1, 2, 3, 4, 5, 6, 7])
+        self.assertListEqual(
+            unique_list(x, lambda x: x / 2),
+            [1, 2, 4, 6])
+        self.assertListEqual(
+            unique_list(x, lambda x: x / 3),
+            [1, 3, 6])
