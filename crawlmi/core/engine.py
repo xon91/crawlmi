@@ -181,8 +181,10 @@ class Engine(object):
             assert isinstance(result, (Response, Failure))
             request = result.request
             if isinstance(result, Response):
-                log.msg(format='Crawled %(response)s', level=log.DEBUG,
-                        response=result)
+                flags = ' %s' % result.flags if result.flags else ''
+                log.msg(format='Crawled %(url)s [%(status)s]%(flags)s',
+                        level=log.DEBUG, url=result.url, status=result.status,
+                        flags=flags)
                 self.signals.send(signal=signals.response_received,
                                   response=result)
             else:
