@@ -26,6 +26,10 @@ class Response(object_ref):
                                      self.status, msg, flags)
 
     @property
+    def base_url(self):
+        return self.url
+
+    @property
     def status_message(self):
         return RESPONSES.get(self.status, '')
 
