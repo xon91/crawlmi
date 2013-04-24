@@ -46,7 +46,7 @@ class Engine(object):
 
     def set_spider(self, spider):
         self.spider = spider
-        self.settings.spider_settings = spider.spider_settings
+        self.settings.spider_settings = spider.spider_settings()
 
     def setup(self):
         assert self.spider is not None, 'Spider is not set in Engine.'

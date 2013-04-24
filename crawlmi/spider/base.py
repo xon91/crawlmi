@@ -3,12 +3,14 @@ from crawlmi.utils.trackref import object_ref
 
 class BaseSpider(object_ref):
     name = None
-    # spider-specific settings to override the default and module settings
-    spider_settings = {}
 
     def __init__(self, name=None):
         if name is not None:
             self.name = name
+
+    @classmethod
+    def spider_settings(cls):
+        return {}
 
     def start_requests(self):
         pass
