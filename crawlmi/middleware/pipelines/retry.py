@@ -63,6 +63,7 @@ class Retry(object):
                     reason=reason)
             retry_req = request.copy()
             retry_req.meta['retry_times'] = retries
+            retry_req.meta['DUPLICATE_FILTER_ENABLED'] = False
             retry_req.priority = request.priority + self.priority_adjust
             return retry_req
         else:

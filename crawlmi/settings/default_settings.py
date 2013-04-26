@@ -61,6 +61,7 @@ TELNET_CONSOLE_HOST = '0.0.0.0'
 # Downloader pipeline
 
 PIPELINE_BASE = {
+    'crawlmi.middleware.pipelines.duplicate_filter.DuplicateFilter': 25,
     'crawlmi.middleware.pipelines.filter.Filter': 50,
     'crawlmi.middleware.pipelines.random_user_agent.RandomUserAgent': 400,
     'crawlmi.middleware.pipelines.retry.Retry': 500,
@@ -79,6 +80,8 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en',
 }
+
+DUPLICATE_FILTER_ENABLED = False
 
 FILTER_NONTEXT_RESPONSE = False  # filter all binary responses (images, pdfs, etc.)
 FILTER_URL_LENGTH_LIMIT = 2083  # uses IE limit
