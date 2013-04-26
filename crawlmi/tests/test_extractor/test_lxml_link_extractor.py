@@ -61,6 +61,18 @@ class LxmlLinkExtractorTest(unittest.TestCase):
             Link(url='http://www.example.com/item/12.html', text=u'Wrong: \ufffd'),
         ])
 
+    def test_invalid(self):
+        # parser shouldn't fail or anything
+        html = '''<?xml version="1.0" encoding="utf-8"?>
+            <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml" lang="cs">
+            <body>
+            </body>
+            </html>'''
+        response = HtmlResponse('http://www.example.com', body=html, encoding='utf-8')
+        lx = LxmlLinkExtractor(unique=False)
+        self.assertEqual(lx.extract_links(response), [])
+
     def test_extraction_encoding(self):
         body = get_testdata('link_extractor', 'linkextractor_noenc.html')
         response_utf8 = HtmlResponse(url='http://example.com/utf8', body=body, headers={'Content-Type': ['text/html; charset=utf-8']})

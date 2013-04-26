@@ -13,17 +13,18 @@ class LxmlLinkExtractor(BaseLinkExtractor):
         if not isinstance(response, HtmlResponse) or not response.body:
             return []
 
-        html = lxml.html.fromstring(response.text)
+        utf8_body = response.text.encode('utf-8')
+        parser = lxml.html.HTMLParser(recover=True, encoding='utf-8')
+        html = lxml.html.fromstring(utf8_body, parser=parser)
         html.make_links_absolute(response.url)
         links = []
         for e, a, l, p in html.iterlinks():
             if self.tag_func(e.tag):
                 if self.attr_func(a):
                     try:
-                        url = requote_url(to_str(l, response.encoding))
+                        url = requote_url(to_str(to_unicode(l, 'utf-8'), response.encoding))
                         text = e.text or u''
-                        text = to_unicode(text, response.encoding,
-                                          errors='replace')
+                        text = to_unicode(text, 'utf-8')
                     except Exception as e:
                         log.msg(
                             format='Error occurred while extracting links from %(url)s. Error (%(etype)s): %(error)s',
