@@ -211,7 +211,8 @@ class Engine(object):
         # set `request` in a case the error was raised inside the spider
         failure.request = request
         self.signals.send(signal=signals.spider_error, failure=failure)
-        log.err(failure, 'Error when downloading %s' % request)
+        if not getattr(failure.value, 'quiet', False):
+            log.err(failure, 'Error when downloading %s' % request)
 
     def __str__(self):
         return '<%s at 0x%0x>' % (type(self).__name__, id(self))

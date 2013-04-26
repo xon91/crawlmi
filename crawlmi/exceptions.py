@@ -1,10 +1,12 @@
 '''Core exceptions.'''
 
+
 # Internal
 
 class NotConfigured(Exception):
     '''Indicates a missing configuration situation.'''
     pass
+
 
 class NotSupported(Exception):
     '''Indicates a feature or method is not supported.'''
@@ -23,7 +25,8 @@ class UsageError(Exception):
 
 class RequestDropped(Exception):
     '''Raised when pipeline processing drops the request.'''
-    pass
+    quiet = True
+
 
 class RestartPipeline(Exception):
     '''Indicates that the pipeline processing should be restarted with the
