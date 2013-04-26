@@ -104,4 +104,38 @@ class HttpCompressionTest(unittest.TestCase):
         new_response = self.mw.process_response(response)
         self.assertIsInstance(new_response, HtmlResponse)
         self.assertEqual(new_response.body, plain_body)
-        self.assertEqual(new_response.encoding, normalize_encoding('cp1252'))
+        self.assertEqual(new_response.encoding, normalize_encoding('utf-8'))
+
+    def test_process_response_encoding_inside_body(self):
+        headers = {
+            'Content-Type': 'text/html',
+            'Content-Encoding': 'gzip',
+        }
+        f = StringIO()
+        plainbody = '''<html><head><title>Some page</title><meta http-equiv="Content-Type" content="text/html; charset=gb2312">'''
+        zf = GzipFile(fileobj=f, mode='wb')
+        zf.write(plainbody)
+        zf.close()
+        response = Response('http;//www.example.com/', headers=headers, body=f.getvalue())
+
+        newresponse = self.mw.process_response(response)
+        self.assertIsInstance(newresponse, HtmlResponse)
+        self.assertEqual(newresponse.body, plainbody)
+        self.assertEqual(newresponse.encoding, normalize_encoding('gb2312'))
+
+    def test_process_response_force_recalculate_encoding(self):
+        headers = {
+            'Content-Type': 'text/html',
+            'Content-Encoding': 'gzip',
+        }
+        f = StringIO()
+        plainbody = '''<html><head><title>Some page</title><meta http-equiv="Content-Type" content="text/html; charset=gb2312">'''
+        zf = GzipFile(fileobj=f, mode='wb')
+        zf.write(plainbody)
+        zf.close()
+        response = HtmlResponse('http;//www.example.com/page.html', headers=headers, body=f.getvalue())
+
+        newresponse = self.mw.process_response(response)
+        self.assertIsInstance(newresponse, HtmlResponse)
+        self.assertEqual(newresponse.body, plainbody)
+        self.assertEqual(newresponse.encoding, normalize_encoding('gb2312'))

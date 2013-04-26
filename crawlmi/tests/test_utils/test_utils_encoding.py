@@ -23,20 +23,21 @@ class EncodingDetectionTest(unittest.TestCase):
             self.assertEqual(water_unicode, decoded)
         # Body without BOM
         enc, bom = _read_bom('foo')
-        self.assertEqual(enc, None)
-        self.assertEqual(bom, None)
+        self.assertIsNone(enc)
+        self.assertIsNone(bom)
         # Empty body
         enc, bom = _read_bom('')
-        self.assertEqual(enc, None)
-        self.assertEqual(bom, None)
+        self.assertIsNone(enc)
+        self.assertIsNone(bom)
 
     def test_http_encoding_header(self):
         headers = Headers({'Content-Type': 'text/html; charset=ISO-8859-4'})
         self.assertEqual(get_encoding_from_headers(headers), 'iso8859-4')
         headers = Headers({'Something-else': 'text/html; charset=ISO-8859-4'})
-        self.assertEqual(get_encoding_from_headers(headers), None)
+        self.assertIsNone(get_encoding_from_headers(headers))
         headers = Headers({'Content-Type': 'text/html'})
-        self.assertEqual(get_encoding_from_headers(headers), 'cp1252')
+        # self.assertEqual(get_encoding_from_headers(headers), 'cp1252')
+        self.assertIsNone(get_encoding_from_headers(headers))
 
     def test_html_body_declared_encoding(self):
         fragments = [
@@ -53,9 +54,9 @@ class EncodingDetectionTest(unittest.TestCase):
         for fragment in fragments:
             encoding = get_encoding_from_content(fragment)
             self.assertEqual(encoding, 'utf-8', fragment)
-        self.assertEqual(None, get_encoding_from_content('something else'))
-        self.assertEqual(None, get_encoding_from_content('''<head></head><body>this isn't searched<meta charset="utf-8">'''))
-        self.assertEqual(None, get_encoding_from_content(
+        self.assertIsNone(get_encoding_from_content('something else'))
+        self.assertIsNone(get_encoding_from_content('''<head></head><body>this isn't searched<meta charset="utf-8">'''))
+        self.assertIsNone(get_encoding_from_content(
             '''<meta http-equiv="Fake-Content-Type-Header" content="text/html; charset=utf-8">'''))
 
 
