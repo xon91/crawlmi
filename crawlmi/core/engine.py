@@ -133,11 +133,13 @@ class Engine(object):
                 self.pending_requests += 1
                 self.signals.send(signal=signals.request_received,
                                   request=request_or_response)
-                self.request_queue.push(request_or_response.priority,
-                                        request_or_response)
+                if self.running:
+                    self.request_queue.push(request_or_response.priority,
+                                            request_or_response)
             elif isinstance(request_or_response, Response):
                 request_or_response.request = request
-                self.response_queue.push(request_or_response)
+                if self.running:
+                    self.response_queue.push(request_or_response)
 
         def _failure(failure):
             failure.request = request
@@ -146,6 +148,7 @@ class Engine(object):
         d = defer_succeed(request, clock=self.clock)
         d.addCallback(self.pipeline.process_request)
         d.addCallbacks(_success, _failure)
+        return d
 
     def is_idle(self):
         return self.pending_requests == 0 and len(self.response_queue) == 0

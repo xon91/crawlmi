@@ -124,6 +124,13 @@ class EngineTest(unittest.TestCase):
         self.clock.advance(0)
         self.assertEqual(len(self.engine.response_queue), 1)
 
+        # download and stop
+        self.pipeline.req = lambda req: Response('')
+        d = self.engine.download(req)
+        self.engine.stop('finished')
+        self.clock.advance(0)
+        return d
+
     def test_processing(self):
         self.engine.start()
         del self.sp.received[:]
