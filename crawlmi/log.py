@@ -95,7 +95,7 @@ def _get_log_level(level_name_or_id):
 
 def start(logfile=None, loglevel='INFO', logstdout=True, encoding='utf-8'):
     loglevel = _get_log_level(loglevel)
-    file = open(logfile, 'a') if logfile else sys.stderr
+    file = open(logfile, 'ab') if logfile else sys.stderr
     observer = CrawlmiFileLogObserver(file, loglevel, encoding)
     _oldshowwarning = warnings.showwarning
     log.startLoggingWithObserver(observer.emit, setStdout=logstdout)

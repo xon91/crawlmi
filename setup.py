@@ -58,7 +58,7 @@ setup_args = {
     'name': 'crawlmi',
     'version': version,
     'description': 'Highly optimized web scraping framework.',
-    'long_description': open('README.md').read(),
+    'long_description': open('README.md', 'rb').read(),
     'author': 'Michal "Mimino" Danilak',
     'maintainer': 'Michal "Mimino" Danilak',
     'maintainer_email': 'michal.danilak@gmail.com',

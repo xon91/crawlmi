@@ -21,7 +21,7 @@ class FileTest(unittest.TestCase):
 
     def setUp(self):
         self.tmpname = self.mktemp()
-        fd = open(self.tmpname + '^', 'w')
+        fd = open(self.tmpname + '^', 'wb')
         fd.write('0123456789')
         fd.close()
         self.download_request = FileDownloadHandler(Settings()).download_request
