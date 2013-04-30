@@ -1,5 +1,6 @@
 import inspect
 import optparse
+import os
 import sys
 
 import crawlmi
@@ -132,6 +133,10 @@ def execute(argv=None):
     spider = run_print_help(parser, cmd.get_spider, args, options)
     engine.set_spider(spider)
     engine.setup()
+    # save pidfile
+    if options.pidfile:
+        with open(options.pidfile, 'wb') as f:
+            f.write(str(os.getpid()) + os.linesep)
     # run command
     run_print_help(parser, cmd.run, args, options)
 
