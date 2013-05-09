@@ -26,6 +26,14 @@ class MockDownloaderHandler(object):
         self.dfds[request].errback(Failure(error))
 
 
+class BadDownloaderHandler(object):
+    def __init__(self, settings):
+        pass
+
+    def download_request(self, request):
+        raise Exception()
+
+
 def get_request(domain='github', func=None):
     dfd = defer.Deferred()
     if func:
@@ -165,6 +173,12 @@ class DownloaderSlotTest(unittest.TestCase):
         self.assertEqual(received[-1].request, r3)
         self.assertEqual(len(self.slot.in_progress), 0)
         self.assertEqual(len(self.slot.transferring), 0)
+
+    def test_fail_enqueue(self):
+        self.slot.download_handler = BadDownloaderHandler(Settings())
+        r1, dfd1 = get_request('1')
+        self.slot.enqueue(r1, dfd1)
+        return self.assertFailure(dfd1, Exception)
 
 
 class DownloaderTest(unittest.TestCase):

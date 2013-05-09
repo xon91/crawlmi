@@ -73,8 +73,9 @@ class Slot(object):
         return False
 
     def _download(self, request):
+        dfd = defer.succeed(request)
         # download the response
-        dfd = self.download_handler.download_request(request)
+        dfd.addCallback(self.download_handler.download_request)
 
         # put the request into the set of `transferring` to block other requests
         # after the response is downloaded, remove it from `transferring`
