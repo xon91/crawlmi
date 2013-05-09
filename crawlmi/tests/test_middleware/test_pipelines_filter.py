@@ -38,6 +38,17 @@ class FilterUrlLengthTest(unittest.TestCase):
         bad2 = mw.process_request(bad1)
         self.assertIsNone(bad2)
 
+    def test_bad_scheme(self):
+        mw = Filter(self._get_engine(FILTER_SCHEMES=['mailto']))
+
+        good1 = Request('http://a.b/')
+        good2 = mw.process_request(good1)
+        self.assertIs(good1, good2)
+
+        bad1 = Request('mailto:contact+news@qr.cz?subject=News')
+        bad2 = mw.process_request(bad1)
+        self.assertIsNone(bad2)
+
     def test_filter_non_200(self):
         mw = Filter(self._get_engine(FILTER_NON_200_RESPONSE_STATUS=True))
         req = Request('http://github.com/')
