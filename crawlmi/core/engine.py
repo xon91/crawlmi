@@ -125,12 +125,12 @@ class Engine(object):
     def download(self, request):
         '''"Download" the given request. First pass it through the downloader
         pipeline.
-            - if the request is received from the pipeline, push it to request_queue
-            - if the response is received from the pipeline, push it to response_queue
+            - if the request is received, push it to `request_queue`
+            - if the response is received , push it to `response_queue`
         '''
         def _success(request_or_response):
+            self.pending_requests += 1
             if isinstance(request_or_response, Request):
-                self.pending_requests += 1
                 self.signals.send(signal=signals.request_received,
                                   request=request_or_response)
                 if self.running:

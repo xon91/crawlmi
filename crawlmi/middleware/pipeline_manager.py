@@ -36,6 +36,13 @@ class PipelineManager(MiddlewareManager):
                                     self.settings['PIPELINE'])
 
     def process_request(self, request):
+        '''Passes request through the pipeline middlewares.
+        It automatically restarts the processing when RestartPipeline is
+        raised.
+
+        Return value is either Request or Response object or the exception
+        RequestDropped is raised.
+        '''
         while True:
             try:
                 for name, enabled_setting, method in self._process_request:
@@ -61,6 +68,11 @@ class PipelineManager(MiddlewareManager):
                 return request
 
     def process_response(self, response):
+        '''Passes response (Response or Failure object) received from
+        Downloader thought pipeline middlewares.
+
+        Return value is either Request, Response or Failure object.
+        '''
         # we can be sure that response.request is set from the downloader
         request = response.request
 
