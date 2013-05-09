@@ -33,13 +33,13 @@ class LogStatsTest(unittest.TestCase):
         self.clock.advance(29)
         self.assertEqual(self.lw.get_first_line(), '')
         self.clock.advance(1)
-        self.assertEqual(self.lw.get_first_line(), '[crawlmi] INFO: Crawled 0 pages (at 0 pages/min). Raw speed 0 downloads/min.')
+        self.assertEqual(self.lw.get_first_line(), '[crawlmi] INFO: Crawled 0 pages (at 0 pages/min).')
         # download some responses
         self.engine.signals.send(signals.response_downloaded, response=Response(url=''))
         self.engine.signals.send(signals.response_downloaded, response=Response(url=''))
         self.engine.signals.send(signals.response_received, response=Response(url=''))
         self.clock.advance(30)
-        self.assertEqual(self.lw.get_first_line(), '[crawlmi] INFO: Crawled 1 pages (at 2 pages/min). Raw speed 4 downloads/min.')
+        self.assertEqual(self.lw.get_first_line(), '[crawlmi] INFO: Crawled 2 pages (at 4 pages/min).')
         # stop the engine
         self.engine.signals.send(signals.engine_stopped)
         self.clock.advance(60)
