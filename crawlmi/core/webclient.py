@@ -191,6 +191,8 @@ class CrawlmiClientContextFactory(ClientContextFactory):
         # see this issue on why we use TLSv1_METHOD by default
         # https://github.com/scrapy/scrapy/issues/194
         self.method = SSL.TLSv1_METHOD
+        # TODO: try following method if TLSv1_METHOD fails
+        # self.method = SSL.SSLv3_METHOD
 
     def getContext(self):
         ctx = ClientContextFactory.getContext(self)
