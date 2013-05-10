@@ -81,13 +81,13 @@ class BaseCommand(object):
                                  print_help=False)
 
         # logging behavior
-        if hasattr(options, 'logfile') and options.logfile:
+        if getattr(options, 'logfile', None):
             custom_settings['LOG_ENABLED'] = True
             custom_settings['LOG_FILE'] = options.logfile
-        if hasattr(options, 'loglevel') and options.loglevel:
+        if getattr(options, 'loglevel', None):
             custom_settings['LOG_ENABLED'] = True
             custom_settings['LOG_LEVEL'] = options.loglevel
-        if hasattr(options, 'nolog') and options.nolog:
+        if getattr(options, 'nolog', None):
             custom_settings['LOG_ENABLED'] = False
 
         return Settings(custom_settings)
@@ -99,7 +99,7 @@ class BaseCommand(object):
 
     def get_spider(self, args, options):
         spiders = self.engine.spiders
-        if hasattr(options, 'spider') and options.spider:
+        if getattr(options, 'spider', None):
             return spiders.create_spider_by_name(options.spider)
         if len(args) == 1 and is_url(args[0]):
             spider = spiders.create_spider_by_url(args[0])

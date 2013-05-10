@@ -7,4 +7,6 @@ tests_datadir = os.path.join(tests_dir, 'sample_data')
 def get_testdata(*paths):
     '''Return test data'''
     path = os.path.join(tests_datadir, *paths)
-    return open(path, 'rb').read()
+    with open(path, 'rb') as f:
+        result = f.read()
+    return result

@@ -133,7 +133,7 @@ def execute(argv=None):
     engine.set_spider(spider)
     engine.setup()
     # save pidfile
-    if options.pidfile:
+    if getattr(options, 'pidfile', None):
         with open(options.pidfile, 'wb') as f:
             f.write(str(os.getpid()) + os.linesep)
     # run command
