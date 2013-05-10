@@ -5,12 +5,11 @@ from crawlmi.utils.settings import read_list_data_file
 
 # General settings
 
-COMMANDS_MODULE = ''
+COMMAND_MODULES = []
+SPIDER_MODULES = []
 
 STATS_CLASS = 'crawlmi.stats.MemoryStats'
 STATS_DUMP = True
-
-SPIDER_MODULES = []
 
 
 # Log settings

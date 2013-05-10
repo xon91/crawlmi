@@ -28,7 +28,7 @@ class CmdlineTest(unittest.TestCase):
         self.assertSetEqual(set(commands.keys()), set(['command2']))
 
     def test_get_commands(self):
-        settings = Settings({'COMMANDS_MODULE': 'crawlmi.tests.test_cmdline.sample_commands'})
+        settings = Settings({'COMMAND_MODULES': ['crawlmi.tests.test_cmdline.sample_commands']})
         commands = get_commands(settings, False)
         self.assertNotIn('command1', commands)
         self.assertIn('command2', commands)

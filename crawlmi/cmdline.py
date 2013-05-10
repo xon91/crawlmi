@@ -44,8 +44,7 @@ def get_commands(settings, inside_project):
     `inside_project` argument.
     '''
     commands = get_commands_from_module('crawlmi.commands', inside_project)
-    module_path = settings.get('COMMANDS_MODULE')
-    if module_path:
+    for module_path in settings.get_list('COMMAND_MODULES'):
         user_commands = get_commands_from_module(module_path, inside_project)
         commands.update(user_commands)
     return commands
