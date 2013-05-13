@@ -3,6 +3,7 @@ from twisted.trial import unittest
 
 from crawlmi import signals
 from crawlmi.core.signal_manager import SignalManager
+from crawlmi.exceptions import DontStopEngine, StopEngine
 from crawlmi.http import Request, Response
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
@@ -23,6 +24,7 @@ class SignalProcessor(object):
         signals.response_received,
         signals.failure_received,
         signals.spider_error,
+        signals.spider_idle,
     ]
 
     def __init__(self, engine):
@@ -175,3 +177,45 @@ class EngineTest(unittest.TestCase):
         self.check_signals([signals.response_downloaded,
                             signals.failure_received,
                             signals.spider_error])
+
+    def test_idle(self):
+        def _spider_idle():
+            raise DontStopEngine()
+
+        self.engine.close_if_idle = True
+        self.engine.start()
+        del self.sp.received[:]
+
+        self.engine.signals.connect(_spider_idle, signal=signals.spider_idle)
+        self.assertTrue(self.engine.is_idle())
+        self.clock.advance(self.engine.QUEUE_CHECK_FREQUENCY)
+        self.check_signals([signals.spider_idle])
+        self.assertTrue(self.engine.running)
+
+        self.engine.signals.disconnect(_spider_idle, signal=signals.spider_idle)
+        self.assertTrue(self.engine.is_idle())
+        self.clock.advance(5)
+        self.check_signals([signals.spider_idle,
+                            signals.engine_stopping,
+                            signals.engine_stopped])
+        self.assertFalse(self.engine.running)
+
+    def test_stop_engine(self):
+        def _stop_engine(response):
+            raise StopEngine()
+
+        def _engine_stopping():
+            self.assertEqual(len(self.engine.response_queue), 1)
+
+        req1 = Request('http://github.com/', callback=_stop_engine)
+        resp1 = Response('', request=req1)
+        self.engine.response_queue.push(resp1)
+        req2 = Request('http://github.com/')
+        resp2 = Response('', request=req2)
+        self.engine.response_queue.push(resp2)
+
+        self.engine.signals.connect(_engine_stopping, signal=signals.engine_stopping)
+        self.engine.start()
+        self.assertTrue(self.engine.running)
+        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])
+        self.assertFalse(self.engine.running)

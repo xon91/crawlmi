@@ -7,6 +7,7 @@ from crawlmi import log, signals
 from crawlmi.core.downloader import Downloader
 from crawlmi.core.signal_manager import SignalManager
 from crawlmi.http import Request, Response
+from crawlmi.exceptions import DontStopEngine, StopEngine
 from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue, ResponseQueue
@@ -154,7 +155,10 @@ class Engine(object):
         return self.pending_requests == 0 and len(self.response_queue) == 0
 
     def _process_queue(self):
-        if self.running and not self.paused and self.response_queue:
+        if not self.running:
+            return
+
+        if not self.paused and self.response_queue:
             response = self.response_queue.pop()
             if isinstance(response, Response):
                 self.signals.send(signal=signals.response_downloaded,
@@ -163,11 +167,18 @@ class Engine(object):
             dfd.addBoth(self.pipeline.process_response)
             dfd.addBoth(self._handle_pipeline_result)
             dfd.addBoth(self._finalize_download)
-        # check stopping condition
-        elif self.close_if_idle and self.is_idle():
-            self.stop('finished')
         elif self.paused:
             self.processing.schedule(5)
+        # check stopping condition
+        elif self.close_if_idle and self.is_idle():
+            # send `spider_idle` signal
+            res = self.signals.send(signal=signals.spider_idle,
+                                    dont_log=DontStopEngine)
+            if any(isinstance(x, Failure) and isinstance(x.value, DontStopEngine)
+                    for _, x in res):
+                self.processing.schedule(5)
+            else:
+                self.stop('finished')
         else:
             self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
 
@@ -211,6 +222,10 @@ class Engine(object):
             self.download(request)
 
     def _handle_spider_error(self, failure, request):
+        error = failure.value
+        if isinstance(error, StopEngine):
+            self.stop(error.reason)
+            return
         # set `request` in a case the error was raised inside the spider
         failure.request = request
         self.signals.send(signal=signals.spider_error, failure=failure)

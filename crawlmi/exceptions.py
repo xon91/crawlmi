@@ -14,6 +14,7 @@ class NotSupported(Exception):
 
 
 # Commands
+
 class UsageError(Exception):
     '''To indicate a command-line usage error.'''
     def __init__(self, *a, **kw):
@@ -34,3 +35,20 @@ class RestartPipeline(Exception):
     '''
     def __init__(self, new_value):
         self.new_value = new_value
+
+
+# Spider
+
+class DontStopEngine(Exception):
+    '''Don't stop the engine, even when it is idle.
+    Raised from `spider_idle` signal handlers.
+    '''
+    pass
+
+
+class StopEngine(Exception):
+    '''Request the engine to stop.
+    Raised from Request's callback functions.
+    '''
+    def __init__(self, reason='cancelled'):
+        self.reason = reason
