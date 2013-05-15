@@ -1,6 +1,6 @@
 class Signal(object):
     '''Signals don't have to be objects of this class, but it gives them
-    a nice `repr()` method, useful for debugging.
+    a nice `repr()` method which useful for debugging.
     '''
     def __init__(self, name):
         self.name = name
@@ -43,3 +43,7 @@ spider_error = Signal('spider_error')
 # raise DontStopEngine exception.
 # args:
 spider_idle = Signal('spider_idle')
+
+
+# signals defined in other modules
+from crawlmi.middleware.extensions.save_response import save_response
