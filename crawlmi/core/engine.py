@@ -34,7 +34,7 @@ class Engine(object):
         self.project = project
         self.spiders = SpiderManager(settings)
 
-        self.close_if_idle = True
+        self.stop_if_idle = True
         self.initialized = False  # True, when `setup()` has been called
 
         self.spider = None
@@ -174,10 +174,10 @@ class Engine(object):
             # send `spider_idle` signal
             res = self.signals.send(signal=signals.spider_idle,
                                     dont_log=DontStopEngine)
-            dont_close = any(isinstance(x, Failure) and
-                             isinstance(x.value, DontStopEngine)
-                             for _, x in res)
-            if not self.close_if_idle or dont_close:
+            dont_stop = any(isinstance(x, Failure) and
+                            isinstance(x.value, DontStopEngine)
+                            for _, x in res)
+            if not self.stop_if_idle or dont_stop:
                 self.processing.schedule(5)
             else:
                 self.stop('finished')

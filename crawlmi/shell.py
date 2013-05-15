@@ -20,7 +20,7 @@ class Shell(object):
 
     def __init__(self, engine, update_vars=None):
         self.engine = engine
-        self.engine.close_if_idle = False
+        self.engine.stop_if_idle = False
         self.update_vars = update_vars or (lambda x: None)
         self.vars = {}
         # disable accidental Ctrl-C key press from shutting down the engine

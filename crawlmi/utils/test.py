@@ -18,7 +18,7 @@ def get_engine(custom_settings=None, **kwargs):
     settings = EngineSettings(custom_settings=custom_settings)
     engine = Engine(settings, Project(path=None), clock=Clock())
     engine.set_spider(BaseSpider('dummy'))
-    engine.close_if_idle = False
+    engine.stop_if_idle = False
     # it is common to use stats and signals in unittests, without full
     # initialization of the engine
     engine.stats = MemoryStats(engine)
