@@ -1,7 +1,9 @@
+import re
+
 from twisted.trial import unittest
 
 from crawlmi.utils.python import (to_unicode, to_str, is_binary, get_func_args,
-                                  flatten, unique_list)
+                                  flatten, unique_list, regex)
 
 
 class UtilsPythonTest(unittest.TestCase):
@@ -80,3 +82,9 @@ class UtilsPythonTest(unittest.TestCase):
         self.assertListEqual(
             unique_list(x, lambda x: x / 3),
             [1, 3, 6])
+
+    def test_regex(self):
+        re_type = type(re.compile(''))
+        self.assertIsInstance(regex(r'.*'), re_type)
+        self.assertIsInstance(regex(u'abc'), re_type)
+        self.assertIsInstance(regex(re.compile('.')), re_type)

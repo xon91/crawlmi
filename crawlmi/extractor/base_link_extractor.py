@@ -1,13 +1,11 @@
-import re
 from urlparse import urlparse
 
 from crawlmi.extractor import IGNORED_EXTENSIONS
 from crawlmi.utils.misc import arg_to_iter
-from crawlmi.utils.python import to_str, unique_list
+from crawlmi.utils.python import to_str, unique_list, regex
 from crawlmi.utils.url import is_url_from_any_domain, has_url_any_extension
 
 
-_re_type = type(re.compile(''))
 _matches = lambda url, regexs: any((r.search(url) for r in regexs))
 
 
@@ -16,10 +14,8 @@ class BaseLinkExtractor(object):
                  allow_domains=None, deny_domains=None,
                  tags=['a', 'area', 'link'], attrs=['href'], unique=True,
                  deny_extensions=None, filter_mobile=True):
-        self.allow_res = [x if isinstance(x, _re_type) else re.compile(x)
-                          for x in arg_to_iter(allow)]
-        self.deny_res = [x if isinstance(x, _re_type) else re.compile(x)
-                         for x in arg_to_iter(deny)]
+        self.allow_res = [regex(x) for x in arg_to_iter(allow)]
+        self.deny_res = [regex(x) for x in arg_to_iter(deny)]
         self.allow_domains = set(arg_to_iter(allow_domains))
         self.deny_domains = set(arg_to_iter(deny_domains))
         self.unique = unique

@@ -1,4 +1,5 @@
 import inspect
+import re
 
 
 def to_unicode(value, encoding=None, errors='strict'):
@@ -82,3 +83,9 @@ def unique_list(list_, key=lambda x: x):
         seen[seenkey] = 1
         result.append(item)
     return result
+
+
+_re_type = type(re.compile(''))
+
+def regex(x):
+    return x if isinstance(x, _re_type) else re.compile(x)
