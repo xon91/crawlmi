@@ -29,6 +29,13 @@ class EngineSettings(Settings):
                 return True
         return False
 
+    def keys(self):
+        keys = set()
+        for settings_name in self.order:
+            settings = getattr(self, settings_name)
+            keys.update(settings.keys())
+        return list(keys)
+
     def get(self, name, default=None):
         for settings_name in self.order:
             settings = getattr(self, settings_name)

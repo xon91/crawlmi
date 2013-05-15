@@ -37,3 +37,13 @@ class EngineSettingsTest(unittest.TestCase):
         self.assertEqual(self.settings.get_int('int'), 10)
         self.assertEqual(self.settings.get_float('float'), 2.3)
         self.assertListEqual(self.settings.get_list('list'), ['1', '2', '3'])
+
+    def test_keys(self):
+        keys = self.settings.keys()
+        self.assertIsInstance(keys, list)
+        keys2 = set(self.default_settings.keys() +
+                    self.module_settings.keys() +
+                    self.spider_settings.keys() +
+                    self.custom_settings.keys())
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertSetEqual(set(keys), keys2)

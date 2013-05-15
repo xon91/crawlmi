@@ -85,3 +85,9 @@ class SettingsTest(unittest.TestCase):
         self.assertIs(self.settings.get_list('invalid', listA), listA)
         listB = []
         self.assertIs(self.settings.get_list('invalid', listB), listB)
+
+    def test_keys(self):
+        keys = self.settings.keys()
+        self.assertIsInstance(keys, list)
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertSetEqual(set(keys), set(self.tests.keys()))

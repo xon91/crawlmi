@@ -24,6 +24,9 @@ class Settings(object):
     def __contains__(self, name):
         return name in self.values
 
+    def keys(self):
+        return self.values.keys()
+
     def get(self, name, default=None):
         return self.values.get(name, default)
 
