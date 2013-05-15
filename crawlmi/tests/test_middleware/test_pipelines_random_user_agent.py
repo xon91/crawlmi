@@ -1,15 +1,16 @@
 from twisted.trial import unittest
 
-from crawlmi.exceptions import NotConfigured
 from crawlmi.http import Request
 from crawlmi.middleware.pipelines.random_user_agent import RandomUserAgent
 from crawlmi.utils.test import get_engine
 
 
 class RandomUserAgentTest(unittest.TestCase):
-    def test_not_configured(self):
+    def test_empty_list(self):
         engine = get_engine(RANDOM_USER_AGENT_LIST=[])
-        self.assertRaises(NotConfigured, RandomUserAgent, engine)
+        mw = RandomUserAgent(engine)
+        # there should be many default user agents
+        self.assertGreater(len(mw.user_agents), 10)
 
     def test_process_request(self):
         engine = get_engine(RANDOM_USER_AGENT_LIST=['a'])

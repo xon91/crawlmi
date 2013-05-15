@@ -1,6 +1,7 @@
+from os.path import join, dirname
 import random
 
-from crawlmi.exceptions import NotConfigured
+from crawlmi.utils.conf import read_list_data_file
 
 
 class RandomUserAgent(object):
@@ -11,7 +12,7 @@ class RandomUserAgent(object):
     def __init__(self, engine):
         self.user_agents = engine.settings.get_list('RANDOM_USER_AGENT_LIST')
         if not self.user_agents:
-            raise NotConfigured()
+            self.user_agents = read_list_data_file(join(dirname(__file__), 'user_agents.txt'))
 
     def process_request(self, request):
         ua = random.choice(self.user_agents)

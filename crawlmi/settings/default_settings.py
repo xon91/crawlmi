@@ -1,8 +1,3 @@
-import os
-
-from crawlmi.utils.settings import read_list_data_file
-
-
 # General settings
 
 COMMAND_MODULES = []
@@ -102,7 +97,7 @@ HTTP_CACHE_IGNORE_SCHEMES = ['file']
 HTTP_CACHE_DBM_MODULE = 'anydbm'
 HTTP_CACHE_POLICY = 'crawlmi.middleware.pipelines.http_cache.policy.DummyPolicy'
 
-RANDOM_USER_AGENT_LIST = read_list_data_file(os.path.join(os.path.dirname(__file__), 'user_agents.txt'))
+RANDOM_USER_AGENT_LIST = []
 
 REDIRECT_MAX_TIMES = 20  # uses Firefox default setting
 REDIRECT_PRIORITY_ADJUST = +2

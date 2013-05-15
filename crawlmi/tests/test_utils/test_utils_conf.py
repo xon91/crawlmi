@@ -1,6 +1,10 @@
+import os
+
 from twisted.trial import unittest
 
-from crawlmi.utils.conf import build_component_list, arglist_to_dict
+from crawlmi.tests import tests_datadir
+from crawlmi.utils.conf import (build_component_list, arglist_to_dict,
+                                read_list_data_file)
 
 
 class UtilsConfTest(unittest.TestCase):
@@ -18,3 +22,8 @@ class UtilsConfTest(unittest.TestCase):
         self.assertEqual(
             arglist_to_dict(['arg1=val1', 'arg2=val2']),
             {'arg1': 'val1', 'arg2': 'val2'})
+
+    def test_read_list_data_file(self):
+        file_name = os.path.join(tests_datadir, 'list_data_file.txt')
+        data = read_list_data_file(file_name)
+        self.assertListEqual(data, ['a', 'b', 'c', 'f'])
