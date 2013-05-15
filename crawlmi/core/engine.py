@@ -24,6 +24,10 @@ class Engine(object):
 
     # how many seconds to wait between the checks of response_queue
     QUEUE_CHECK_FREQUENCY = 0.1
+    # how often to check is still paused
+    PAUSED_CHECK_FREQUENCY = 5
+    # how often to check if being idle
+    IDLE_CHECK_FREQUENCY = 5
 
     def __init__(self, settings, project, clock=None):
         '''Constructor of Engine should be very lightweight, so that things
@@ -130,7 +134,6 @@ class Engine(object):
             - if the response is received , push it to `response_queue`
         '''
         def _success(request_or_response):
-            self.pending_requests += 1
             if isinstance(request_or_response, Request):
                 self.signals.send(signal=signals.request_received,
                                   request=request_or_response)
@@ -143,9 +146,11 @@ class Engine(object):
                     self.response_queue.push(request_or_response)
 
         def _failure(failure):
+            self.pending_requests -= 1
             failure.request = request
             return self._handle_pipeline_result(failure)
 
+        self.pending_requests += 1
         d = defer_succeed(request, clock=self.clock)
         d.addCallback(self.pipeline.process_request)
         d.addCallbacks(_success, _failure)
@@ -157,8 +162,9 @@ class Engine(object):
     def _process_queue(self):
         if not self.running:
             return
-
-        if not self.paused and self.response_queue:
+        elif self.paused:
+            self.processing.schedule(self.PAUSED_CHECK_FREQUENCY)
+        elif self.response_queue:
             response = self.response_queue.pop()
             if isinstance(response, Response):
                 self.signals.send(signal=signals.response_downloaded,
@@ -167,9 +173,6 @@ class Engine(object):
             dfd.addBoth(self.pipeline.process_response)
             dfd.addBoth(self._handle_pipeline_result)
             dfd.addBoth(self._finalize_download)
-        elif self.paused:
-            self.processing.schedule(5)
-        # check stopping condition
         elif self.is_idle():
             # send `spider_idle` signal
             res = self.signals.send(signal=signals.spider_idle,
@@ -177,8 +180,12 @@ class Engine(object):
             dont_stop = any(isinstance(x, Failure) and
                             isinstance(x.value, DontStopEngine)
                             for _, x in res)
-            if not self.stop_if_idle or dont_stop:
-                self.processing.schedule(5)
+            # more requests have been scheduled
+            if not self.is_idle():
+                self.processing.schedule(0)
+            # slow down a little, but still run
+            elif dont_stop or not self.stop_if_idle:
+                self.processing.schedule(self.IDLE_CHECK_FREQUENCY)
             else:
                 self.stop('finished')
         else:

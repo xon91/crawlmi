@@ -2,6 +2,7 @@ from twisted.python.failure import Failure
 from twisted.trial import unittest
 
 from crawlmi import signals
+from crawlmi.core.engine import Engine
 from crawlmi.core.signal_manager import SignalManager
 from crawlmi.exceptions import DontStopEngine, StopEngine
 from crawlmi.http import Request, Response
@@ -179,29 +180,49 @@ class EngineTest(unittest.TestCase):
                             signals.spider_error])
 
     def test_idle(self):
-        def _spider_idle():
+        def _spider_idle_exception():
             raise DontStopEngine()
+
+        def _spider_idle_schedule():
+            self.engine.download(Request('http://github.com/'))
 
         self.engine.stop_if_idle = True
         self.engine.start()
         del self.sp.received[:]
 
-        self.engine.signals.connect(_spider_idle, signal=signals.spider_idle)
+        # don't stop, when DontStopEngine is raised
+        self.engine.signals.connect(_spider_idle_exception, signal=signals.spider_idle)
         self.assertTrue(self.engine.is_idle())
         self.clock.advance(self.engine.QUEUE_CHECK_FREQUENCY)
         self.check_signals([signals.spider_idle])
         self.assertTrue(self.engine.running)
+        self.engine.signals.disconnect(_spider_idle_exception, signal=signals.spider_idle)
 
-        self.engine.signals.disconnect(_spider_idle, signal=signals.spider_idle)
+        # don't stop when more requests are scheduled
+        self.engine.signals.connect(_spider_idle_schedule, signal=signals.spider_idle)
+        self.assertTrue(self.engine.is_idle())
+        self.clock.advance(self.engine.IDLE_CHECK_FREQUENCY)
+        self.check_signals([signals.spider_idle])
+        self.assertFalse(self.engine.is_idle())
+        self.assertTrue(self.engine.running)
+        self.engine.signals.disconnect(_spider_idle_schedule, signal=signals.spider_idle)
+        # clear scheduled request
+        self.clock.advance(0)
+        self.engine.request_queue.pop()
+        self.engine.pending_requests = 0
+        del self.sp.received[:]
+
+        # don't stop when stop_if_idle is false
         self.engine.stop_if_idle = False
         self.assertTrue(self.engine.is_idle())
-        self.clock.advance(5)
+        self.clock.advance(Engine.IDLE_CHECK_FREQUENCY)
         self.check_signals([signals.spider_idle])
         self.assertTrue(self.engine.running)
 
+        # now stop
         self.engine.stop_if_idle = True
         self.assertTrue(self.engine.is_idle())
-        self.clock.advance(5)
+        self.clock.advance(Engine.IDLE_CHECK_FREQUENCY)
         self.check_signals([signals.spider_idle,
                             signals.engine_stopping,
                             signals.engine_stopped])
