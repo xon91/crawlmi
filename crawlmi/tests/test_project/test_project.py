@@ -1,4 +1,5 @@
 import os
+from os.path import join, exists
 
 from twisted.trial import unittest
 
@@ -6,14 +7,14 @@ from crawlmi.core.project import Project
 from crawlmi.tests import tests_dir
 
 
-sample_project_dir = os.path.join(tests_dir, 'test_project', 'sample_project')
+sample_project_dir = join(tests_dir, 'test_project', 'sample_project')
 
 
 class ProjectTest(unittest.TestCase):
     def test_good_project(self):
         project_dirs = [
             sample_project_dir,
-            os.path.join(sample_project_dir, 'crawlmi_project'),
+            join(sample_project_dir, 'crawlmi_project'),
         ]
 
         for project_dir in project_dirs:
@@ -24,22 +25,22 @@ class ProjectTest(unittest.TestCase):
 
     def test_data_dir(self):
         project = Project(path=sample_project_dir)
-        self.assertEqual(project.data_dir, os.path.join(sample_project_dir, 'crawlmi_data'))
-        self.assertTrue(os.path.exists(project.data_dir))
+        self.assertEqual(project.data_dir, join(sample_project_dir, 'crawlmi_data'))
+        self.assertTrue(exists(project.data_dir))
         os.rmdir(project.data_dir)
 
     def test_data_path(self):
         project = Project(path=sample_project_dir)
         # relative path
-        expected = os.path.join(sample_project_dir, 'crawlmi_data', 'a', 'b')
-        relative = project.data_path(os.path.join('a', 'b'), create_dir=False)
+        expected = join(sample_project_dir, 'crawlmi_data', 'a', 'b')
+        relative = project.data_path(join('a', 'b'), create_dir=False)
         self.assertEqual(relative, expected)
-        self.assertFalse(os.path.exists(expected))
+        self.assertFalse(exists(expected))
         # create dir
-        project.data_path(os.path.join('a', 'b'), create_dir=True)
-        self.assertTrue(os.path.exists(expected))
-        os.rmdir(os.path.join(sample_project_dir, 'crawlmi_data', 'a', 'b'))
-        os.rmdir(os.path.join(sample_project_dir, 'crawlmi_data', 'a'))
+        project.data_path(join('a', 'b'), create_dir=True)
+        self.assertTrue(exists(expected))
+        os.rmdir(join(sample_project_dir, 'crawlmi_data', 'a', 'b'))
+        os.rmdir(join(sample_project_dir, 'crawlmi_data', 'a'))
         # absolute path
         expected = os.path.abspath(__file__)
         absolute = project.data_path(expected, create_dir=False)
