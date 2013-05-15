@@ -9,7 +9,7 @@ class Command(BaseCommand):
         return '[options] <spider>'
 
     def short_desc(self):
-        return 'Start the crawling process of the spider'
+        return 'Start the crawling process of the spider.'
 
     def add_options(self, parser):
         BaseCommand.add_options(self, parser)

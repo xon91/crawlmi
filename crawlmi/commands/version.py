@@ -15,7 +15,7 @@ class Command(BaseCommand):
         return '[-v]'
 
     def short_desc(self):
-        return 'Print Crawlmi version'
+        return 'Print Crawlmi version.'
 
     def add_options(self, parser):
         parser.add_option('--verbose', '-v', dest='verbose', action='store_true',

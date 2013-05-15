@@ -29,7 +29,7 @@ class Command(BaseCommand):
         return '<project_name>'
 
     def short_desc(self):
-        return 'Create new project'
+        return 'Create new project.'
 
     def add_options(self, parser):
         pass

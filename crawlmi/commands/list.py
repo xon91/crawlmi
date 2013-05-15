@@ -6,7 +6,7 @@ class Command(BaseCommand):
     command_settings = {'LOG_ENABLED': False}
 
     def short_desc(self):
-        return 'List available spiders'
+        return 'List available spiders.'
 
     def add_options(self, parser):
         pass
