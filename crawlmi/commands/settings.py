@@ -1,3 +1,5 @@
+from pprint import pformat
+
 from crawlmi.commands.base import BaseCommand
 
 
@@ -9,7 +11,7 @@ class Command(BaseCommand):
         return '[options]'
 
     def short_desc(self):
-        return 'Get settings values'
+        return 'Get settings values.'
 
     def add_options(self, parser):
         parser.add_option('--get', dest='get', metavar='SETTING',
@@ -22,6 +24,8 @@ class Command(BaseCommand):
             help='print setting value, intepreted as an float')
         parser.add_option('--getlist', dest='getlist', metavar='SETTING',
             help='print setting value, intepreted as an float')
+        parser.add_option('--spider', dest='spider',
+            help='use this spider\'s settings')
 
     def run(self, args, options):
         settings = self.engine.settings
@@ -35,3 +39,6 @@ class Command(BaseCommand):
             print settings.get_float(options.getfloat)
         elif options.getlist:
             print settings.get_list(options.getlist)
+        else:
+            for key in sorted(settings.keys()):
+                print '%s: %s' % (key, pformat(settings.get(key)))
