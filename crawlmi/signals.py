@@ -38,9 +38,8 @@ failure_received = Signal('failure_received')
 # args: failure
 spider_error = Signal('spider_error')
 
-# invoked when there are no more requests to download and engine wants to
-# stop (i.e. engine.close_if_idle == True). Either schedule new requests or
-# raise DontStopEngine exception.
+# invoked when there are no more requests to download.
+# Either schedule new requests or raise DontStopEngine exception.
 # args:
 spider_idle = Signal('spider_idle')
 

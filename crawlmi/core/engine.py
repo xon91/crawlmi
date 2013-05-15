@@ -170,12 +170,14 @@ class Engine(object):
         elif self.paused:
             self.processing.schedule(5)
         # check stopping condition
-        elif self.close_if_idle and self.is_idle():
+        elif self.is_idle():
             # send `spider_idle` signal
             res = self.signals.send(signal=signals.spider_idle,
                                     dont_log=DontStopEngine)
-            if any(isinstance(x, Failure) and isinstance(x.value, DontStopEngine)
-                    for _, x in res):
+            dont_close = any(isinstance(x, Failure) and
+                             isinstance(x.value, DontStopEngine)
+                             for _, x in res)
+            if not self.close_if_idle or dont_close:
                 self.processing.schedule(5)
             else:
                 self.stop('finished')

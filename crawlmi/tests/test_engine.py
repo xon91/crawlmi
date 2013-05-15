@@ -193,6 +193,13 @@ class EngineTest(unittest.TestCase):
         self.assertTrue(self.engine.running)
 
         self.engine.signals.disconnect(_spider_idle, signal=signals.spider_idle)
+        self.engine.close_if_idle = False
+        self.assertTrue(self.engine.is_idle())
+        self.clock.advance(5)
+        self.check_signals([signals.spider_idle])
+        self.assertTrue(self.engine.running)
+
+        self.engine.close_if_idle = True
         self.assertTrue(self.engine.is_idle())
         self.clock.advance(5)
         self.check_signals([signals.spider_idle,
