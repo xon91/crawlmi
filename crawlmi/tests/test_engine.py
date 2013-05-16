@@ -71,6 +71,7 @@ class EngineTest(unittest.TestCase):
     def tearDown(self):
         if self.engine.running:
             self.engine.stop('finished')
+            self.clock.advance(0)
         self.flushLoggedErrors()
 
     def test_init(self):
@@ -99,6 +100,7 @@ class EngineTest(unittest.TestCase):
         self.engine.start()
         self.check_signals([signals.engine_started])
         self.engine.stop('finished')
+        self.clock.advance(0)
         self.check_signals([signals.engine_stopped])
         self.assertFalse(self.engine.running)
         self.assertTrue(self.engine.request_queue._closed)
@@ -221,7 +223,7 @@ class EngineTest(unittest.TestCase):
         # now stop
         self.engine.stop_if_idle = True
         self.assertTrue(self.engine.is_idle())
-        self.clock.advance(Engine.IDLE_CHECK_FREQUENCY)
+        self.clock.pump([Engine.IDLE_CHECK_FREQUENCY, 0])
         self.check_signals([signals.spider_idle,
                             signals.engine_stopped])
         self.assertFalse(self.engine.running)
@@ -243,5 +245,5 @@ class EngineTest(unittest.TestCase):
         self.engine.signals.connect(_engine_stopped, signal=signals.engine_stopped)
         self.engine.start()
         self.assertTrue(self.engine.running)
-        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])
+        self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0, 0])
         self.assertFalse(self.engine.running)

@@ -112,15 +112,20 @@ class Engine(object):
 
     def stop(self, reason=''):
         assert self.running, 'Engine is not running.'
-
         self.running = False
-        self.processing.cancel()
-        self.downloader.close()
-        self.request_queue.close()
-        self.response_queue.close()
-        log.msg(format='Engine stopped (%(reason)s)', reason=reason)
-        self.signals.send(signal=signals.engine_stopped, reason=reason)
-        self.stats.dump_stats()
+
+        def _stop(_):
+            self.processing.cancel()
+            self.downloader.close()
+            self.request_queue.close()
+            self.response_queue.close()
+            log.msg(format='Engine stopped (%(reason)s)', reason=reason)
+            self.signals.send(signal=signals.engine_stopped, reason=reason)
+            self.stats.dump_stats()
+
+        dfd = defer_succeed(reason, clock=self.clock)
+        dfd.addBoth(_stop)
+        return dfd
 
     def pause(self):
         self.paused = True

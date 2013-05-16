@@ -1,6 +1,6 @@
 import signal
 
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 
 from crawlmi import log, signals
 from crawlmi.utils.ossignal import install_shutdown_handlers, signal_names
@@ -24,10 +24,12 @@ class Process(object):
 
     def stop(self):
         if self.engine.running:
-            self.engine.stop()
-        self._stop_reactor()
+            dfd = self.engine.stop()
+        else:
+            dfd = defer.succeed(None)
+        dfd.addBoth(self._stop_reactor)
 
-    def _stop_reactor(self):
+    def _stop_reactor(self, _=None):
         try:
             reactor.stop()
         except RuntimeError:  # raised if already stopped or in shutdown stage
