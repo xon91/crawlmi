@@ -14,13 +14,14 @@ ssl_supported = 'ssl' in optional_features
 class HttpDownloadHandler(object):
 
     def __init__(self, settings):
-        self.download_timeout = settings.get_int('DOWNLOAD_TIMEOUT', 180)
-        self.download_size_limit = settings.get_int('DOWNLOAD_SIZE_LIMIT', 0)
+        self.settings = settings
 
     def download_request(self, request):
         '''Return a deferred for the HTTP download.'''
-        factory = CrawlmiHTPPClientFactory(request, self.download_timeout,
-                                           self.download_size_limit)
+        factory = CrawlmiHTPPClientFactory(
+            request,
+            self.settings.get_int('DOWNLOAD_TIMEOUT', 180, request),
+            self.settings.get_int('DOWNLOAD_SIZE_LIMIT', 0, request))
         self._connect(factory)
         return factory.deferred
 
