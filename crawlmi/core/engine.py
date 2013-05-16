@@ -29,7 +29,7 @@ class Engine(object):
     # how often to check if being idle
     IDLE_CHECK_FREQUENCY = 5
 
-    def __init__(self, settings, project, clock=None):
+    def __init__(self, settings, project, command_invoked='', clock=None):
         '''Constructor of Engine should be very lightweight, so that things
         can be easily unittested. For any more complicated initialization
         use `setup()`.
@@ -40,6 +40,8 @@ class Engine(object):
 
         self.stop_if_idle = True
         self.initialized = False  # True, when `setup()` has been called
+        # name of the command invoking the engine. E.g. `crawl`, `shell`, etc.
+        self.command_invoked = command_invoked
 
         self.spider = None
         self.pending_requests = 0

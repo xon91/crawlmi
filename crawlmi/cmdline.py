@@ -127,7 +127,7 @@ def execute(argv=None):
     custom_settings = run_print_help(parser, cmd.get_settings, args, options)
     settings.custom_settings = custom_settings
     # initialize engine
-    engine = Engine(settings, project)
+    engine = Engine(settings, project, command_invoked=cmd_name)
     cmd.set_engine(engine)
     spider = run_print_help(parser, cmd.get_spider, args, options)
     engine.set_spider(spider)
