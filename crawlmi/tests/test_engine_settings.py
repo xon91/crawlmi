@@ -1,5 +1,6 @@
 from twisted.trial import unittest
 
+from crawlmi.http import Request, Response
 from crawlmi.settings.engine_settings import EngineSettings
 
 
@@ -25,6 +26,14 @@ class EngineSettingsTest(unittest.TestCase):
         self.assertRaises(KeyError, self.settings.__getitem__, 'x')
         self.assertEqual(self.settings.get('d'), 1)
         self.assertIsNone(self.settings.get('x'))
+
+    def test_req_or_resp(self):
+        req = Request('http://github.com/', meta={'a': 10, 'x': 'y'})
+        self.assertEqual(self.settings.get('a', req_or_resp=req), 10)
+        self.assertEqual(self.settings.get('x', req_or_resp=req), 'y')
+        resp = Response('', request=req)
+        self.assertEqual(self.settings.get('a', req_or_resp=resp), 10)
+        self.assertEqual(self.settings.get('x', req_or_resp=resp), 'y')
 
     def test_priority(self):
         self.assertEqual(self.settings.get('a'), 4)

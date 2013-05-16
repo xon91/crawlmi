@@ -1,5 +1,6 @@
 from twisted.trial import unittest
 
+from crawlmi.http import Request, Response
 from crawlmi.settings import Settings
 
 
@@ -54,6 +55,14 @@ class SettingsTest(unittest.TestCase):
             if k.startswith(prefix):
                 result.append((k, v[1]))
         return result
+
+    def test_req_or_resp(self):
+        req = Request('http://github.com/', meta={'INT_1': 10, 'a': 'b'})
+        self.assertEqual(self.settings.get('INT_1', req_or_resp=req), 10)
+        self.assertEqual(self.settings.get('a', req_or_resp=req), 'b')
+        resp = Response('', request=req)
+        self.assertEqual(self.settings.get('INT_1', req_or_resp=resp), 10)
+        self.assertEqual(self.settings.get('a', req_or_resp=resp), 'b')
 
     def test_bool(self):
         for (k, v) in self._get_answers('BOOL'):

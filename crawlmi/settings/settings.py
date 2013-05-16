@@ -27,31 +27,33 @@ class Settings(object):
     def keys(self):
         return self.values.keys()
 
-    def get(self, name, default=None):
+    def get(self, name, default=None, req_or_resp=None):
+        if req_or_resp and name in req_or_resp.meta:
+            return req_or_resp.meta[name]
         return self.values.get(name, default)
 
     def __copy__(self):
         return self.__class__(self.values)
     copy = __copy__
 
-    def get_bool(self, name, default=False):
+    def get_bool(self, name, default=False, req_or_resp=None):
         '''
         True is: 1, '1', True
         False is: 0, '0', False, None
         '''
-        value = self.get(name, default)
+        value = self.get(name, default, req_or_resp)
         if value is None:
             return False
         return bool(int(value))
 
-    def get_int(self, name, default=0):
-        return int(self.get(name, default))
+    def get_int(self, name, default=0, req_or_resp=None):
+        return int(self.get(name, default, req_or_resp))
 
-    def get_float(self, name, default=0.0):
-        return float(self.get(name, default))
+    def get_float(self, name, default=0.0, req_or_resp=None):
+        return float(self.get(name, default, req_or_resp))
 
-    def get_list(self, name, default=None):
-        value = self.get(name)
+    def get_list(self, name, default=None, req_or_resp=None):
+        value = self.get(name, req_or_resp=req_or_resp)
         if value is None:
             return default if default is not None else []
         elif hasattr(value, '__iter__'):

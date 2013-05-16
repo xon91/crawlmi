@@ -36,7 +36,9 @@ class EngineSettings(Settings):
             keys.update(settings.keys())
         return list(keys)
 
-    def get(self, name, default=None):
+    def get(self, name, default=None, req_or_resp=None):
+        if req_or_resp and name in req_or_resp.meta:
+            return req_or_resp.meta[name]
         for settings_name in self.order:
             settings = getattr(self, settings_name)
             if name in settings:
