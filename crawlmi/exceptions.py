@@ -31,10 +31,10 @@ class DropRequest(Exception):
 
 class RestartPipeline(Exception):
     '''Indicates that the pipeline processing should be restarted with the
-    new value.
+    new request.
     '''
-    def __init__(self, new_value):
-        self.new_value = new_value
+    def __init__(self, new_request):
+        self.new_request = new_request
 
 
 # Spider

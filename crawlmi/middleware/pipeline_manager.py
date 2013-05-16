@@ -60,7 +60,7 @@ class PipelineManager(MiddlewareManager):
                     elif isinstance(request, Response):
                         return request
             except RestartPipeline as e:
-                request = e.new_value
+                request = e.new_request
                 assert isinstance(request, Request), \
                     'Middleware %s.process_request must raise RestartPipeline with Request, got %s' % \
                     (method.im_self.__class__.__name__, type(request))
