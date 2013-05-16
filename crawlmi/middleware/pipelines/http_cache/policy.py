@@ -13,7 +13,7 @@ class DummyPolicy(object):
         return request.parsed_url.scheme not in self.ignore_schemes
 
     def should_cache_response(self, response, request):
-        if self.ignore_non_200 and response.status != 200:
+        if self.ignore_non_200 and not (200 <= response.status < 300):
             return False
         return not self.ignore_status(response.status)
 

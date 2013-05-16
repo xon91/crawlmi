@@ -32,7 +32,7 @@ class Filter(object):
     def process_response(self, response):
         filter_non_200 = self.settings.get('FILTER_NON_200_RESPONSE_STATUS',
                                            req_or_resp=response)
-        if filter_non_200 and response.status != 200:
+        if filter_non_200 and not (200 <= response.status < 300):
             self.stats.inc_value('filter/non_200')
             log.msg(format='Filtering non-200 response (status %(status)d): %(url)s',
                     level=log.DEBUG,
