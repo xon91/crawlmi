@@ -18,7 +18,6 @@ from crawlmi.utils.test import get_engine
 class SignalProcessor(object):
     active_signals = [
         signals.engine_started,
-        signals.engine_stopping,
         signals.engine_stopped,
         signals.request_received,
         signals.response_downloaded,
@@ -100,7 +99,7 @@ class EngineTest(unittest.TestCase):
         self.engine.start()
         self.check_signals([signals.engine_started])
         self.engine.stop('finished')
-        self.check_signals([signals.engine_stopping, signals.engine_stopped])
+        self.check_signals([signals.engine_stopped])
         self.assertFalse(self.engine.running)
         self.assertTrue(self.engine.request_queue._closed)
         self.assertTrue(self.engine.response_queue._closed)
@@ -224,7 +223,6 @@ class EngineTest(unittest.TestCase):
         self.assertTrue(self.engine.is_idle())
         self.clock.advance(Engine.IDLE_CHECK_FREQUENCY)
         self.check_signals([signals.spider_idle,
-                            signals.engine_stopping,
                             signals.engine_stopped])
         self.assertFalse(self.engine.running)
 
@@ -232,7 +230,7 @@ class EngineTest(unittest.TestCase):
         def _stop_engine(response):
             raise StopEngine()
 
-        def _engine_stopping():
+        def _engine_stopped():
             self.assertEqual(len(self.engine.response_queue), 1)
 
         req1 = Request('http://github.com/', callback=_stop_engine)
@@ -242,7 +240,7 @@ class EngineTest(unittest.TestCase):
         resp2 = Response('', request=req2)
         self.engine.response_queue.push(resp2)
 
-        self.engine.signals.connect(_engine_stopping, signal=signals.engine_stopping)
+        self.engine.signals.connect(_engine_stopped, signal=signals.engine_stopped)
         self.engine.start()
         self.assertTrue(self.engine.running)
         self.clock.pump([self.engine.QUEUE_CHECK_FREQUENCY, 0, 0])

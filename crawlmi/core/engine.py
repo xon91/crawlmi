@@ -111,9 +111,8 @@ class Engine(object):
         self.processing.schedule(self.QUEUE_CHECK_FREQUENCY)
 
     def stop(self, reason=''):
-        assert self.running, 'Engine is not running. Why stopping it?'
+        assert self.running, 'Engine is not running.'
 
-        self.signals.send(signal=signals.engine_stopping, reason=reason)
         self.running = False
         self.processing.cancel()
         self.downloader.close()

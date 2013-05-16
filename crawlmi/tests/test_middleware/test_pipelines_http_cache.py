@@ -64,7 +64,7 @@ class BaseTest(unittest.TestCase):
         try:
             yield mw
         finally:
-            mw.engine_stopping()
+            mw.engine_stopped()
 
     def assertEqualResponse(self, response1, response2):
         self.assertEqual(response1.url, response2.url)

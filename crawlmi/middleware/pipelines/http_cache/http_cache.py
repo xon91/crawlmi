@@ -14,12 +14,12 @@ class HttpCache(object):
         self.stats = engine.stats
 
         engine.signals.connect(self.engine_started, signal=signals.engine_started)
-        engine.signals.connect(self.engine_stopping, signal=signals.engine_stopping)
+        engine.signals.connect(self.engine_stopped, signal=signals.engine_stopped)
 
     def engine_started(self):
         self.storage.open()
 
-    def engine_stopping(self):
+    def engine_stopped(self):
         self.storage.close()
 
     def process_request(self, request):
