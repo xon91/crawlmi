@@ -1,7 +1,7 @@
 from twisted.trial import unittest
 
 from crawlmi.http import Request, Response, TextResponse
-from crawlmi.middleware.pipelines.filter import Filter
+from crawlmi.middleware.pipelines.filter import Filter, FilterError
 from crawlmi.utils.test import get_engine
 
 
@@ -20,8 +20,7 @@ class FilterUrlLengthTest(unittest.TestCase):
         self.assertIs(good1, good2)
 
         bad1 = Response('', request=req)
-        bad2 = mw.process_response(bad1)
-        self.assertIsNone(bad2)
+        self.assertRaises(FilterError, mw.process_response, bad1)
 
         mw = Filter(self._get_engine(FILTER_NONTEXT_RESPONSE=False))
         bad3 = mw.process_response(bad1)
@@ -35,8 +34,7 @@ class FilterUrlLengthTest(unittest.TestCase):
         self.assertIs(good1, good2)
 
         bad1 = Request('http://a.bc/')
-        bad2 = mw.process_request(bad1)
-        self.assertIsNone(bad2)
+        self.assertRaises(FilterError, mw.process_request, bad1)
 
     def test_bad_scheme(self):
         mw = Filter(self._get_engine(FILTER_SCHEMES=['mailto']))
@@ -46,8 +44,7 @@ class FilterUrlLengthTest(unittest.TestCase):
         self.assertIs(good1, good2)
 
         bad1 = Request('mailto:contact+news@qr.cz?subject=News')
-        bad2 = mw.process_request(bad1)
-        self.assertIsNone(bad2)
+        self.assertRaises(FilterError, mw.process_request, bad1)
 
     def test_filter_non_200(self):
         mw = Filter(self._get_engine(FILTER_NON_200_RESPONSE_STATUS=True))
@@ -58,8 +55,7 @@ class FilterUrlLengthTest(unittest.TestCase):
         self.assertIs(good1, good2)
 
         bad1 = Response('', request=req, status=404)
-        bad2 = mw.process_response(bad1)
-        self.assertIsNone(bad2)
+        self.assertRaises(FilterError, mw.process_response, bad1)
 
         mw = Filter(self._get_engine(FILTER_NON_200_RESPONSE_STATUS=False))
         bad3 = mw.process_response(bad1)
@@ -74,5 +70,4 @@ class FilterUrlLengthTest(unittest.TestCase):
         self.assertIs(good1, good2)
 
         bad1 = Response('', request=req, status=200)
-        bad2 = mw.process_response(bad1)
-        self.assertIsNone(bad2)
+        self.assertRaises(FilterError, mw.process_response, bad1)
