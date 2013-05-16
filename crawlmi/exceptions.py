@@ -24,7 +24,7 @@ class UsageError(Exception):
 
 # Downloader pipeline
 
-class RequestDropped(Exception):
+class DropRequest(Exception):
     '''Raised when pipeline processing drops the request.'''
     quiet = True
 

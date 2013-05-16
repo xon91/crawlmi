@@ -1,6 +1,6 @@
 from twisted.python.failure import Failure
 
-from crawlmi.exceptions import RestartPipeline, RequestDropped
+from crawlmi.exceptions import RestartPipeline, DropRequest
 from crawlmi.http import Request, Response
 from crawlmi.middleware.middleware_manager import MiddlewareManager
 from crawlmi.utils.conf import build_component_list
@@ -41,7 +41,7 @@ class PipelineManager(MiddlewareManager):
         raised.
 
         Return value is either Request or Response object or the exception
-        RequestDropped is raised.
+        DropRequest is raised.
         '''
         while True:
             try:
@@ -54,7 +54,7 @@ class PipelineManager(MiddlewareManager):
                         'Middleware %s.process_request must return None, Response or Request, got %s' % \
                         (method.im_self.__class__.__name__, type(request))
                     if request is None:
-                        raise RequestDropped(
+                        raise DropRequest(
                             '`%s` pipeline middleware dropped the request in `process_request()` method' %
                             name)
                     elif isinstance(request, Response):
@@ -90,7 +90,7 @@ class PipelineManager(MiddlewareManager):
                 (method.im_self.__class__.__name__, type(response))
             if response is None:
                 method_name = 'process_response()' if method is pr else 'process_failure()'
-                failure = Failure(RequestDropped(
+                failure = Failure(DropRequest(
                     '`%s` pipeline middleware dropped the request in `%s` method' %
                     (name, method_name)))
                 failure.request = request

@@ -1,8 +1,8 @@
-from crawlmi.exceptions import RequestDropped
+from crawlmi.exceptions import DropRequest
 from crawlmi.http import TextResponse
 
 
-class FilterError(RequestDropped):
+class FilterError(DropRequest):
     '''Raised when filtering out the request.'''
 
 

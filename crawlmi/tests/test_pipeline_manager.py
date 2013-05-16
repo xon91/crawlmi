@@ -1,7 +1,7 @@
 from twisted.python.failure import Failure
 from twisted.trial import unittest
 
-from crawlmi.exceptions import RestartPipeline, RequestDropped
+from crawlmi.exceptions import RestartPipeline, DropRequest
 from crawlmi.http import Request, Response
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.utils.test import get_engine
@@ -51,7 +51,7 @@ class PipelineManagerTest(unittest.TestCase):
         pm = self._get_pm(
             self._build('M1', preq=lambda x: None),
             self._build('M2', preq=True))
-        self.assertRaises(RequestDropped, pm.process_request, self.req)
+        self.assertRaises(DropRequest, pm.process_request, self.req)
         self.assertListEqual(self.mws, ['M1'])
 
     def test_process_request_response(self):
@@ -127,7 +127,7 @@ class PipelineManagerTest(unittest.TestCase):
             self._build('M1', presp=lambda x: None))
         result = pm.process_response(self.resp)
         self.assertIsInstance(result, Failure)
-        self.assertIsInstance(result.value, RequestDropped)
+        self.assertIsInstance(result.value, DropRequest)
         self.assertListEqual(self.mws, ['M1'])
 
     def test_process_response_to_failure(self):
