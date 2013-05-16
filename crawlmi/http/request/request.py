@@ -49,7 +49,7 @@ class Request(object_ref):
     def details(self):
         '''Useful for debugging purposes.'''
         return '<Request [%s] %s> (Headers: %s, History: %s, Meta: %s, Proxy: %s)' % \
-            (self._method, self._url, self.headers, self.meta, self.proxy)
+            (self._method, self._url, self.headers, self.history, self.meta, self.proxy)
 
     @property
     def original_url(self):

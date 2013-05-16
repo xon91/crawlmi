@@ -94,6 +94,17 @@ class RequestTest(unittest.TestCase):
         self.assertEqual(r._prepare_method('f.adsf/dsaf,'), 'F.ADSF/DSAF,')
         self.assertIsInstance(r._prepare_method(u'get'), str)
 
+    def test_details(self):
+        headers = Headers({'Accept': 'gzip', 'Custom-Header': 'nothing to tell you'})
+        meta = {'a': 'b', 'c': 'd'}
+        params = {'a': 10, 'b': 20}
+        history = ['a', 'b']
+        encoding = 'latin1'
+        body = u'Price: \xa3100'
+        r = Request(url=gh_url, method='post', headers=headers, body=body,
+            encoding=encoding, meta=meta, params=params, history=history)
+        r.details
+
     def test_headers(self):
         r = Request(url=gh_url)
         self.assertIsInstance(r.headers, Headers)
