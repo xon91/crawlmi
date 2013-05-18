@@ -2,7 +2,7 @@
 
 from twisted.internet import defer
 
-from crawlmi.http import Response
+from crawlmi.http.response import factory as resp_factory
 from crawlmi.utils.url import file_uri_to_path
 
 
@@ -15,5 +15,6 @@ class FileDownloadHandler(object):
         def download():
             filepath = file_uri_to_path(request.url)
             body = open(filepath, 'rb').read()
-            return Response(url=request.url, body=body, request=request)
+            response_cls = resp_factory.from_args(filename=filepath, body=body)
+            return response_cls(url=request.url, body=body, request=request)
         return defer.maybeDeferred(download)
