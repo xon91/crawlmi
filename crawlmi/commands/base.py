@@ -27,10 +27,10 @@ class BaseCommand(object):
 
     Process of initialization is:
         1. `get_settings()` is called to receive the command specific settings.
-        2. `set_engine()` is called. Spider is still uninitialized.
-        3. `get_spider()` is called.
-        4. `run()` is called. Engine is fully initialized. To start
-           crawlnig process, call `self.process.start()`.
+        2. `get_spider()` is called. Object `engine.spiders` is available.
+        3. `set_engine()` is called. Engine is now fully initialized.
+        4. `run()` is called. To start crawlnig process,
+            call `self.process.start()`.
     '''
 
     requires_project = False
@@ -92,13 +92,8 @@ class BaseCommand(object):
 
         return Settings(custom_settings)
 
-    def set_engine(self, engine):
-        self.engine = engine
-        self.settings = engine.settings
-        self.process = Process(engine)
-
-    def get_spider(self, args, options):
-        spiders = self.engine.spiders
+    def get_spider(self, engine, args, options):
+        spiders = engine.spiders
         if getattr(options, 'spider', None):
             return spiders.create_spider_by_name(options.spider)
         if len(args) == 1 and is_url(args[0]):
@@ -106,6 +101,11 @@ class BaseCommand(object):
             if spider:
                 return spider
         return BaseSpider('default')
+
+    def set_engine(self, engine):
+        self.engine = engine
+        self.settings = engine.settings
+        self.process = Process(engine)
 
     def run(self, args, options):
         '''The actual logic of the command. Subclasses must implement this

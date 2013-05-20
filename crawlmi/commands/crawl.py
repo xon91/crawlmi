@@ -17,10 +17,10 @@ class Command(BaseCommand):
         parser.add_option('-a', dest='spargs', action='append', default=[],
             metavar='NAME=VALUE', help='set spider argument (may be repeated)')
 
-    def get_spider(self, args, options):
+    def get_spider(self, engine, args, options):
         if len(args) != 1:
             raise UsageError()
-        return self.engine.spiders.create_spider_by_name(args[0])
+        return engine.spiders.create_spider_by_name(args[0])
 
     def run(self, args, options):
         self.engine.crawl_start_requests()

@@ -41,13 +41,15 @@ class Project(object):
                     self.module_settings = Settings.from_module(settings_module)
                     self.inside_project = True
 
+    def set_data_dir(self, data_dir):
+        if data_dir is None:
+            self._data_dir = None
+        else:
+            self._data_dir = os.path.join(self.project_dir, data_dir)
+
     @property
     def data_dir(self):
-        if self._data_dir is None:
-            self._data_dir = self._get_data_dir()
-            if not os.path.exists(self._data_dir):
-                os.makedirs(self._data_dir)
-        return self._data_dir
+        return self._data_dir if self._data_dir else '.crawlmi'
 
     def data_path(self, path, create_dir=False):
         '''If path is relative, return the given path inside the project data
@@ -58,16 +60,6 @@ class Project(object):
         if create_dir and not os.path.exists(path):
             os.makedirs(path)
         return path
-
-    def _get_data_dir(self):
-        if not self.inside_project:
-            return '.crawlmi'
-
-        if self.cfg.has_option('crawlmi', 'datadir'):
-            data_dir = self.cfg.get('crawlmi', 'datadir')
-        else:
-            data_dir = '.crawlmi'
-        return os.path.join(self.project_dir, data_dir)
 
     def get_closest_cfg(self, path, prev_path=None):
         '''Return the path to the closest crawlmi.cfg file by traversing the current

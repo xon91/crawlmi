@@ -128,10 +128,12 @@ def execute(argv=None):
     settings.custom_settings = custom_settings
     # initialize engine
     engine = Engine(settings, project, command_invoked=cmd_name)
-    cmd.set_engine(engine)
-    spider = run_print_help(parser, cmd.get_spider, args, options)
+    spider = run_print_help(parser, cmd.get_spider, engine, args, options)
     engine.set_spider(spider)
+    # set project's data dir. It has to be when all the settings are known.
+    project.set_data_dir(engine.settings.get('DATA_DIR'))
     engine.setup()
+    cmd.set_engine(engine)
     # save pidfile
     if getattr(options, 'pidfile', None):
         with open(options.pidfile, 'wb') as f:

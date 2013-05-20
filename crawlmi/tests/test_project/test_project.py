@@ -25,12 +25,19 @@ class ProjectTest(unittest.TestCase):
 
     def test_data_dir(self):
         project = Project(path=sample_project_dir)
+        self.assertEqual(project.data_dir, '.crawlmi')
+        project.set_data_dir('crawlmi_data')
         self.assertEqual(project.data_dir, join(sample_project_dir, 'crawlmi_data'))
+        self.assertFalse(exists(project.data_dir))
+        project.data_path('.', create_dir=True)
         self.assertTrue(exists(project.data_dir))
         os.rmdir(project.data_dir)
+        project.set_data_dir(None)
+        self.assertEqual(project.data_dir, '.crawlmi')
 
     def test_data_path(self):
         project = Project(path=sample_project_dir)
+        project.set_data_dir('crawlmi_data')
         # relative path
         expected = join(sample_project_dir, 'crawlmi_data', 'a', 'b')
         relative = project.data_path(join('a', 'b'), create_dir=False)

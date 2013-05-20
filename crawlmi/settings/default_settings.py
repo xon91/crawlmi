@@ -1,5 +1,7 @@
 # General settings
 
+DATA_DIR = None
+
 COMMAND_MODULES = []
 SPIDER_MODULES = []
 
