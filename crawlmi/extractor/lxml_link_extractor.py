@@ -1,8 +1,7 @@
-import lxml.html
-
 from crawlmi import log
 from crawlmi.extractor import Link, BaseLinkExtractor
 from crawlmi.http import HtmlResponse
+from crawlmi.utils.lxml_fix import get_html
 from crawlmi.utils.python import to_str, to_unicode
 from crawlmi.utils.url import requote_url
 
@@ -13,9 +12,7 @@ class LxmlLinkExtractor(BaseLinkExtractor):
         if not isinstance(response, HtmlResponse) or not response.body:
             return []
 
-        utf8_body = response.text.encode('utf-8')
-        parser = lxml.html.HTMLParser(recover=True, encoding='utf-8')
-        html = lxml.html.fromstring(utf8_body, parser=parser)
+        html = get_html(response)
         html.make_links_absolute(response.url)
         links = []
         for e, a, l, p in html.iterlinks():
