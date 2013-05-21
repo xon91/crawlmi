@@ -14,19 +14,26 @@ class LxmlLinkExtractor(BaseLinkExtractor):
 
         html = get_html(response)
         html.make_links_absolute(response.url)
+        return self._extract_links_from_html(html, response.encoding)
+
+    def _extract_links_from_html(self, html, response_encoding):
         links = []
         for e, a, l, p in html.iterlinks():
             if self.tag_func(e.tag):
                 if self.attr_func(a):
                     try:
-                        url = requote_url(to_str(to_unicode(l, 'utf-8'), response.encoding))
+                        url = requote_url(to_str(to_unicode(l, 'utf-8'), response_encoding))
                         text = e.text or u''
                         text = to_unicode(text, 'utf-8')
                     except Exception as e:
                         log.msg(
                             format='Error occurred while extracting links from %(url)s. Error (%(etype)s): %(error)s',
-                            level=log.WARNING, url=response.url, etype=type(e),
+                            level=log.WARNING, url=html.base_url, etype=type(e),
                             error=e)
                     else:
                         links.append(Link(url=url, text=text))
         return links
+
+    def extract_links_from_html(self, html, response_encoding, process_links=None):
+        links = self._extract_links_from_html(html, response_encoding)
+        return self._process_links(links, process_links)

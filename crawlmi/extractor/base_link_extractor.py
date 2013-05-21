@@ -56,14 +56,7 @@ class BaseLinkExtractor(object):
             allowed &= not has_url_any_extension(parsed_url, self.deny_extensions)
         return allowed
 
-    def extract_links(self, response, process_links=None):
-        '''
-        Return the list of extracted links from the response body.
-            link.url - string; url is escaped and ready to be visited
-            link.text - unicode; text from inside the <a></a> tags
-        '''
-
-        links = self._extract_links(response)
+    def _process_links(self, links, process_links=None):
         # filter bad links
         links = filter(self.link_allowed, links)
         # user process links
@@ -73,3 +66,12 @@ class BaseLinkExtractor(object):
         links = (unique_list(links, key=lambda link: link.url) if self.unique
                  else links)
         return links
+
+    def extract_links(self, response, process_links=None):
+        '''
+        Return the list of extracted links from the response body.
+            link.url - string; url is escaped and ready to be visited
+            link.text - unicode; text from inside the <a></a> tags
+        '''
+        links = self._extract_links(response)
+        return self._process_links(links, process_links)
