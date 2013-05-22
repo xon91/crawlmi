@@ -187,12 +187,13 @@ class CrawlmiClientContextFactory(ClientContextFactory):
     # see https://github.com/scrapy/scrapy/issues/82
     # and https://github.com/scrapy/scrapy/issues/26
 
-    def __init__(self):
+    def __init__(self, method):
         # see this issue on why we use TLSv1_METHOD by default
         # https://github.com/scrapy/scrapy/issues/194
-        self.method = SSL.TLSv1_METHOD
-        # TODO: try following method if TLSv1_METHOD fails
+        # self.method = SSL.TLSv1_METHOD
+        # try following method if TLSv1_METHOD fails
         # self.method = SSL.SSLv3_METHOD
+        self.method = method
 
     def getContext(self):
         ctx = ClientContextFactory.getContext(self)

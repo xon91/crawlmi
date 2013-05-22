@@ -23,7 +23,7 @@ LOG_STDOUT = False
 DOWNLOAD_HANDLERS = {
     'file': 'crawlmi.core.handlers.FileDownloadHandler',
     'http': 'crawlmi.core.handlers.HttpDownloadHandler',
-    'https': 'crawlmi.core.handlers.HttpDownloadHandler',
+    'https': 'crawlmi.core.handlers.HttpsDownloadHandler',
 }
 
 DOWNLOAD_TIMEOUT = 180  # 3mins

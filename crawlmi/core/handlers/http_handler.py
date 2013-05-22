@@ -1,14 +1,8 @@
-'''Download handlers for http and https schemes.'''
+'''Download handler for http scheme.'''
 
 from twisted.internet import reactor
 
-from crawlmi.compat import optional_features
-from crawlmi.exceptions import NotSupported
-from crawlmi.core.webclient import (CrawlmiHTPPClientFactory,
-        CrawlmiClientContextFactory)
-
-
-ssl_supported = 'ssl' in optional_features
+from crawlmi.core.webclient import CrawlmiHTPPClientFactory
 
 
 class HttpDownloadHandler(object):
@@ -22,15 +16,6 @@ class HttpDownloadHandler(object):
             request,
             self.settings.get_int('DOWNLOAD_TIMEOUT', 180, request),
             self.settings.get_int('DOWNLOAD_SIZE_LIMIT', 0, request))
-        self._connect(factory)
-        return factory.deferred
-
-    def _connect(self, factory):
         host, port = factory.host, factory.port
-        if factory.scheme == 'https':
-            if ssl_supported:
-                return reactor.connectSSL(host, port, factory,
-                        CrawlmiClientContextFactory())
-            raise NotSupported('HTTPS not supported: install pyopenssl')
-        else:
-            return reactor.connectTCP(host, port, factory)
+        reactor.connectTCP(host, port, factory)
+        return factory.deferred
