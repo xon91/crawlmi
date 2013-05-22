@@ -29,7 +29,11 @@ class LinkTest(unittest.TestCase):
         self._assert_different_links(l4, l5)
         self._assert_same_links(l4, l6)
 
+        l7 = Link('http://www.example.com', text='test', nofollow=False)
+        l8 = Link('http://www.example.com', text='test', nofollow=True)
+        self._assert_different_links(l7, l8)
+
     def test_repr(self):
-        l1 = Link('http://www.example.com', text='test')
+        l1 = Link('http://www.example.com', text='test', nofollow=True)
         l2 = eval(repr(l1))
         self._assert_same_links(l1, l2)

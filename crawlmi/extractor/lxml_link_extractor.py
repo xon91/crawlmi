@@ -25,13 +25,14 @@ class LxmlLinkExtractor(BaseLinkExtractor):
                         url = requote_url(to_str(to_unicode(l, 'utf-8'), response_encoding))
                         text = e.text or u''
                         text = to_unicode(text, 'utf-8')
+                        nofollow = (e.attrib.get('rel') == 'nofollow')
                     except Exception as e:
                         log.msg(
                             format='Error occurred while extracting links from %(url)s. Error (%(etype)s): %(error)s',
                             level=log.WARNING, url=html.base_url, etype=type(e),
                             error=e)
                     else:
-                        links.append(Link(url=url, text=text))
+                        links.append(Link(url=url, text=text, nofollow=nofollow))
         return links
 
     def extract_links_from_html(self, html, response_encoding, process_links=None):

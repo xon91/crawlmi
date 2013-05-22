@@ -96,6 +96,17 @@ class LxmlLinkExtractorTest(unittest.TestCase):
             Link(url='http://example.com/sample_%E1.html', text='sample \xe1 text'.decode('latin1')),
         ])
 
+    def test_link_nofollow(self):
+        html = '''
+        <a href="page.html?action=print" rel="nofollow">Printer-friendly page</a>
+        <a href="about.html">About us</a>
+        '''
+        response = HtmlResponse('http://example.org/page.html', body=html)
+        lx = LxmlLinkExtractor()
+        self.assertEqual(lx.extract_links(response),
+            [Link(url='http://example.org/page.html?action=print', text=u'Printer-friendly page', nofollow=True),
+             Link(url='http://example.org/about.html', text=u'About us', nofollow=False)])
+
     def test_empty_body(self):
         lx = LxmlLinkExtractor()
         response = HtmlResponse('http://www.example.com')
