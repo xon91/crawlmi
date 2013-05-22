@@ -17,5 +17,6 @@ class HttpDownloadHandler(object):
             self.settings.get_int('DOWNLOAD_TIMEOUT', 180, request),
             self.settings.get_int('DOWNLOAD_SIZE_LIMIT', 0, request))
         host, port = factory.host, factory.port
-        reactor.connectTCP(host, port, factory)
+        bind_address = request.meta.get('bind_address')
+        reactor.connectTCP(host, port, factory, bindAddress=bind_address)
         return factory.deferred
