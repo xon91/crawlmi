@@ -1,5 +1,6 @@
 from crawlmi.commands.base import BaseCommand
 from crawlmi.exceptions import UsageError
+from crawlmi.utils.conf import arglist_to_dict
 
 
 class Command(BaseCommand):
@@ -20,7 +21,13 @@ class Command(BaseCommand):
     def get_spider(self, engine, args, options):
         if len(args) != 1:
             raise UsageError()
-        return engine.spiders.create_spider_by_name(args[0])
+
+        try:
+            spargs = arglist_to_dict(options.spargs)
+        except ValueError:
+            raise UsageError('Invalid -a value, use -a NAME=VALUE',
+                             print_help=False)
+        return engine.spiders.create_spider_by_name(args[0], spargs=spargs)
 
     def run(self, args, options):
         self.engine.crawl_start_requests()

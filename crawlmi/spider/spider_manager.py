@@ -36,13 +36,13 @@ class SpiderManager(object):
                 spiders.append(name)
         return spiders
 
-    def create_spider_by_name(self, name):
+    def create_spider_by_name(self, name, spargs={}):
         spider_class = self._spiders.get(name)
         if spider_class is None:
             raise KeyError('Spider not found: %s' % name)
-        return spider_class()
+        return spider_class(**spargs)
 
-    def create_spider_by_url(self, url, default_spider=None):
+    def create_spider_by_url(self, url, default_spider=None, spargs={}):
         spiders = self.get_spiders_by_url(url)
 
         if len(spiders) == 1:

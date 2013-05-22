@@ -38,8 +38,10 @@ class SpiderManagerTest(unittest.TestCase):
     def test_create_by_name(self):
         spider1 = self.manager.create_spider_by_name('spider1')
         self.assertEqual(spider1.__class__.__name__, 'Spider1')
-        spider2 = self.manager.create_spider_by_name('spider2')
+        spider2 = self.manager.create_spider_by_name('spider2', {'p1': 1, 'p2': 2})
         self.assertEqual(spider2.__class__.__name__, 'Spider2')
+        self.assertEqual(spider2.p1, 1)
+        self.assertEqual(spider2.p2, 2)
 
     def test_get_spiders_by_url(self):
         self.assertEqual(self.manager.get_spiders_by_url('http://crawlmi1.org/test'), ['spider1'])
