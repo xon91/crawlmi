@@ -12,7 +12,7 @@ from crawlmi.middleware.extension_manager import ExtensionManager
 from crawlmi.middleware.pipeline_manager import PipelineManager
 from crawlmi.queue import PriorityQueue, MemoryQueue, ResponseQueue
 from crawlmi.spider.spider_manager import SpiderManager
-from crawlmi.utils.defer import ScheduledCall, defer_succeed, defer_result
+from crawlmi.utils.defer import ScheduledCall, defer_fail, defer_succeed, defer_result
 from crawlmi.utils.misc import arg_to_iter, load_object
 
 
@@ -152,9 +152,11 @@ class Engine(object):
                     self.response_queue.push(request_or_response)
 
         def _failure(failure):
-            self.pending_requests -= 1
             failure.request = request
-            return self._handle_pipeline_result(failure)
+            dfd = defer_fail(failure, clock=self.clock)
+            dfd.addBoth(self._handle_pipeline_result)
+            dfd.addBoth(self._finalize_download)
+            return dfd
 
         self.pending_requests += 1
         d = defer_succeed(request, clock=self.clock)
@@ -179,6 +181,7 @@ class Engine(object):
             dfd.addBoth(self.pipeline.process_response)
             dfd.addBoth(self._handle_pipeline_result)
             dfd.addBoth(self._finalize_download)
+            dfd.addBoth(lambda _: self.processing.schedule(0))
         elif self.is_idle():
             # send `spider_idle` signal
             res = self.signals.send(signal=signals.spider_idle,
@@ -199,7 +202,6 @@ class Engine(object):
 
     def _finalize_download(self, _):
         self.pending_requests -= 1
-        self.processing.schedule(0)
 
     def _handle_pipeline_result(self, result):
         if result is None:
