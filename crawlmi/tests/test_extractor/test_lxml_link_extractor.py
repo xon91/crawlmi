@@ -111,6 +111,8 @@ class LxmlLinkExtractorTest(unittest.TestCase):
         lx = LxmlLinkExtractor()
         response = HtmlResponse('http://www.example.com')
         self.assertEqual(lx.extract_links(response), [])
+        response = HtmlResponse('http://www.example.com', body='\n\r\n\n')
+        self.assertEqual(lx.extract_links(response), [])
 
     def test_urls_type(self):
         '''Test that the resulting urls are regular strings and not a unicode objects.

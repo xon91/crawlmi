@@ -22,6 +22,6 @@ def get_html(response_or_str, encoding='utf-8', base_url=None):
     else:
         body = response_or_str
 
-    body = body or '<html/>'  # empty body raises error in lxml
+    body = body.strip() or '<html/>'  # empty body raises error in lxml
     parser = lxml.html.HTMLParser(recover=True, encoding=encoding)
     return lxml.html.fromstring(body, parser=parser, base_url=base_url)
