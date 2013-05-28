@@ -38,6 +38,8 @@ class EncodingDetectionTest(unittest.TestCase):
         headers = Headers({'Content-Type': 'text/html'})
         # self.assertEqual(get_encoding_from_headers(headers), 'cp1252')
         self.assertIsNone(get_encoding_from_headers(headers))
+        headers = Headers({'Content-Type': 'application/xhtml+xml'})
+        self.assertIsNone(get_encoding_from_headers(headers))
 
     def test_html_body_declared_encoding(self):
         fragments = [

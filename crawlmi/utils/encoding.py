@@ -49,6 +49,8 @@ def get_encoding_from_headers(headers):
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
         # encoding = 'iso-8859-1'
         return None
+    else:
+        return None
     return normalize_encoding(encoding)
 
 
