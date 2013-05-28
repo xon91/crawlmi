@@ -16,16 +16,23 @@ UNRESERVED_SET = frozenset(
 def _unquote_unreserved(url):
     '''Un-escape any percent-escape sequences in a URL that are unreserved
     characters. This leaves all reserved, illegal and non-ASCII bytes encoded.
+
+    TODO: how to handle percent encoded unicode characters, i.e. %uXXXX?
+    http://en.wikipedia.org/wiki/Percent-encoding
     '''
     parts = url.split('%')
     for i in range(1, len(parts)):
         h = parts[i][0:2]
         if len(h) == 2 and h.isalnum():
-            c = chr(int(h, 16))
-            if c in UNRESERVED_SET:
-                parts[i] = c + parts[i][2:]
+            try:
+                c = chr(int(h, 16))
+            except ValueError:
+                parts[i] = '%' + parts[i]
             else:
-                parts[i] = '%' + h.upper() + parts[i][2:]
+                if c in UNRESERVED_SET:
+                    parts[i] = c + parts[i][2:]
+                else:
+                    parts[i] = '%' + h.upper() + parts[i][2:]
         else:
             parts[i] = '%' + parts[i]
     return ''.join(parts)

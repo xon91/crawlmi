@@ -1,6 +1,7 @@
 from twisted.trial import unittest
 
 from crawlmi.utils.url import (is_url, is_url_from_any_domain, any_to_uri,
+                               requote_url,
                                has_url_any_extension, canonicalize_url)
 
 
@@ -12,6 +13,15 @@ class UrlTest(unittest.TestCase):
 
         self.assertFalse(is_url('github.com'))
         self.assertFalse(is_url('/etc/conf'))
+
+    def test_requote_url(self):
+        url = 'http://%68%65%2f%6c%6c%6f.com/%'
+        self.assertEqual(requote_url(url), 'http://he%2Fllo.com/%')
+        # test some real-life urls
+        url = 'mailto:development@alleytheatre.org?Subject=Registration%Help'
+        self.assertEqual(requote_url(url), 'mailto:development@alleytheatre.org?Subject=Registration%Help')
+        url = 'https://maps.google.nl/maps?q=Eekholt+4,+Diemen&%u205Ehl=nl'
+        self.assertEqual(requote_url(url), 'https://maps.google.nl/maps?q=Eekholt+4,+Diemen&%u205Ehl=nl')
 
     def test_is_url_from_any_domain(self):
         url = 'http://www.wheele-bin-art.co.uk/get/product/123'
