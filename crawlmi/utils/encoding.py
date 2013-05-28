@@ -80,7 +80,7 @@ def normalize_encoding(encoding):
     '''Return the normalize form of the encoding.
     '''
     if not encoding:
-        return encoding
+        return None
     encoding = encodings.normalize_encoding(encoding).lower()
     encoding = encodings.aliases.aliases.get(encoding, encoding)
     encoding = _default_encoding_translation.get(encoding, encoding)
