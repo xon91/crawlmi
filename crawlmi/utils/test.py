@@ -1,4 +1,5 @@
 from cStringIO import StringIO
+import math
 
 from crawlmi import log
 from crawlmi.core.engine import Engine
@@ -54,3 +55,8 @@ class LogWrapper(object):
     def get_first_line(self, strip=True, clear=True):
         lines = self.get_lines(strip=strip, clear=clear)
         return lines[0] if lines else ''
+
+
+def eq(a, b):
+    '''Floating point equality comparsion.'''
+    return math.fabs(a-b) < 1e-9
