@@ -2,6 +2,7 @@ from functools import partial
 import random
 
 from twisted.internet import reactor, defer
+from twisted.python.failure import Failure
 
 from crawlmi.core.handlers import GeneralHandler
 from crawlmi.queue import MemoryQueue
@@ -76,6 +77,13 @@ class Slot(object):
         dfd = defer.succeed(request)
         # download the response
         dfd.addCallback(self.download_handler.download_request)
+
+        # it is VERY important to wrap the failure into a new object!
+        # For errors like ConnectionLost, the same Failure object is returned
+        # everytime and we cannot use 'failure.request' field.
+        def wrap_failure(failure):
+            return Failure(failure.value)
+        dfd.addErrback(wrap_failure)
 
         # put the request into the set of `transferring` to block other requests
         # after the response is downloaded, remove it from `transferring`

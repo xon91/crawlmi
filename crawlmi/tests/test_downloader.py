@@ -26,12 +26,22 @@ class MockDownloaderHandler(object):
         self.dfds[request].errback(Failure(error))
 
 
-class BadDownloaderHandler(object):
+class ExceptionDownloaderHandler(object):
     def __init__(self, settings):
         pass
 
     def download_request(self, request):
         raise Exception()
+
+
+class FailureDownloaderHandler(object):
+    failure = Failure(ValueError())
+
+    def __init__(self, settings):
+        pass
+
+    def download_request(self, request):
+        return self.failure
 
 
 def get_request(domain='github', func=None):
@@ -174,12 +184,28 @@ class DownloaderSlotTest(unittest.TestCase):
         self.assertEqual(len(self.slot.in_progress), 0)
         self.assertEqual(len(self.slot.transferring), 0)
 
-    def test_fail_enqueue(self):
-        self.slot.download_handler = BadDownloaderHandler(Settings())
+    def test_exception(self):
+        self.slot.download_handler = ExceptionDownloaderHandler(Settings())
         r1, dfd1 = get_request('1')
         self.slot.enqueue(r1, dfd1)
         return self.assertFailure(dfd1, Exception)
 
+    def test_failure(self):
+        self.slot.download_handler = FailureDownloaderHandler(Settings())
+        download_values = []
+        def downloaded(value):
+            download_values.append(value)
+
+        for i in xrange(2):
+            r, dfd = get_request(str(i))
+            dfd.addBoth(downloaded)
+            self.slot.enqueue(r, dfd)
+
+        self.assertEqual(len(download_values), 2)
+        self.assertIsInstance(download_values[0], Failure)
+        self.assertIsInstance(download_values[1], Failure)
+        self.assertIsNot(download_values[0], download_values[1])
+        self.assertIsInstance(download_values[0].value, ValueError)
 
 class DownloaderTest(unittest.TestCase):
 
