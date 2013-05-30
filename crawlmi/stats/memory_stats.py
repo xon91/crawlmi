@@ -1,5 +1,7 @@
 import pprint
 
+from .statistics import Statistics
+from .top_samples import TopSamples
 from crawlmi import log
 
 
@@ -30,6 +32,22 @@ class MemoryStats(object):
 
     def min_value(self, key, value):
         self._stats[key] = min(self._stats.setdefault(key, value), value)
+
+    def add_value(self, key, value, weight=1.0):
+        statistics = self._stats.get(key)
+        if statistics is None:
+            statistics = self._stats[key] = Statistics()
+        elif not isinstance(statistics, Statistics):
+            raise RuntimeError('Object with key %s is not of type Statistics' % key)
+        statistics.add_value(value, weight)
+
+    def add_sample(self, key, priority, value):
+        top_samples = self._stats.get(key)
+        if top_samples is None:
+            top_samples = self._stats[key] = TopSamples()
+        elif not isinstance(top_samples, TopSamples):
+            raise RuntimeError('Object with key %s is not of type TopSamples' % key)
+        top_samples.add_sample(priority, value)
 
     def clear_stats(self):
         self._stats.clear()

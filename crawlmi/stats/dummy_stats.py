@@ -24,6 +24,12 @@ class DummyStats(object):
     def min_value(self, key, value):
         pass
 
+    def add_value(self, key, value, weight=1.0):
+        pass
+
+    def add_sample(self, key, priority, value):
+        pass
+
     def clear_stats(self):
         pass
 

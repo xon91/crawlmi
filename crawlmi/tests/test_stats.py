@@ -1,7 +1,7 @@
 from twisted.trial import unittest
 
 from crawlmi.stats import DummyStats, MemoryStats
-from crawlmi.utils.test import get_engine, LogWrapper
+from crawlmi.utils.test import get_engine, LogWrapper, eq
 
 
 class StatsTest(unittest.TestCase):
@@ -40,6 +40,19 @@ class StatsTest(unittest.TestCase):
         stats.min_value('test4', 7)
         self.assertEqual(stats.get_value('test4'), 7)
 
+        stats.add_value('stats', 3)
+        stats.add_value('stats', 2, 2.0)
+        statistics = stats.get_value('stats')
+        self.assertTrue(eq(statistics.average, 7.0/3.0), statistics.average)
+        self.assertRaises(RuntimeError, stats.add_value, 'test4', 1)
+
+        stats.add_sample('samples', 3, 'hello')
+        stats.add_sample('samples', 2, 'world')
+        samples = stats.get_value('samples')
+        self.assertEqual(len(samples), 2)
+        self.assertListEqual(samples.samples, [(3, 'hello'), (2, 'world')])
+        self.assertRaises(RuntimeError, stats.add_value, 'test4', 5, '!')
+
         stats.dump_stats()
         logged = self.lw.get_first_line(clear=False)
         self.assertTrue(logged.startswith('[crawlmi] INFO: Dumping crawlmi stats:'))
@@ -48,6 +61,8 @@ class StatsTest(unittest.TestCase):
         self.assertIn('test2', logged)
         self.assertIn('test3', logged)
         self.assertIn('test3', logged)
+        self.assertIn('stats', logged)
+        self.assertIn('samples', logged)
 
     def test_dummy_stats(self):
         stats = DummyStats(get_engine())
@@ -59,5 +74,8 @@ class StatsTest(unittest.TestCase):
         stats.max_value('v2', 100)
         stats.min_value('v3', 100)
         stats.set_value('test', 'value')
+        stats.add_value('stats', 100)
+        stats.add_value('stats', 100, 12)
+        stats.add_sample('samples', 3, 'hello')
         self.assertEqual(stats.get_stats(), {})
         stats.dump_stats()
