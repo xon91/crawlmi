@@ -87,3 +87,17 @@ class STest(unittest.TestCase):
         # footer
         self.assertIsInstance(parsed['footer'][0], HtmlXPathSelector)
         self.assertListEqual(parsed['footer_links'], [u'http://myip.com/url2', u'http://google.com/'])
+
+    def test_get_nodes(self):
+        node1 = S('node', '.')
+        node2 = S('node', '.')
+        ts = S('_main', '.', children=[
+            node1,
+            S('_inner', '.', children=[
+                node2,
+                node1,
+            ])
+        ])
+        self.assertListEqual(ts.get_nodes('_main'), [ts])
+        self.assertListEqual(ts.get_nodes('node'), [node1, node2, node1])
+        self.assertListEqual(ts.get_nodes('non-existent'), [])

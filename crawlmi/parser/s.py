@@ -43,6 +43,15 @@ class S(object):
         self.group = group
         self.children = children if children is not None else []
 
+    def get_nodes(self, name):
+        '''Return the list of S nodes with the given name.'''
+        result = []
+        if self.name == name:
+            result.append(self)
+        for c in self.children:
+            result += c.get_nodes(name)
+        return result
+
     @property
     def visible(self):
         return self.name and not self.name.startswith('_')
