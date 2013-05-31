@@ -1,3 +1,4 @@
+from pprint import pprint
 import signal
 import traceback
 
@@ -65,6 +66,7 @@ class Shell(object):
         # some useful objects
         self.vars['Request'] = Request
         self.vars['Response'] = Response
+        self.vars.setdefault('pprint', pprint)
         self.print_vars = set(self.update_vars(self.vars) or [])
         self.print_vars |= set(['engine', 'settings', 'spider', 'request',
                                 'response', 'xs'])
