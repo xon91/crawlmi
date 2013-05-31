@@ -3,11 +3,7 @@ import traceback
 
 from twisted.internet import reactor, threads
 
-from crawlmi.core.engine import Engine
 from crawlmi.http import Request, Response
-from crawlmi.parser.selectors import XPathSelector
-from crawlmi.settings import Settings
-from crawlmi.spider import BaseSpider
 from crawlmi.utils.console import start_python_console
 from crawlmi.utils.request import request_deferred
 from crawlmi.utils.response import open_in_browser
@@ -15,9 +11,6 @@ from crawlmi.utils.url import any_to_uri
 
 
 class Shell(object):
-    relevant_classes = (Engine, BaseSpider, Request, Response, XPathSelector,
-                        Settings)
-
     def __init__(self, engine, update_vars=None):
         self.engine = engine
         self.engine.stop_if_idle = False
@@ -65,22 +58,23 @@ class Shell(object):
         self.vars['spider'] = self.engine.spider
         self.vars['request'] = request
         self.vars['response'] = response
-        if hasattr(response, 'selector'):
-            self.vars['xs'] = response.selector
+        self.vars['xs'] = getattr(response, 'selector', None)
         self.vars['fetch'] = self.fetch
         self.vars['view'] = open_in_browser
         self.vars['shelp'] = self.print_help
         # some useful objects
         self.vars['Request'] = Request
         self.vars['Response'] = Response
-        self.update_vars(self.vars)
+        self.print_vars = set(self.update_vars(self.vars) or [])
+        self.print_vars |= set(['engine', 'settings', 'spider', 'request',
+                                'response', 'xs'])
         self.print_help()
 
     def print_help(self):
         print
         self.p('Available Crawlmi objects:')
         for k, v in sorted(self.vars.iteritems()):
-            if isinstance(v, self.relevant_classes):
+            if v is not None and k in self.print_vars:
                 self.p('  %-10s %s' % (k, v))
         print
         self.p('Useful shortcuts:')

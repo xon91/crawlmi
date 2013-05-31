@@ -24,6 +24,7 @@ class Command(BaseCommand):
     def update_vars(self, vars):
         '''You can use this function to update the Crawlmi objects that will be
         available in the shell.
+        Return the list of object names to print in the `shelp()`.
         '''
 
     def run(self, args, options):
