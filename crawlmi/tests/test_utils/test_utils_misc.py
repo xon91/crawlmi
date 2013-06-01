@@ -1,6 +1,20 @@
 from twisted.trial import unittest
 
-from crawlmi.utils.misc import arg_to_iter, load_object, iter_submodules
+from crawlmi.utils.misc import (arg_to_iter, load_object, iter_submodules,
+                                iter_subclasses)
+
+
+class BaseClass(object):
+    pass
+
+class Sub1(BaseClass):
+    pass
+
+class Sub2(BaseClass):
+    pass
+
+class Sub3(Sub1):
+    pass
 
 
 class UtilsMiscTest(unittest.TestCase):
@@ -49,3 +63,9 @@ class UtilsMiscTest(unittest.TestCase):
         self.assertSetEqual(set([m.__name__ for m in mods]), set(expected))
 
         self.assertRaises(ImportError, iter_submodules, 'nomodule999')
+
+    def test_iter_subclasses(self):
+        self.assertSetEqual(set(iter_subclasses('crawlmi.tests.test_utils.test_utils_misc', BaseClass)),
+                            set([Sub1, Sub2, Sub3]))
+        self.assertSetEqual(set(iter_subclasses('crawlmi.tests.test_utils.test_utils_misc', BaseClass, include_base=True)),
+                            set([BaseClass, Sub1, Sub2, Sub3]))

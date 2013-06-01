@@ -1,6 +1,6 @@
 from crawlmi import log
-from crawlmi.utils.misc import iter_submodules
-from crawlmi.utils.spider import iter_spider_classes
+from crawlmi.spider import BaseSpider
+from crawlmi.utils.misc import iter_subclasses
 from crawlmi.utils.url import is_url_from_any_domain
 
 
@@ -13,12 +13,9 @@ class SpiderManager(object):
         self.spider_modules = settings.get_list('SPIDER_MODULES')
         self._spiders = {}
         for path in self.spider_modules:
-            for module in iter_submodules(path):
-                self._load_spiders(module)
-
-    def _load_spiders(self, module):
-        for spider_class in iter_spider_classes(module):
-            self._spiders[spider_class.name] = spider_class
+            for spider_class in iter_subclasses(path, BaseSpider):
+                if getattr(spider_class, 'name', None):
+                    self._spiders[spider_class.name] = spider_class
 
     def get_spiders(self):
         '''Return the names of all the available spiders.

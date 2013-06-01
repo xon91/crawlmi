@@ -1,4 +1,3 @@
-import inspect
 import optparse
 import os
 import sys
@@ -9,20 +8,7 @@ from crawlmi.core.engine import Engine
 from crawlmi.core.project import Project
 from crawlmi.exceptions import UsageError
 from crawlmi.settings import EngineSettings
-from crawlmi.utils.misc import iter_submodules
-
-
-def iter_command_classes(module_path):
-    '''From the root module path (e.g. `crawlmi.commands`), iterate through all
-    the submodules and load and return all the command classes.
-    '''
-    for module in iter_submodules(module_path):
-        for obj in vars(module).itervalues():
-            if (inspect.isclass(obj) and
-                    obj is not BaseCommand and
-                    issubclass(obj, BaseCommand) and
-                    obj.__module__ == module.__name__):
-                yield obj
+from crawlmi.utils.misc import iter_subclasses
 
 
 def get_commands_from_module(module_path, inside_project):
@@ -31,7 +17,7 @@ def get_commands_from_module(module_path, inside_project):
     compatible with `inside_project` argument.
     '''
     commands = {}
-    for cmd in iter_command_classes(module_path):
+    for cmd in iter_subclasses(module_path, BaseCommand):
         if inside_project or not cmd.requires_project:
             cmd_name = cmd.__module__.split('.')[-1]
             commands[cmd_name] = cmd
