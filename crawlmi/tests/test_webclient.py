@@ -10,8 +10,9 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
         ErrorResource, NoLengthResource, HostHeaderResource,
         PayloadResource, BrokenDownloadResource)
 
-from crawlmi.core.webclient import (BadHttpHeaderError, DownloadSizeError,
-        CrawlmiHTTPClient, CrawlmiHTPPClientFactory)
+from crawlmi.core.webclient import (BadHttpHeaderError, CrawlmiHTTPClient,
+                                    CrawlmiHTPPClientFactory)
+from crawlmi.exceptions import DownloadSizeError
 from crawlmi.http import Headers, Request
 
 

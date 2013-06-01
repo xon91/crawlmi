@@ -1,4 +1,8 @@
-'''Core exceptions.'''
+# Core
+
+class DownloadSizeError(Exception):
+    '''Raised when response's body size exceed the limit.
+    '''
 
 
 # Internal

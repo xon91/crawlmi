@@ -6,17 +6,13 @@ from twisted.web.http import HTTPClient
 from twisted.internet import defer
 
 from crawlmi.compat import optional_features
+from crawlmi.exceptions import DownloadSizeError
 from crawlmi.http import Headers
 from crawlmi.http.response import factory as resp_factory
 
 
 class BadHttpHeaderError(Exception):
     '''Raised when bad http header have beed received.
-    '''
-
-
-class DownloadSizeError(Exception):
-    '''Raised when response's body size exceed the limit.
     '''
 
 
@@ -91,8 +87,8 @@ class CrawlmiHTTPClient(HTTPClient):
                 self.body_size > self.factory.download_size):
             self.transport.loseConnection()
             self.factory.noPage(
-                DownloadSizeError('Size of %s exceeded %s bytes.' %
-                    (self.factory.url, self.factory.download_size)))
+                DownloadSizeError('Response exceeded %s bytes.' %
+                                  self.factory.download_size))
 
 
 class CrawlmiHTPPClientFactory(HTTPClientFactory):
@@ -108,12 +104,12 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
         self.body = request.body or None
         self.headers = Headers(request.headers)
         self.response_headers = None
-        self.timeout = request.meta.get('download_timeout', timeout)
         self.start_time = time()
         self.deferred = defer.Deferred()
         self.deferred.addCallback(self._build_response, request)
         self.invalid_headers = []
-        self.download_size = request.meta.get('download_size', download_size)
+        self.timeout = timeout
+        self.download_size = download_size
 
         # Fixes Twisted 11.1.0+ support as HTTPClientFactory is expected
         # to have _disconnectedDeferred. See Twisted r32329.
