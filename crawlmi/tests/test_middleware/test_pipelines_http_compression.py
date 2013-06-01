@@ -4,6 +4,7 @@ from os.path import join
 
 from twisted.trial import unittest
 
+from crawlmi.exceptions import DecompressSizeError
 from crawlmi.http import Request, Response, HtmlResponse
 from crawlmi.middleware.pipelines.http_compression import HttpCompression
 from crawlmi.tests import tests_datadir
@@ -118,10 +119,10 @@ class HttpCompressionTest(unittest.TestCase):
         zf.close()
         response = Response('http;//www.example.com/', headers=headers, body=f.getvalue())
 
-        newresponse = self.mw.process_response(response)
-        self.assertIsInstance(newresponse, HtmlResponse)
-        self.assertEqual(newresponse.body, plainbody)
-        self.assertEqual(newresponse.encoding, normalize_encoding('gb2312'))
+        new_response = self.mw.process_response(response)
+        self.assertIsInstance(new_response, HtmlResponse)
+        self.assertEqual(new_response.body, plainbody)
+        self.assertEqual(new_response.encoding, normalize_encoding('gb2312'))
 
     def test_process_response_force_recalculate_encoding(self):
         headers = {
@@ -135,7 +136,16 @@ class HttpCompressionTest(unittest.TestCase):
         zf.close()
         response = HtmlResponse('http;//www.example.com/page.html', headers=headers, body=f.getvalue())
 
-        newresponse = self.mw.process_response(response)
-        self.assertIsInstance(newresponse, HtmlResponse)
-        self.assertEqual(newresponse.body, plainbody)
-        self.assertEqual(newresponse.encoding, normalize_encoding('gb2312'))
+        new_response = self.mw.process_response(response)
+        self.assertIsInstance(new_response, HtmlResponse)
+        self.assertEqual(new_response.body, plainbody)
+        self.assertEqual(new_response.encoding, normalize_encoding('gb2312'))
+
+    def test_max_length(self):
+        request = Request('http://github.com/', meta={'DOWNLOAD_SIZE_LIMIT': 74839})
+        response = self._getresponse('rawdeflate')
+        response.request = request
+        self.assertRaises(DecompressSizeError, self.mw.process_response, response)
+        # don't raise error
+        response.meta['DOWNLOAD_SIZE_LIMIT'] = 74840
+        self.mw.process_response(response)
