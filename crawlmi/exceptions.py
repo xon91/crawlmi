@@ -1,8 +1,19 @@
 # Core
 
-class DownloadSizeError(Exception):
-    '''Raised when response's body size exceed the limit.
+class MaxSizeError(Exception):
+    '''Raised when response's body size exceed the limit.'''
+    pass
+
+
+class DownloadSizeError(MaxSizeError):
+    '''Raised when response's body size exceed the limit during download.'''
+    pass
+
+
+class DecompressSizeError(MaxSizeError):
+    '''Raised when response's body size exceed the limit during decompression.
     '''
+    pass
 
 
 # Internal

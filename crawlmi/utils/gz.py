@@ -2,8 +2,10 @@ from cStringIO import StringIO
 from gzip import GzipFile
 import struct
 
+from crawlmi.exceptions import DecompressSizeError
 
-def gunzip(data):
+
+def gunzip(data, max_length=0):
     '''Gunzip the given data and return as much data as possible.
     This is resilient to CRC checksum errors.
     '''
@@ -14,6 +16,9 @@ def gunzip(data):
         try:
             chunk = f.read(8196)
             output += chunk
+            if max_length and len(output) > max_length:
+                raise DecompressSizeError('Object exceeded %s bytes' %
+                                          max_length)
         except (IOError, struct.error):
             # complete only if there is some data, otherwise re-raise
             # see issue 87 about catching struct.error
@@ -25,6 +30,7 @@ def gunzip(data):
             else:
                 raise
     return output
+
 
 def is_gzipped(response):
     '''Return True if the response is gzipped, or False otherwise'''

@@ -2,6 +2,7 @@ from os.path import join
 
 from twisted.trial import unittest
 
+from crawlmi.exceptions import DecompressSizeError
 from crawlmi.tests import tests_datadir
 from crawlmi.utils.gz import gunzip
 
@@ -17,7 +18,7 @@ class GzTest(unittest.TestCase):
     def test_gunzip_truncated(self):
         with open(join(SAMPLE_DIR, 'truncated-crc-error.gz'), 'rb') as f:
             text = gunzip(f.read())
-            assert text.endswith('</html')
+            self.assertTrue(text.endswith('</html'))
 
     def test_gunzip_no_gzip_file_raises(self):
         with open(join(SAMPLE_DIR, 'feed-sample1.xml'), 'rb') as f:
@@ -26,4 +27,10 @@ class GzTest(unittest.TestCase):
     def test_gunzip_truncated_short(self):
         with open(join(SAMPLE_DIR, 'truncated-crc-error-short.gz'), 'rb') as f:
             text = gunzip(f.read())
-            assert text.endswith('</html>')
+            self.assertTrue(text.endswith('</html>'))
+
+    def test_max_length(self):
+        with open(join(SAMPLE_DIR, 'feed-sample1.xml.gz'), 'rb') as f:
+            raw = f.read()
+            self.assertEqual(len(gunzip(raw, 9950)), 9950)
+            self.assertRaises(DecompressSizeError, gunzip, raw, 9949)
