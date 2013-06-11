@@ -39,7 +39,7 @@ def get_sitemap_type(sitemap_text):
     return ''
 
 
-_loc_re = re.compile(r'<loc\s*>(.*?)</loc>', re.DOTALL)
+_loc_re = re.compile(r'<loc\s*>(.*?)</loc>', re.IGNORECASE | re.DOTALL)
 
 def iter_urls_from_sitemap(sitemap_text):
     '''Return an iterator over all <loc> urls contained in the given sitemap.

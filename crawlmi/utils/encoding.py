@@ -21,7 +21,8 @@ _xml_encoding_re = _template_pattern % ('encoding', r'(?P<xmlcharset>[\w-]+)')
 # check for meta tags, or xml decl. Stop search if a body tag is encountered.
 _body_encoding_re = re.compile(
     r'<\s*(?:meta(?:(?:\s+%s|\s+%s){2}|\s+%s)|\?xml\s[^>]+%s|body)' %
-        (_httpequiv_re, _content_re, _content2_re, _xml_encoding_re), re.I)
+        (_httpequiv_re, _content_re, _content2_re, _xml_encoding_re),
+    re.IGNORECASE)
 
 def get_encoding_from_content(content):
     '''Supposing the content is either html or xml document, try to extract

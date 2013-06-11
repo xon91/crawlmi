@@ -6,7 +6,7 @@ from crawlmi.parser.selectors import HtmlXPathSelector
 from crawlmi.utils.url import requote_url
 
 
-_base_url_re = re.compile(ur'<base\s+href\s*=\s*[\"\']\s*([^\"\'\s]+)\s*[\"\']', re.I)
+_base_url_re = re.compile(ur'<base\s+href\s*=\s*[\"\']\s*([^\"\'\s]+)\s*[\"\']', re.IGNORECASE)
 
 
 class HtmlResponse(TextResponse):
