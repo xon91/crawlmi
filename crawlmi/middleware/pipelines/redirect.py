@@ -1,6 +1,8 @@
 from urlparse import urljoin
 
 from crawlmi import log
+from crawlmi.http import HtmlResponse
+from crawlmi.utils.response import get_meta_refresh
 
 
 class BaseRedirect(object):
@@ -29,8 +31,7 @@ class BaseRedirect(object):
 
 
 class Redirect(BaseRedirect):
-    '''Handle redirection of requests based on response status and
-    meta-refresh html tag.
+    '''Handle redirection of requests based on response status.
     '''
 
     def process_response(self, response):
@@ -54,4 +55,22 @@ class Redirect(BaseRedirect):
             redirected = request.replace(url=redirected_url)
             return self._redirect(redirected, request, response.status)
 
+        return response
+
+
+class MetaRefreshRedirect(BaseRedirect):
+    '''Handle redirection of requests based on meta-refresh html tag.
+    '''
+    def __init__(self, engine):
+        super(MetaRefreshRedirect, self).__init__(engine)
+        self.max_delay = engine.settings.get_int('REDIRECT_MAX_METAREFRESH_DELAY')
+
+    def process_response(self, response):
+        request = response.request
+
+        if request.method != 'HEAD' and isinstance(response, HtmlResponse):
+            interval, url = get_meta_refresh(response)
+            if url and interval < self.max_delay:
+                redirected = self._redirect_request_using_get(request, url)
+                return self._redirect(redirected, request, 'meta refresh')
         return response

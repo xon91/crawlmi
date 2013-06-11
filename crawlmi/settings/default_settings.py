@@ -66,8 +66,9 @@ PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.retry.Retry': 500,
     'crawlmi.middleware.pipelines.tor.Tor': 510,
     'crawlmi.middleware.pipelines.default_headers.DefaultHeaders': 550,
+    'crawlmi.middleware.pipelines.redirect.MetaRefreshRedirect': 580,
+    'crawlmi.middleware.pipelines.http_compression.HttpCompression': 590,
     'crawlmi.middleware.pipelines.redirect.Redirect': 600,
-    'crawlmi.middleware.pipelines.http_compression.HttpCompression': 800,
     'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
     'crawlmi.middleware.pipelines.downloader_stats.DownloaderStats': 850,
     'crawlmi.middleware.pipelines.http_cache.HttpCache': 900,
@@ -103,6 +104,7 @@ RANDOM_USER_AGENT_LIST = []
 
 REDIRECT_MAX_TIMES = 20  # uses Firefox default setting
 REDIRECT_PRIORITY_ADJUST = +2
+REDIRECT_MAX_METAREFRESH_DELAY = 100
 
 RETRY_TIMES = 2  # initial response + 2 retries = 3 requests
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408]
