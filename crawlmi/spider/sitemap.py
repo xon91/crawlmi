@@ -1,3 +1,7 @@
+from functools import partial
+
+from twisted.internet import defer
+
 from . import BaseSpider
 from crawlmi import log, signals
 from crawlmi.http import Request
@@ -7,7 +11,7 @@ from crawlmi.utils.sitemap import (get_sitemap_body, iter_urls_from_robots,
 
 
 class SitemapSpider(BaseSpider):
-    '''SitemapSpider is an abstract spider for scraping the sites from their
+    '''SitemapSpider is a base spider for scraping the sites from their
     sitemaps. It can deal with <sitemapindex> and <urlset> sitemaps and
     robots.txt files.
 
@@ -48,22 +52,17 @@ class SitemapSpider(BaseSpider):
 
     def set_engine(self, engine):
         super(SitemapSpider, self).set_engine(engine)
-        self._batch_size = 3 * engine.downloader.total_concurrency
+        self._max_batch_size = 2 * engine.downloader.total_concurrency
+        self._batch_size = 0
         if engine.command_invoked == 'crawl':
             self.engine.signals.connect(self._spider_idle,
                                         signal=signals.spider_idle)
 
     def _spider_idle(self):
-        # schedule site requests
-        current_batch = 0
-        while current_batch < self._batch_size and self._site_urls:
-            url = self._site_urls.pop()
-            req = self._process_site_url(url)
-            if req:
-                current_batch += 1
-                self.engine.download(req)
-        if current_batch:
-            return
+        if self._site_urls:
+            self._schedule_site_requests()
+            if self._batch_size:
+                return
 
         # sitemap finished
         if self._current_sitemap_url is not None:
@@ -142,4 +141,34 @@ class SitemapSpider(BaseSpider):
         for rule, cb in self._cbs:
             if rule.search(url):
                 req = Request(url, callback=cb)
-                return self.process_site_request(req)
+                req = self.process_site_request(req)
+                if req:
+                    req.callback = partial(self._site_request_callback, req.callback)
+                    req.errback = partial(self._site_request_errback, req.errback)
+                return req
+
+    def _site_request_callback(self, original_callback, response):
+        dfd = defer.succeed(response)
+        dfd.addCallback(original_callback)
+        dfd.addBoth(self._site_request_finished)
+        return dfd
+
+    def _site_request_errback(self, original_errback, failure):
+        dfd = defer.fail(failure)
+        if original_errback:
+            dfd.addErrback(original_errback)
+        dfd.addBoth(self._site_request_finished)
+        return dfd
+
+    def _site_request_finished(self, _value):
+        self._batch_size -= 1
+        self._schedule_site_requests()
+        return _value
+
+    def _schedule_site_requests(self):
+        while self._batch_size < self._max_batch_size and self._site_urls:
+            url = self._site_urls.pop()
+            req = self._process_site_url(url)
+            if req:
+                self._batch_size += 1
+                self.engine.download(req)
