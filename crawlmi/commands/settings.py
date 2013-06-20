@@ -1,6 +1,8 @@
+from operator import itemgetter
 from pprint import pformat
 
 from crawlmi.commands.base import BaseCommand
+from crawlmi.utils.python import cut_suffix
 
 
 class Command(BaseCommand):
@@ -40,5 +42,15 @@ class Command(BaseCommand):
         elif options.getlist:
             print settings.get_list(options.getlist)
         else:
+            special_dicts = ['PIPELINE', 'EXTENSIONS']
             for key in sorted(settings.keys()):
-                print '%s: %s' % (key, pformat(settings.get(key)))
+                if key in special_dicts:
+                    d = settings.get(key + '_BASE')
+                    d.update(settings.get(key))
+                    value = [(k, v) for k, v in sorted(d.items(), key=itemgetter(1))
+                             if v is not None]
+                elif cut_suffix(key, '_BASE') in special_dicts:
+                    continue
+                else:
+                    value = settings.get(key)
+                print '%s: %s' % (key, pformat(value))
