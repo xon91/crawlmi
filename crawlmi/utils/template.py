@@ -2,6 +2,8 @@ import os
 import re
 import string
 
+from crawlmi.utils.python import cut_suffix
+
 
 def render_templatefile(path, **kwargs):
     with open(path, 'rb') as file:
@@ -9,7 +11,7 @@ def render_templatefile(path, **kwargs):
 
     content = string.Template(raw).substitute(**kwargs)
 
-    with open(path.rstrip('.tmpl'), 'wb') as file:
+    with open(cut_suffix(path, '.tmpl'), 'wb') as file:
         file.write(content)
     if path.endswith('.tmpl'):
         os.remove(path)

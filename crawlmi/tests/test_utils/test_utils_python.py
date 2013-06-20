@@ -3,7 +3,7 @@ import re
 from twisted.trial import unittest
 
 from crawlmi.utils.python import (to_unicode, to_str, is_binary, get_func_args,
-                                  flatten, unique_list, regex)
+                                  flatten, unique_list, regex, cut_suffix)
 
 
 class UtilsPythonTest(unittest.TestCase):
@@ -88,3 +88,10 @@ class UtilsPythonTest(unittest.TestCase):
         self.assertIsInstance(regex(r'.*'), re_type)
         self.assertIsInstance(regex(u'abc'), re_type)
         self.assertIsInstance(regex(re.compile('.')), re_type)
+
+    def test_cut_suffix(self):
+        self.assertEqual(cut_suffix('helloworld', 'world'), 'hello')
+        self.assertEqual(cut_suffix('helloworld', 'worldx'), 'helloworld')
+        self.assertEqual(cut_suffix('helloworld', 'xworld'), 'helloworld')
+        self.assertEqual(cut_suffix('aaaaaa', 'a'), 'aaaaa')
+        self.assertEqual(cut_suffix('aaa', 'aaaa'), 'aaa')

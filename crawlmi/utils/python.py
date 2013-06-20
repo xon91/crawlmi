@@ -89,3 +89,9 @@ _re_type = type(re.compile(''))
 
 def regex(x):
     return x if isinstance(x, _re_type) else re.compile(x)
+
+
+def cut_suffix(string, suffix):
+    if string.endswith(suffix):
+        string = string[:-len(suffix)]
+    return string
