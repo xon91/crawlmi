@@ -130,7 +130,7 @@ _utm_tags_re = re.compile('|'.join(['utm_source', 'utm_medium', 'utm_campaign',
                                     'utm_term', 'utm_content']))
 
 def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
-                     strip_utm_tags=True, encoding=None):
+                     strip_utm_tags=True, strip_www=False, encoding=None):
     '''Canonicalize the given url by applying the following procedures:
 
     - sort query arguments, first by key, then by value
@@ -140,6 +140,7 @@ def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
     - normalize percent encodings case (%2f -> %2F)
     - remove query arguments with blank values (unless keep_blank_values is True)
     - remove fragments (unless keep_fragments is True)
+    - strip `www.` subdomain (unless strip_www is False)
     '''
     def _strip_tags(keyvals):
         return filter(lambda (k, v): not _utm_tags_re.match(k), keyvals)
@@ -150,6 +151,13 @@ def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
         raise TypeError('Bad type for `url` object: %s' % type(url))
 
     scheme, netloc, path, params, query, fragment = urlparse(url)
+    netloc = netloc.lower()
+    if strip_www:
+        auth, _, domain = netloc.rpartition('@')
+        if domain.startswith('www.'):
+            domain = domain[4:]
+            netloc = '%s@%s' % (auth, domain) if auth else domain
+
     keyvals = parse_qsl(query, keep_blank_values)
     keyvals.sort()
     if strip_utm_tags:
@@ -165,4 +173,4 @@ def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
             fragment = urllib.urlencode(_strip_tags(parsed_fragment))
         except ValueError:
             pass
-    return requote_url(urlunparse([scheme, netloc.lower(), path, params, query, fragment]))
+    return requote_url(urlunparse([scheme, netloc, path, params, query, fragment]))

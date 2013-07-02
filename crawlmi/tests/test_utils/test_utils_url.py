@@ -168,3 +168,23 @@ class UrlTest(unittest.TestCase):
         # when fragment is not query-like, keep utm
         self.assertEqual(canonicalize_url('http://gh.com/test?msg=hello#a;b;utm_source=gh', keep_fragments=True),
             'http://gh.com/test?msg=hello#a;b;utm_source=gh')
+
+        # stip www prefix
+        self.assertEqual(canonicalize_url(
+            'http://www.example.com/', strip_www=True),
+            'http://example.com/')
+        self.assertEqual(canonicalize_url(
+            'http://example.com/', strip_www=True),
+            'http://example.com/')
+        self.assertEqual(canonicalize_url(
+            'http://www2.example.com/', strip_www=True),
+            'http://www2.example.com/')
+        self.assertEqual(canonicalize_url(
+            'http://www.www.example.com/', strip_www=True),
+            'http://www.example.com/')
+        self.assertEqual(canonicalize_url(
+            'http://user:pass@www.example.com/', strip_www=True),
+            'http://user:pass@example.com/')
+        self.assertEqual(canonicalize_url(
+            'http://user:pass@example.com/', strip_www=True),
+            'http://user:pass@example.com/')
