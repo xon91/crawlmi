@@ -11,4 +11,5 @@ class XmlResponse(TextResponse):
     def selector(self):
         if self._selector is None:
             self._selector = XmlXPathSelector(self)
+            self._selector.namespaces = self._selector._root.nsmap
         return self._selector
