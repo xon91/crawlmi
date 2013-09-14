@@ -1,5 +1,6 @@
 from collections import defaultdict
 from functools import partial
+import urlparse
 
 from crawlmi.parser.quantity import Quantity
 from crawlmi.utils.python import get_func_args
@@ -56,7 +57,15 @@ class S(object):
     def visible(self):
         return self.name and not self.name.startswith('_')
 
-    def parse(self, selector, context=None):
+    def parse(self, response_or_selector, context=None):
+        from crawlmi.http import HtmlResponse, XmlResponse
+        if isinstance(response_or_selector, (HtmlResponse, XmlResponse)):
+            context = context or {}
+            context['response'] = response_or_selector
+            selector = response_or_selector.selector
+        else:
+            selector = response_or_selector
+
         result = defaultdict(list)
         items = selector.select(self.xpath)
         num_items = len(items)
@@ -121,3 +130,11 @@ class S(object):
         else:
             result.update(children_fields)
         return result
+
+    @classmethod
+    def absolute_url(cls, value, context):
+        '''
+        Useful callback method when parsing out urls.
+        '''
+        response = context['response']
+        return urlparse.urljoin(response.base_url, value)

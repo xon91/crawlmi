@@ -1,5 +1,4 @@
 from collections import defaultdict
-import urlparse
 
 from twisted.trial import unittest
 
@@ -7,11 +6,6 @@ from crawlmi.http import HtmlResponse
 from crawlmi.parser import SValidationError, S
 from crawlmi.parser.selectors import HtmlXPathSelector
 from crawlmi.tests import get_testdata
-
-
-def absolute_url(value, context):
-    response = context['response']
-    return urlparse.urljoin(response.base_url, value)
 
 
 class STest(unittest.TestCase):
@@ -41,21 +35,20 @@ class STest(unittest.TestCase):
                 ])
             ]),
 
-            S('url', 'descendant-or-self::a', quant='1', value='@href', callback=absolute_url),
+            S('url', 'descendant-or-self::a', quant='1', value='@href', callback=S.absolute_url),
             S('empty', 'div[@id="empty"]', quant='1', value='text()'),
             S('footer', 'following-sibling::div[@id="footer"]', quant='1', children=[
-                S('footer_links', 'a', quant='+', value='@href', callback=absolute_url)
+                S('footer_links', 'a', quant='+', value='@href', callback=S.absolute_url)
             ]),
             S('nonexistent', 'div/div/div', quant='?', value='text()')
         ])
-        context = {'response': response}
 
         self.assertTrue(valid_ts.xpath_exists(hxs))
 
         # validation without context, when context is expected
         self.assertRaises(SValidationError, valid_ts.parse, hxs)
 
-        parsed = valid_ts.parse(hxs, context)
+        parsed = valid_ts.parse(response)
 
         self.assertItemsEqual(parsed, ['title', 'full_title_script', 'full_title_no_script', 'full_title_script_bad', 'ips',
             'url', 'empty', 'footer', 'footer_links'])  # nonexistent is missing!
