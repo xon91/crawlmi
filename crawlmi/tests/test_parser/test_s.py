@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from twisted.trial import unittest
 
+from crawlmi.compat import optional_features
 from crawlmi.http import HtmlResponse
 from crawlmi.parser import SValidationError, S
 from crawlmi.parser.selectors import HtmlXPathSelector
@@ -9,11 +10,7 @@ from crawlmi.tests import get_testdata
 
 
 class STest(unittest.TestCase):
-    def test_ip_page(self):
-        '''
-        Test selector on ip_page.html.
-        '''
-
+    def test_xpath(self):
         body = get_testdata('pages', 'ip_page.html')
         response = HtmlResponse(url='http://myip.com/list', body=body)
         hxs = response.selector
@@ -80,6 +77,23 @@ class STest(unittest.TestCase):
         # footer
         self.assertIsInstance(parsed['footer'][0], HtmlXPathSelector)
         self.assertListEqual(parsed['footer_links'], [u'http://myip.com/url2', u'http://google.com/'])
+
+    def test_css(self):
+        body = get_testdata('pages', 'ip_page.html')
+        response = HtmlResponse(url='http://myip.com/list', body=body)
+        hxs = response.selector
+
+        valid_ts = S('_', css='div#main', quant='1', children=[
+            S('all_ip', css='span.ip', quant='7'),
+            S('_', css='ul#ip_list', quant='1', children=[
+                S('list_ip', css='span.ip', quant='6')
+            ]),
+        ])
+        parsed = valid_ts.parse(hxs)
+        self.assertRaises(TypeError, S, '_')
+        self.assertRaises(TypeError, S, '_', 'div[@id="main]', css='div#main')
+
+    test_css.skip = 'cssselect' not in optional_features
 
     def test_get_nodes(self):
         node1 = S('node', '.')

@@ -2,8 +2,13 @@ from collections import defaultdict
 from functools import partial
 import urlparse
 
+from crawlmi.compat import optional_features
 from crawlmi.parser.quantity import Quantity
 from crawlmi.utils.python import get_func_args
+
+css_supported = 'cssselect' in optional_features
+if css_supported:
+    from cssselect import GenericTranslator
 
 
 def wrap_context(function, context):
@@ -26,7 +31,7 @@ class S(object):
     Parsed values are either xpath nodes or unicode strings if S.value is used.
     '''
 
-    def __init__(self, name, xpath, quant='*', value=None, callback=None, group=None, children=None):
+    def __init__(self, name, xpath=None, quant='*', value=None, callback=None, group=None, children=None, css=None):
         '''
         name - the parsed item will be stored in a dictionary on this index (not to store the item, use '_' as a prefix of the name).
         xpath - xpath to the item.
@@ -35,9 +40,18 @@ class S(object):
         callback - callback function to be called on each found item. It can take named argument "context", which is dictionary containing additionnal values.
         group - if not None, all the child nodes will be stored under one dictionary entry of group's name
         children - list of nested S objects. For each item found, each child will be called with the item as the selector.
+        css - css selector, in a case xpath is not defined
         '''
+        if (xpath is None) == (css is None):
+            raise TypeError('Exactly one of `xpath` or `css` arguments must be specified.')
+
         self.name = name
-        self.xpath = xpath
+        if xpath is not None:
+            self.xpath = xpath
+        elif css_supported:
+            self.xpath = GenericTranslator().css_to_xpath(css)
+        else:
+            raise TypeError('Css selectors not supported, install cssselect library.')
         self.quant = Quantity(quant)
         self.value = value
         self.callback = callback

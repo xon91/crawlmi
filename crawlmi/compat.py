@@ -18,3 +18,11 @@ except ImportError:
     OpenSSL = None
 if OpenSSL is not None:
     optional_features.add('ssl')
+
+
+try:
+    import cssselect
+except ImportError:
+    cssselect = None
+if cssselect is not None:
+    optional_features.add('cssselect')
