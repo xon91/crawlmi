@@ -1,12 +1,25 @@
+from crawlmi.http import Response
+from crawlmi.parser.selectors import XPathSelector
+
+
 class SP(object):
     '''Class SP is used to process the results from class S into a user
     friendly form.
     '''
 
-    def __init__(self, **kwargs):
+    def __init__(self, s=None, **kwargs):
+        self.s = s
         self.filters = kwargs
+        if s is not None:
+            self.validate(s)
 
-    def parse(self, parsed):
+    def parse(self, parsed, context=None):
+        # convenience parsing directly out of response of selector classes
+        if isinstance(parsed, (Response, XPathSelector)):
+            if self.s is None:
+                raise TypeError('To parse directly from response or selector, you need to specify S class, first.')
+            return self.parse(self.s.parse(parsed, context))
+
         result = {}
         for k, v in self.filters.iteritems():
             if isinstance(v, SP):
