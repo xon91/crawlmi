@@ -91,6 +91,14 @@ class SP(object):
     def unique(parsed, key):
         return list(set(parsed.get(key, [])))
 
+    @staticmethod
+    def first(parsed, key):
+        '''Return first element in the parsed list.
+        '''
+        result = parsed.get(key)
+        return result[0] if result else None
+
+
     ###########################################################################
     # Filter factories (their names end with "f")
     ###########################################################################
