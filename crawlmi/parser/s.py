@@ -31,7 +31,8 @@ class S(object):
     Parsed values are either xpath nodes or unicode strings if S.value is used.
     '''
 
-    def __init__(self, name, xpath=None, quant='*', value=None, callback=None, group=None, children=None, css=None):
+    def __init__(self, name, xpath=None, quant='*', value=None, callback=None,
+                 group=None, children=None, css=None, filter=None):
         '''
         name - the parsed item will be stored in a dictionary on this index (not to store the item, use '_' as a prefix of the name).
         xpath - xpath to the item.
@@ -41,6 +42,8 @@ class S(object):
         group - if not None, all the child nodes will be stored under one dictionary entry of group's name
         children - list of nested S objects. For each item found, each child will be called with the item as the selector.
         css - css selector, in a case xpath is not defined
+        filter - one-argument function. Given the node from the xpath, return true, if to the node. Otherwise return False.
+                 `quant` is checked AFTER the filter is applied.
         '''
         if (xpath is None) == (css is None):
             raise TypeError('Exactly one of `xpath` or `css` arguments must be specified.')
@@ -57,6 +60,7 @@ class S(object):
         self.callback = callback
         self.group = group
         self.children = children if children is not None else []
+        self.filter = filter
 
     def get_nodes(self, name):
         '''Return the list of S nodes with the given name.'''
@@ -81,46 +85,54 @@ class S(object):
             selector = response_or_selector
 
         result = defaultdict(list)
-        items = selector.select(self.xpath)
-        num_items = len(items)
-        if not self.quant.check_quantity(num_items):
-            raise SValidationError(
-                'Number of selected `%s` items %s doesn\'t match the expected quant %s.' %
-                (self.name, num_items, self.quant.raw_quant))
+        nodes = selector.select(self.xpath)
+        original_num_nodes = len(nodes)
+        if self.filter:
+            nodes = filter(self.filter, nodes)
+        filtered_num_nodes = len(nodes)
+        if not self.quant.check_quantity(filtered_num_nodes):
+            if self.filter:
+                raise SValidationError(
+                    'Number of `%s` nodes %s (%s before filtering) doesn\'t match the expected quant %s.' %
+                    (self.name, filtered_num_nodes, original_num_nodes, self.quant.raw_quant))
+            else:
+                raise SValidationError(
+                    'Number of selected `%s` nodes %s doesn\'t match the expected quant %s.' %
+                    (self.name, filtered_num_nodes, self.quant.raw_quant))
 
-        for item in items:
+        for node in nodes:
             if self.visible:
                 if self.value is not None:
-                    extracted = item.select(self.value).extract()
+                    extracted = node.select(self.value).extract()
                     if self.callback is not None:
                         context_callback = wrap_context(self.callback, context)
                         try:
                             extracted = map(context_callback, extracted)
                         except Exception as e:
                             raise SValidationError(
-                                'Callback function returned an error on item `%s`: %s' %
+                                'Callback function returned an error on node `%s`: %s' %
                                 (self.name, e))
                     result[self.name].extend(extracted)
                 else:
                     if self.callback is not None:
                         context_callback = wrap_context(self.callback, context)
                         try:
-                            item = context_callback(item)
+                            node = context_callback(node)
                         except Exception as e:
                             raise SValidationError(
-                                'Callback function returned an error on item `%s`: %s' %
+                                'Callback function returned an error on node `%s`: %s' %
                                 (self.name, e))
-                    result[self.name].append(item)
+                    result[self.name].append(node)
 
             if self.group is not None:
                 groupd = defaultdict(list)
                 for c in self.children:
-                    for k, v in c.parse(item, context).iteritems():
+                    for k, v in c.parse(node, context).iteritems():
                         groupd[k].extend(v)
                 result[self.group].append(groupd)
             else:
                 for c in self.children:
-                    for k, v in c.parse(item, context).iteritems():
+                    for k, v in c.parse(node, context).iteritems():
                         result[k].extend(v)
         return result
 
