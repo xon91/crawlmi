@@ -123,7 +123,7 @@ class Downloader(object):
         self.processing.schedule(self.QUEUE_CHECK_FREQUENCY, now=True)
         self.running = True
 
-        self.download_delay = settings.get_int('DOWNLOAD_DELAY')
+        self.download_delay = settings.get_float('DOWNLOAD_DELAY')
         self.randomize_delay = settings.get_int(
             'RANDOMIZE_DOWNLOAD_DELAY')
         if self.download_delay:

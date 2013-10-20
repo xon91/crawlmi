@@ -244,7 +244,8 @@ class DownloaderTest(unittest.TestCase):
         self.assertTrue(self.dwn.use_domain_specific)
         # delay set
         self._update_dwn(CONCURRENT_REQUESTS=10, CONCURRENT_REQUESTS_PER_DOMAIN=5,
-                      DOWNLOAD_DELAY=5)
+                      DOWNLOAD_DELAY=3.14)
+        self.assertEqual(self.dwn.download_delay, 3.14)
         self.assertEqual(self.dwn.total_concurrency, 1)
         self.assertEqual(self.dwn.domain_concurrency, 1)
         self.assertFalse(self.dwn.use_domain_specific)
