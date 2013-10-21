@@ -52,7 +52,7 @@ def from_body(body):
     it's not meant to be used except for special cases where response types
     cannot be guess using more straightforward methods.
     '''
-    chunk = body[:5000]
+    chunk = body[:4096]
     if is_binary(chunk):
         return from_mime_type('application/octet-stream')
     elif '<html>' in chunk.lower():
