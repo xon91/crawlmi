@@ -65,6 +65,7 @@ PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.random_user_agent.RandomUserAgent': 400,
     'crawlmi.middleware.pipelines.retry.Retry': 500,
     'crawlmi.middleware.pipelines.tor.Tor': 510,
+    'crawlmi.middleware.pipelines.canonical.Canonical': 525,
     'crawlmi.middleware.pipelines.default_headers.DefaultHeaders': 550,
     'crawlmi.middleware.pipelines.redirect.MetaRefreshRedirect': 580,
     'crawlmi.middleware.pipelines.http_compression.HttpCompression': 590,
@@ -75,6 +76,7 @@ PIPELINE_BASE = {
 }
 PIPELINE = {}
 
+CANONICAL_ENABLED = False
 
 DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
