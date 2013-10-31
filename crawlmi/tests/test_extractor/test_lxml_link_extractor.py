@@ -253,3 +253,25 @@ class LxmlLinkExtractorTest(unittest.TestCase):
         self.assertEqual(lx.extract_links(response, process_links=_process), [
             Link(url='http://gogo.com/', text=u'>>')
         ])
+
+    def test_relative_paths(self):
+        html = '''<html><head></head><body>
+        <a href="hello/world/"></a>
+        <a href="/hello/world/"></a>
+        <a href="/hello/././world"></a>
+        <a href="/hello/../world"></a>
+        <a href="../hello/world"></a>
+        <a href="./hello/world"></a>
+        <a href="../../hello/././world"></a>
+        </body></html>'''
+        response = HtmlResponse('http://exmaple.org/yay/', body=html)
+        lx = LxmlLinkExtractor(unique=False)
+        self.assertEqual([link.url for link in lx.extract_links(response)], [
+            'http://exmaple.org/yay/hello/world/',
+            'http://exmaple.org/hello/world/',
+            'http://exmaple.org/hello/world',
+            'http://exmaple.org/world',
+            'http://exmaple.org/hello/world',
+            'http://exmaple.org/yay/hello/world',
+            'http://exmaple.org/hello/world',
+        ])
