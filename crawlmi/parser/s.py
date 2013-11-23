@@ -1,5 +1,4 @@
 from collections import defaultdict
-from functools import partial
 import urlparse
 
 from crawlmi.compat import optional_features
@@ -9,13 +8,6 @@ from crawlmi.utils.python import get_func_args
 css_supported = 'cssselect' in optional_features
 if css_supported:
     from cssselect import GenericTranslator
-
-
-def wrap_context(function, context):
-    if 'context' in get_func_args(function):
-        return partial(function, context=context)
-    else:
-        return function
 
 
 class SValidationError(Exception):
@@ -50,14 +42,18 @@ class S(object):
 
         self.name = name
         if xpath is not None:
-            self.xpath = xpath
+            self.raw_xpath = xpath
         elif css_supported:
-            self.xpath = GenericTranslator().css_to_xpath(css)
+            self.raw_xpath = GenericTranslator().css_to_xpath(css)
         else:
             raise TypeError('Css selectors not supported, install cssselect library.')
+        self.hashed_namespaces = None
+        self.compiled_xpath = None
         self.quant = Quantity(quant)
-        self.value = value
+        self.raw_value = value
+        self.compiled_value = None
         self.callback = callback
+        self.context_callback = callback and 'context' in get_func_args(callback)
         self.group = group
         self.children = children if children is not None else []
         self.filter = filter
@@ -75,6 +71,9 @@ class S(object):
     def visible(self):
         return self.name and not self.name.startswith('_')
 
+    def _hash_namespaces(self, namespaces):
+        return hash(frozenset(namespaces.iteritems())) if namespaces else 0
+
     def parse(self, response_or_selector, context=None):
         from crawlmi.http import HtmlResponse, XmlResponse
         if isinstance(response_or_selector, (HtmlResponse, XmlResponse)):
@@ -83,9 +82,18 @@ class S(object):
             selector = response_or_selector.selector
         else:
             selector = response_or_selector
+        return self._parse(selector, context)
+
+    def _parse(self, selector, context):
+        hashed_namespaces = self._hash_namespaces(selector.namespaces)
+        if self.compiled_xpath is None or self.hashed_namespaces != hashed_namespaces:
+            self.hashed_namespaces = hashed_namespaces
+            self.compiled_xpath = selector.compile_xpath(self.raw_xpath)
+            if self.raw_value is not None:
+                self.compiled_value = selector.compile_xpath(self.raw_value)
 
         result = defaultdict(list)
-        nodes = selector.select(self.xpath)
+        nodes = selector.select(self.compiled_xpath)
         original_num_nodes = len(nodes)
         if self.filter:
             nodes = filter(self.filter, nodes)
@@ -102,22 +110,26 @@ class S(object):
 
         for node in nodes:
             if self.visible:
-                if self.value is not None:
-                    extracted = node.select(self.value).extract()
-                    if self.callback is not None:
-                        context_callback = wrap_context(self.callback, context)
+                if self.raw_value is not None:
+                    extracted = node.select(self.compiled_value).extract()
+                    if self.callback:
                         try:
-                            extracted = map(context_callback, extracted)
+                            if self.context_callback:
+                                extracted = [self.callback(v, context=context) for v in extracted]
+                            else:
+                                extracted = [self.callback(v) for v in extracted]
                         except Exception as e:
                             raise SValidationError(
                                 'Callback function returned an error on node `%s`: %s' %
                                 (self.name, e))
                     result[self.name].extend(extracted)
                 else:
-                    if self.callback is not None:
-                        context_callback = wrap_context(self.callback, context)
+                    if self.callback:
                         try:
-                            node = context_callback(node)
+                            if self.context_callback:
+                                node = self.callback(node, context=context)
+                            else:
+                                node = self.callback(node)
                         except Exception as e:
                             raise SValidationError(
                                 'Callback function returned an error on node `%s`: %s' %
@@ -127,12 +139,12 @@ class S(object):
             if self.group is not None:
                 groupd = defaultdict(list)
                 for c in self.children:
-                    for k, v in c.parse(node, context).iteritems():
+                    for k, v in c._parse(node, context).iteritems():
                         groupd[k].extend(v)
                 result[self.group].append(groupd)
             else:
                 for c in self.children:
-                    for k, v in c.parse(node, context).iteritems():
+                    for k, v in c._parse(node, context).iteritems():
                         result[k].extend(v)
         return result
 

@@ -151,7 +151,7 @@ class XpathSelectorTest(object):
         response = XmlResponse(url='http://example.com', body='<html></html>')
         x = self.hxs_cls(response)
         xpath = '//test[@foo="bar]'
-        self.assertRaisesRegexp(ValueError, re.escape(xpath), x.select, xpath)
+        self.assertRaises(Exception, x.select, xpath)
 
     def test_http_header_encoding_precedence(self):
         # u'\xa3'     = pound symbol in unicode

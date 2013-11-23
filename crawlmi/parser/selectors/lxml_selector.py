@@ -10,8 +10,7 @@ class XPathSelector(object_ref):
     _parser = etree.HTMLParser
     _tostring_method = 'html'
 
-    def __init__(self, response=None, text=None, namespaces=None, _root=None,
-                 _expr=None):
+    def __init__(self, response=None, text=None, namespaces=None, _root=None):
         if text is not None:
             response = TextResponse(url='about:blank', body=to_str(text))
         if response is not None:
@@ -20,7 +19,6 @@ class XPathSelector(object_ref):
         self.namespaces = namespaces
         self.response = response
         self._root = _root
-        self._expr = _expr
 
     def _get_root(self, response):
         url = response.url
@@ -29,22 +27,19 @@ class XPathSelector(object_ref):
         return etree.fromstring(body, parser=parser, base_url=url)
 
     def select(self, xpath):
-        try:
-            xpath_call = self._root.xpath
-        except AttributeError:
+        if not hasattr(self._root, 'xpath'):
             return XPathSelectorList([])
 
-        try:
-            result = xpath_call(xpath, namespaces=self.namespaces)
-        except etree.XPathError:
-            raise ValueError('Invalid XPath: %s' % xpath)
+        if isinstance(xpath, etree.XPath):
+            result = xpath(self._root)
+        else:
+            result = self._root.xpath(xpath, namespaces=self.namespaces)
 
-        if type(result) is not list:
+        if not isinstance(result, list):
             result = [result]
 
-        result = [self.__class__(_root=x, _expr=xpath, namespaces=self.namespaces)
-                  for x in result]
-        return XPathSelectorList(result)
+        return XPathSelectorList([self.__class__(_root=x, namespaces=self.namespaces)
+                                  for x in result])
 
     def extract(self):
         try:
@@ -63,12 +58,15 @@ class XPathSelector(object_ref):
             self.namespaces = {}
         self.namespaces[prefix] = uri
 
+    def compile_xpath(self, xpath):
+        return etree.XPath(xpath, namespaces=self.namespaces)
+
     def __nonzero__(self):
         return bool(self.extract())
 
     def __str__(self):
         data = repr(self.extract()[:40])
-        return '<%s xpath=%r data=%s>' % (type(self).__name__, self._expr, data)
+        return '<%s data=%s>' % (type(self).__name__, data)
 
     __repr__ = __str__
 
