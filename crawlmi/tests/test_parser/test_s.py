@@ -40,8 +40,6 @@ class STest(unittest.TestCase):
             S('nonexistent', 'div/div/div', quant='?', value='text()')
         ])
 
-        self.assertTrue(valid_ts.xpath_exists(hxs))
-
         # validation without context, when context is expected
         self.assertRaises(SValidationError, valid_ts.parse, hxs)
 

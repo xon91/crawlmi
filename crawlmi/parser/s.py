@@ -136,9 +136,6 @@ class S(object):
                         result[k].extend(v)
         return result
 
-    def xpath_exists(self, selector):
-        return len(selector.select(self.xpath)) >= 1
-
     def add_child(self, child):
         self.children.append(child)
 
