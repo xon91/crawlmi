@@ -9,8 +9,8 @@ from crawlmi.utils.url import requote_url, requote_ajax
 
 class Request(object_ref):
     def __init__(self, url, callback=None, method='GET', headers={},
-                 params={}, body='', meta={}, errback=None, proxy=None,
-                 priority=0, history=[], encoding='utf-8'):
+                 params={}, body='', cookies=None, meta={}, errback=None,
+                 proxy=None, priority=0, history=[], encoding='utf-8'):
         self.callback = callback
         self.errback = errback
 
@@ -19,6 +19,7 @@ class Request(object_ref):
         self.history = list(history)
         self.proxy = proxy
         self.priority = priority
+        self.cookies = cookies or {}
 
         # following attributes are immutable
         self._encoding = encoding
@@ -134,7 +135,7 @@ class Request(object_ref):
         given new values.
         '''
         for x in ['url', 'callback', 'errback', 'method', 'headers', 'priority',
-                  'meta', 'body', 'proxy', 'history', 'encoding']:
+                  'cookies', 'meta', 'body', 'proxy', 'history', 'encoding']:
             kwargs.setdefault(x, getattr(self, x))
         cls = kwargs.pop('cls', self.__class__)
         return cls(*args, **kwargs)

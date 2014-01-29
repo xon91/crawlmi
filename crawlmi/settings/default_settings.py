@@ -70,6 +70,7 @@ PIPELINE_BASE = {
     'crawlmi.middleware.pipelines.redirect.MetaRefreshRedirect': 580,
     'crawlmi.middleware.pipelines.http_compression.HttpCompression': 590,
     'crawlmi.middleware.pipelines.redirect.Redirect': 600,
+    'crawlmi.middleware.pipelines.cookies.Cookies': 700,
     'crawlmi.middleware.pipelines.chunked_transfer.ChunkedTransfer': 830,
     'crawlmi.middleware.pipelines.downloader_stats.DownloaderStats': 850,
     'crawlmi.middleware.pipelines.http_cache.HttpCache': 900,
@@ -77,6 +78,9 @@ PIPELINE_BASE = {
 PIPELINE = {}
 
 CANONICAL_ENABLED = False
+
+COOKIES_ENABLED = False
+COOKIES_DEBUG = False
 
 DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
