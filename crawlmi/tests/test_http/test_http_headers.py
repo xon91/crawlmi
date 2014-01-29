@@ -97,14 +97,14 @@ class HeadersTest(unittest.TestCase):
         self.assertIsInstance(h2, Headers)
 
     def test_add(self):
-        h1 = Headers({'header1': 'value1'})
-        h1.add('header1', 'value3')
-        self.assertEqual(h1.getlist('header1'), ['value1', 'value3'])
+        h = Headers({'header1': 'value1'})
+        h.add('header1', 'value3')
+        self.assertEqual(h.getlist('header1'), ['value1', 'value3'])
 
-        h1 = Headers()
-        h1.add('header1', 'value1')
-        h1.add('header1', 'value3')
-        self.assertEqual(h1.getlist('header1'), ['value1', 'value3'])
+        h = Headers()
+        h.add('header1', 'value1')
+        h.add('header1', 'value3')
+        self.assertEqual(h.getlist('header1'), ['value1', 'value3'])
 
     def test_clear(self):
         h = Headers({'a': 'b'})
@@ -117,3 +117,13 @@ class HeadersTest(unittest.TestCase):
         self.assertEqual(h.to_string(), 'Content-Type: text/html\r\nAccept: gzip')
         h = Headers({'Content-type': ['text/html'], 'Accept': ['gzip']})
         self.assertEqual(h.to_string(), 'Content-Type: text/html\r\nAccept: gzip')
+
+    def test_appendlist(self):
+        h = Headers({'header1': 'value1'})
+        h.appendlist('header1', 'value3')
+        self.assertListEqual(h.getlist('header1'), ['value1', 'value3'])
+
+        h = Headers()
+        h.appendlist('header1', 'value1')
+        h.appendlist('header1', 'value3')
+        self.assertListEqual(h.getlist('header1'), ['value1', 'value3'])

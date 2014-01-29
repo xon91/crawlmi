@@ -40,14 +40,21 @@ class Headers(dict):
         key = self.normkey(key)
         return self[key] if key in self else default
 
-    def getlist(self, key, default=[]):
+    def getlist(self, key, default=None):
         key = self.normkey(key)
         if key in self:
             return dict.__getitem__(self, key)
         else:
+            if default is None:
+                default = []
             if not hasattr(default, '__iter__'):
                 default = [default]
             return default
+
+    def appendlist(self, key, value):
+        lst = self.getlist(key)
+        lst.extend(self.normvalue(value))
+        self[key] = lst
 
     def add(self, key, value):
         key = self.normkey(key)
