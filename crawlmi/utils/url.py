@@ -38,6 +38,40 @@ def _unquote_unreserved(url):
     return ''.join(parts)
 
 
+def _correct_relative_path(url_path):
+    # following code is taken from urlparse.urljoin()
+    segments = url_path.split('/')
+    if segments[-1] == '.':
+        segments[-1] = ''
+    while '.' in segments:
+        segments.remove('.')
+    while 1:
+        i = 1
+        n = len(segments) - 1
+        while i < n:
+            if (segments[i] == '..'
+                and segments[i-1] not in ('', '..')):
+                del segments[i-1:i+1]
+                break
+            i = i+1
+        else:
+            break
+    if segments == ['', '..']:
+        segments[-1] = ''
+    elif len(segments) >= 2 and segments[-1] == '..':
+        segments[-2:] = ['']
+
+    # final cleanup
+    segments = [x for x in segments if x != '..']
+    return '/'.join(segments)
+
+
+def correct_relative_path(url):
+    scheme, netloc, path, params, query, fragment = urlparse(url)
+    path = _correct_relative_path(path)
+    return urlunparse((scheme, netloc, path, params, query, fragment))
+
+
 def requote_url(url):
     '''Re-quote the given URL.
 
@@ -163,6 +197,7 @@ def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
     if strip_utm_tags:
         keyvals = _strip_tags(keyvals)
     query = urllib.urlencode(keyvals)
+    path = _correct_relative_path(path)
     if not path:
         path = '/'
     fragment = '' if not keep_fragments else fragment

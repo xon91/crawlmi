@@ -1,7 +1,7 @@
 from twisted.trial import unittest
 
 from crawlmi.utils.url import (is_url, is_url_from_any_domain, any_to_uri,
-                               requote_url,
+                               requote_url, correct_relative_path,
                                has_url_any_extension, canonicalize_url)
 
 
@@ -13,6 +13,29 @@ class UrlTest(unittest.TestCase):
 
         self.assertFalse(is_url('github.com'))
         self.assertFalse(is_url('/etc/conf'))
+
+    def test_correct_relative_path(self):
+        self.assertEqual(correct_relative_path(
+            'http://digineff.cz/art/sout/fotky-s-p-b-hem.html'),
+            'http://digineff.cz/art/sout/fotky-s-p-b-hem.html')
+        self.assertEqual(correct_relative_path(
+            'http://www.test.com/.'),
+            'http://www.test.com/')
+        self.assertEqual(correct_relative_path(
+            'http://www.test.com/./'),
+            'http://www.test.com/')
+        self.assertEqual(correct_relative_path(
+            'http://www.test.com/..'),
+            'http://www.test.com/')
+        self.assertEqual(correct_relative_path(
+            'http://www.test.com/../'),
+            'http://www.test.com/')
+        self.assertEqual(correct_relative_path(
+            'http://www.test.com/./.././..'),
+            'http://www.test.com/')
+        self.assertEqual(correct_relative_path(
+            'http://www.test.com/./a/./b/../c'),
+            'http://www.test.com/a/c')
 
     def test_requote_url(self):
         url = 'http://%68%65%2f%6c%6c%6f.com/%'
@@ -141,6 +164,11 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(canonicalize_url(
             'http://www.simplybedrooms.com/White-Bedroom-Furniture/Bedroom-Mirror:-Josephine-Cheval-Mirror.html'),
             'http://www.simplybedrooms.com/White-Bedroom-Furniture/Bedroom-Mirror:-Josephine-Cheval-Mirror.html')
+
+        # relative paths in url
+        self.assertEqual(canonicalize_url(
+            'http://www.test.com/./a/./b/../c'),
+            'http://www.test.com/a/c')
 
         # urllib.quote uses a mapping cache of encoded characters. when parsing
         # an already percent-encoded url, it will fail if that url was not
