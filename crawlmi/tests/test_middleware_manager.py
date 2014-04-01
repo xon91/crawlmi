@@ -1,5 +1,6 @@
 from twisted.trial import unittest
 
+from crawlmi import log
 from crawlmi.exceptions import NotConfigured
 from crawlmi.middleware.middleware_manager import MiddlewareManager
 from crawlmi.utils.test import get_engine, LogWrapper
@@ -31,7 +32,7 @@ class TestMiddlewareManager(MiddlewareManager):
 class MiddlewareManagerTest(unittest.TestCase):
     def setUp(self):
         self.lw = LogWrapper()
-        self.lw.setUp()
+        self.lw.setUp(level=log.DEBUG)
 
     def tearDown(self):
         self.lw.tearDown()
@@ -42,7 +43,7 @@ class MiddlewareManagerTest(unittest.TestCase):
         self.assertListEqual(active, [M1, M2])
 
         logged = self.lw.get_first_line()
-        self.assertEqual(logged, "[crawlmi] WARNING: Disabled <class 'crawlmi.tests.test_middleware_manager.MOff'>:")
+        self.assertEqual(logged, "[crawlmi] DEBUG: Disabled <class 'crawlmi.tests.test_middleware_manager.MOff'>:")
 
     def test_init2(self):
         mw = TestMiddlewareManager(get_engine(), mw_classes=[M1, M2, MOff])
