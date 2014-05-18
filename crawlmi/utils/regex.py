@@ -10,3 +10,5 @@ html_script_re = re.compile(r'<\s*script.*?>.*?</\s*script\s*>',
                             re.DOTALL | re.IGNORECASE)
 html_noscript_re = re.compile(r'<\s*noscript.*?>.*?</\s*noscript\s*>',
                               re.DOTALL | re.IGNORECASE)
+html_style_re = re.compile(r'<\s*style.*?>.*?</\s*style\s*>',
+                           re.DOTALL | re.IGNORECASE)
