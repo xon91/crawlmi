@@ -1,0 +1,8 @@
+include README.md
+include MANIFEST.in
+include crawlmi/http/response/mime.types
+include crawlmi/middleware/pipelines/user_agents.txt
+recursive-include crawlmi/templates *
+recursive-include crawlmi/tests/sample_data *
+include crawlmi/tests/test_project/sample_project/crawlmi.cfg
+recursive-include bin *

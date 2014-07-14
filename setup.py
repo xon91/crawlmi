@@ -25,7 +25,7 @@ if root_dir != '':
     os.chdir(root_dir)
 
 def is_not_module(filename):
-    return os.path.splitext(f)[1] not in ['.py', '.pyc', '.pyo']
+    return os.path.splitext(filename)[1] not in ['.py', '.pyc', '.pyo']
 
 for crawlmi_dir in ['crawlmi']:
     for dirpath, dirnames, filenames in os.walk(crawlmi_dir):
@@ -84,5 +84,13 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+else:
+    setup_args['install_requires'] = [
+        'Twisted>=13.0.0',
+        'lxml',
+        'pyOpenSSL',
+        'charade',
+        'cssselect>=0.9',
+    ]
 
 setup(**setup_args)

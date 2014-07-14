@@ -1,5 +1,5 @@
-Optional:
----------
-
+Twisted>=13.0.0
+lxml
+pyOpenSSL
 charade
-cssselect
+cssselect>=0.9
