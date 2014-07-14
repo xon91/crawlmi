@@ -24,10 +24,6 @@ class Request(object_ref):
         # following attributes are immutable
         self._encoding = encoding
         self._method = self._prepare_method(method)
-        if self._method == 'POST':
-            self.headers.setdefault('Content-Type', 'application/x-www-form-urlencoded')
-            body = self._encode_params(params)
-            params = {}
         self._url = self._prepare_url(url, params)
         self._body = self._prepare_body(body)
 
