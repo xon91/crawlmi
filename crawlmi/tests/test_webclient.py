@@ -89,7 +89,6 @@ class HTTPPageGetterTest(unittest.TestCase):
         self._test(factory,
             'GET /bar HTTP/1.0\r\n'
             'Host: foo\r\n'
-            'Connection: close\r\n'
             '\r\n')
 
         # test a simple POST with body and content-type
@@ -118,7 +117,6 @@ class HTTPPageGetterTest(unittest.TestCase):
         self._test(factory,
             'GET /bar HTTP/1.0\r\n'
             'Host: foo\r\n'
-            'Connection: close\r\n'
             'X-Meta-Multivalued: value1\r\n'
             'X-Meta-Multivalued: value2\r\n'
             'X-Meta-Single: single\r\n'
@@ -134,7 +132,6 @@ class HTTPPageGetterTest(unittest.TestCase):
         self._test(factory,
             'GET /bar HTTP/1.0\r\n'
             'Host: foo\r\n'
-            'Connection: close\r\n'
             'X-Meta-Multivalued: value1\r\n'
             'X-Meta-Multivalued: value2\r\n'
             'X-Meta-Single: single\r\n'

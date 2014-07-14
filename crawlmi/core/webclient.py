@@ -5,7 +5,6 @@ from twisted.web.client import HTTPClientFactory
 from twisted.web.http import HTTPClient
 from twisted.internet import defer
 
-from crawlmi.compat import optional_features
 from crawlmi.exceptions import DownloadSizeError
 from crawlmi.http import Headers
 from crawlmi.http.response import factory as resp_factory
@@ -64,12 +63,15 @@ class CrawlmiHTTPClient(HTTPClient):
         self.factory.gotHeaders(self.headers)
 
     def connectionLost(self, reason):
+        self._connection_lost_reason = reason
         HTTPClient.connectionLost(self, reason)
         self.factory.noPage(reason)
 
     def handleResponse(self, response):
         if self.factory.method.upper() == 'HEAD':
             self.factory.page('')
+        elif self.length is not None and self.length > 0:
+            self.factory.noPage(self._connection_lost_reason)
         else:
             self.factory.page(response)
         self.transport.loseConnection()
@@ -127,8 +129,8 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
         # set Content-Length based len of body
         if self.body is not None:
             self.headers['Content-Length'] = len(self.body)
-        # just in case a broken http/1.1 decides to keep connection alive
-        self.headers.setdefault('Connection', 'close')
+            # just in case a broken http/1.1 decides to keep connection alive
+            self.headers.setdefault('Connection', 'close')
 
     def _build_response(self, body, request):
         if self.invalid_headers:
@@ -169,31 +171,3 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
     def gotHeaders(self, headers):
         self.headers_time = time()
         self.response_headers = headers
-
-
-if 'ssl' in optional_features:
-    from twisted.internet.ssl import ClientContextFactory
-    from OpenSSL import SSL
-else:
-    ClientContextFactory = object
-
-
-class CrawlmiClientContextFactory(ClientContextFactory):
-    'A SSL context factory which is more permissive against SSL bugs.'
-    # see https://github.com/scrapy/scrapy/issues/82
-    # and https://github.com/scrapy/scrapy/issues/26
-
-    def __init__(self, method):
-        # see this issue on why we use TLSv1_METHOD by default
-        # https://github.com/scrapy/scrapy/issues/194
-        # self.method = SSL.TLSv1_METHOD
-        # try following method if TLSv1_METHOD fails
-        # self.method = SSL.SSLv3_METHOD
-        self.method = method
-
-    def getContext(self):
-        ctx = ClientContextFactory.getContext(self)
-        # Enable all workarounds to SSL bugs as documented by
-        # http://www.openssl.org/docs/ssl/SSL_CTX_set_options.html
-        ctx.set_options(SSL.OP_ALL)
-        return ctx

@@ -13,14 +13,6 @@ if chardet is not None:
     optional_features.add('chardet')
 
 try:
-    import OpenSSL
-except ImportError:
-    OpenSSL = None
-if OpenSSL is not None:
-    optional_features.add('ssl')
-
-
-try:
     import cssselect
 except ImportError:
     cssselect = None
