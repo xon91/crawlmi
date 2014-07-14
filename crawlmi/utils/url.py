@@ -149,9 +149,10 @@ def safe_urlparse(url):
 def is_url_from_any_domain(url, domains):
     '''Return `True` if given url matches any of the `domains`.
     '''
-    host = safe_urlparse(url).netloc
+    host = safe_urlparse(url).netloc.lower()
+
     if host:
-        return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
+        return any((host == d.lower()) or (host.endswith('.%s' % d.lower())) for d in domains)
     else:
         return False
 
