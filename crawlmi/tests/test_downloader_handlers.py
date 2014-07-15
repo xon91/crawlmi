@@ -1,6 +1,6 @@
 import os
 
-from twisted.internet import reactor
+from twisted.internet import reactor, defer, error
 from twisted.protocols.policies import WrappingFactory
 from twisted.python.filepath import FilePath
 from twisted.trial import unittest
@@ -10,8 +10,8 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
         PayloadResource, BrokenDownloadResource)
 
 from crawlmi.core.handlers import (FileDownloadHandler, HttpDownloadHandler,
-        GeneralHandler)
-from crawlmi.exceptions import NotConfigured, NotSupported
+                                   HTTP11DownloadHandler, GeneralHandler)
+from crawlmi.exceptions import NotConfigured, NotSupported, DownloadSizeError
 from crawlmi.http import Request
 from crawlmi.settings import Settings
 from crawlmi.utils.url import path_to_file_uri
@@ -43,6 +43,7 @@ class FileTest(unittest.TestCase):
 
 
 class HttpTest(unittest.TestCase):
+    download_handler_cls = HttpDownloadHandler
 
     def setUp(self):
         name = self.mktemp()
@@ -51,6 +52,7 @@ class HttpTest(unittest.TestCase):
         r = static.File(name)
         r.putChild('redirect', util.Redirect('/file'))
         r.putChild('wait', ForeverTakingResource())
+        r.putChild('hang-after-headers', ForeverTakingResource(write=True))
         r.putChild('nolength', NoLengthResource())
         r.putChild('host', HostHeaderResource())
         r.putChild('payload', PayloadResource())
@@ -59,10 +61,14 @@ class HttpTest(unittest.TestCase):
         self.wrapper = WrappingFactory(self.site)
         self.port = reactor.listenTCP(0, self.wrapper, interface='127.0.0.1')
         self.portno = self.port.getHost().port
-        self.download_request = HttpDownloadHandler(Settings()).download_request
+        self.download_handler = self.download_handler_cls(Settings({'CONCURRENT_REQUESTS_PER_DOMAIN': 8}))
+        self.download_request = self.download_handler.download_request
 
+    @defer.inlineCallbacks
     def tearDown(self):
-        return self.port.stopListening()
+        yield self.port.stopListening()
+        if hasattr(self.download_handler, 'close'):
+            yield self.download_handler.close()
 
     def getURL(self, path):
         return 'http://127.0.0.1:%d/%s' % (self.portno, path)
@@ -95,15 +101,25 @@ class HttpTest(unittest.TestCase):
         d.addCallback(self.assertEquals, 302)
         return d
 
+    @defer.inlineCallbacks
+    def test_timeout_download_from_spider(self):
+        meta = {'DOWNLOAD_TIMEOUT': 0.2}
+        # client connects but no data is received
+        request = Request(self.getURL('wait'), meta=meta)
+        d = self.download_request(request)
+        yield self.assertFailure(d, defer.TimeoutError, error.TimeoutError)
+        # client connects, server send headers and some body bytes but hangs
+        request = Request(self.getURL('hang-after-headers'), meta=meta)
+        d = self.download_request(request)
+        yield self.assertFailure(d, defer.TimeoutError, error.TimeoutError)
+
     def test_host_header_not_in_request_headers(self):
         def _test(response):
             self.assertEquals(response.body, '127.0.0.1:%d' % self.portno)
             self.assertEquals(request.headers, {})
 
         request = Request(self.getURL('host'))
-        d = self.download_request(request)
-        d.addCallback(_test)
-        return d
+        return self.download_request(request).addCallback(_test)
 
     def test_host_header_seted_in_request_headers(self):
         def _test(response):
@@ -111,9 +127,7 @@ class HttpTest(unittest.TestCase):
             self.assertEquals(request.headers.get('Host'), 'example.com')
 
         request = Request(self.getURL('host'), headers={'Host': 'example.com'})
-        d = self.download_request(request)
-        d.addCallback(_test)
-        return d
+        return self.download_request(request).addCallback(_test)
 
     def test_payload(self):
         body = '1' * 100  # PayloadResource requires body length to be 100
@@ -122,6 +136,16 @@ class HttpTest(unittest.TestCase):
         d.addCallback(lambda r: r.body)
         d.addCallback(self.assertEquals, body)
         return d
+
+    def test_download_size_limit(self):
+        meta = {'DOWNLOAD_SIZE_LIMIT': 3}
+        request = Request(self.getURL('file'), meta=meta)
+        d = self.download_request(request)
+        yield self.assertFailure(d, DownloadSizeError)
+
+
+class Http11Test(HttpTest):
+    download_handler_cls = HTTP11DownloadHandler
 
 
 class UriResource(resource.Resource):
@@ -135,16 +159,21 @@ class UriResource(resource.Resource):
 
 
 class HttpProxyTest(unittest.TestCase):
+    download_handler_cls = HttpDownloadHandler
 
     def setUp(self):
         site = server.Site(UriResource(), timeout=None)
         wrapper = WrappingFactory(site)
         self.port = reactor.listenTCP(0, wrapper, interface='127.0.0.1')
         self.portno = self.port.getHost().port
-        self.download_request = HttpDownloadHandler(Settings()).download_request
+        self.download_handler = HttpDownloadHandler(Settings({'CONCURRENT_REQUESTS_PER_DOMAIN': 8}))
+        self.download_request = self.download_handler.download_request
 
+    @defer.inlineCallbacks
     def tearDown(self):
-        return self.port.stopListening()
+        yield self.port.stopListening()
+        if hasattr(self.download_handler, 'close'):
+            yield self.download_handler.close()
 
     def getURL(self, path):
         return 'http://127.0.0.1:%d/%s' % (self.portno, path)
@@ -153,9 +182,19 @@ class HttpProxyTest(unittest.TestCase):
         def _test(response):
             self.assertEquals(response.status, 200)
             self.assertEquals(response.url, request.url)
-            self.assertEquals(response.body, 'https://example.com/')
+            self.assertEquals(response.body, 'http://example.com/')
 
         http_proxy = self.getURL('')
+        request = Request('http://example.com', proxy=http_proxy)
+        return self.download_request(request).addCallback(_test)
+
+    def test_download_with_proxy_https_noconnect(self):
+        def _test(response):
+            self.assertEquals(response.status, 200)
+            self.assertEquals(response.url, request.url)
+            self.assertEquals(response.body, 'https://example.com/')
+
+        http_proxy = '%s?noconnect' % self.getURL('')
         request = Request('https://example.com', proxy=http_proxy)
         return self.download_request(request).addCallback(_test)
 
@@ -167,6 +206,10 @@ class HttpProxyTest(unittest.TestCase):
 
         request = Request(self.getURL('path/to/resource'))
         return self.download_request(request).addCallback(_test)
+
+
+class Http11ProxyTest(HttpProxyTest):
+    download_handler_cls = HTTP11DownloadHandler
 
 
 class NonConfiguredHandler(object):

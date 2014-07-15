@@ -10,6 +10,19 @@ from crawlmi.http import Headers
 from crawlmi.http.response import factory as resp_factory
 
 
+def _parse_url_args(url):
+    parsed = urlparse(url.strip())
+    path = urlunparse(('', '', parsed.path or '/', parsed.params,
+                       parsed.query, ''))
+    host = parsed.hostname
+    port = parsed.port
+    scheme = parsed.scheme
+    netloc = parsed.netloc
+    if port is None:
+        port = 443 if scheme == 'https' else 80
+    return scheme, netloc, host, port, path
+
+
 class BadHttpHeaderError(Exception):
     '''Raised when bad http header have beed received.
     '''
@@ -147,23 +160,11 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
 
     def _set_connection_attributes(self, request):
         self.scheme, self.netloc, self.host, self.port, self.path = \
-            self._parse_url_args(request.url)
+            _parse_url_args(request.url)
         if request.proxy:
             self.scheme, _, self.host, self.port, _ = \
-                self._parse_url_args(request.proxy)
+                _parse_url_args(request.proxy)
             self.path = self.url
-
-    def _parse_url_args(self, url):
-        parsed = urlparse(url.strip())
-        path = urlunparse(('', '', parsed.path or '/', parsed.params,
-                           parsed.query, ''))
-        host = parsed.hostname
-        port = parsed.port
-        scheme = parsed.scheme
-        netloc = parsed.netloc
-        if port is None:
-            port = 443 if scheme == 'https' else 80
-        return scheme, netloc, host, port, path
 
     def gotStatus(self, version, status, message):
         self.version, self.status, self.message = version, int(status), message

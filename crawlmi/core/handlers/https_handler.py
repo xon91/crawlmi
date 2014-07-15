@@ -29,7 +29,7 @@ class HttpsDownloadHandler(object):
     def _download(self, request, method):
         factory = CrawlmiHTPPClientFactory(
             request,
-            self.settings.get_int('DOWNLOAD_TIMEOUT', 180, request),
+            self.settings.get_float('DOWNLOAD_TIMEOUT', 180, request),
             self.settings.get_int('DOWNLOAD_SIZE_LIMIT', 0, request))
         host, port = factory.host, factory.port
         bind_address = request.meta.get('bind_address')

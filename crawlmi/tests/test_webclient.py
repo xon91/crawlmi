@@ -11,7 +11,7 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
         PayloadResource, BrokenDownloadResource)
 
 from crawlmi.core.webclient import (BadHttpHeaderError, CrawlmiHTTPClient,
-                                    CrawlmiHTPPClientFactory)
+                                    CrawlmiHTPPClientFactory, _parse_url_args)
 from crawlmi.exceptions import DownloadSizeError
 from crawlmi.http import Headers, Request
 
@@ -50,7 +50,7 @@ class ParseUrlTest(unittest.TestCase):
 
         f = CrawlmiHTPPClientFactory(Request(url='http://github.com/'))
         for url, test in tests:
-            self.assertEqual(f._parse_url_args(url), test, url)
+            self.assertEqual(_parse_url_args(url), test, url)
 
 
 class HTTPPageGetterTest(unittest.TestCase):
@@ -304,7 +304,7 @@ class WebClientTest(unittest.TestCase):
 
         url = self.get_url('file')
         factory = CrawlmiHTPPClientFactory(Request(url))
-        scheme, netloc, host, port, path = factory._parse_url_args(url)
+        scheme, netloc, host, port, path = _parse_url_args(url)
         reactor.connectTCP(host, port, factory)
         return factory.deferred.addCallback(_cbFactoryInfo, factory)
 
