@@ -19,7 +19,7 @@ def gunzip(data, max_length=0):
             if max_length and len(output) > max_length:
                 raise DecompressSizeError('Object exceeded %s bytes' %
                                           max_length)
-        except (IOError, struct.error):
+        except (IOError, EOFError, struct.error):
             # complete only if there is some data, otherwise re-raise
             # see issue 87 about catching struct.error
             # some pages are quite small so output is '' and f.extrabuf
