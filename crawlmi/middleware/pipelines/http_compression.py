@@ -2,7 +2,7 @@ import zlib
 
 from crawlmi.exceptions import DecompressSizeError
 from crawlmi.http.response import factory
-from crawlmi.utils.gz import gunzip
+from crawlmi.utils.gz import gunzip, is_gzipped
 
 
 class HttpCompression(object):
@@ -13,12 +13,12 @@ class HttpCompression(object):
         self.settings = engine.settings
 
     def process_request(self, request):
-        request.headers.setdefault('Accept-Encoding', 'x-gzip,gzip,deflate')
+        request.headers.setdefault('Accept-Encoding', 'gzip,deflate')
         return request
 
     def process_response(self, response):
         content_encoding = response.headers.getlist('Content-Encoding')
-        if content_encoding:
+        if content_encoding and not is_gzipped(response):
             max_length = self.settings.get_int('DOWNLOAD_SIZE_LIMIT', 0,
                                                response.request)
             encoding = content_encoding.pop()

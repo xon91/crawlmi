@@ -51,7 +51,7 @@ class HttpCompressionTest(unittest.TestCase):
         request = Request('http://github.com/')
         self.assertNotIn('Accept-Encoding', request.headers)
         request = self.mw.process_request(request)
-        self.assertEqual(request.headers.get('Accept-Encoding'), 'x-gzip,gzip,deflate')
+        self.assertEqual(request.headers.get('Accept-Encoding'), 'gzip,deflate')
 
     def test_process_response_gzip(self):
         response = self._getresponse('gzip')
