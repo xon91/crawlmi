@@ -22,8 +22,11 @@ LOG_STDOUT = False
 
 DOWNLOAD_HANDLERS = {
     'file': 'crawlmi.core.handlers.FileDownloadHandler',
-    'http': 'crawlmi.core.handlers.http_1_1_handler.HTTP11DownloadHandler',
-    'https': 'crawlmi.core.handlers.http_1_1_handler.HTTP11DownloadHandler',
+    'http': 'crawlmi.core.handlers.http_handler.HttpDownloadHandler',
+    'https': 'crawlmi.core.handlers.https_handler.HttpsDownloadHandler',
+    # be carefoul when using HTTP11DownloadHandler - it creates persistent connections
+    # and doesn't cooperate well with bind_address settings. Because of
+    # persistence, it still uses the old address.
 }
 
 DOWNLOAD_TIMEOUT = 180  # 3mins
