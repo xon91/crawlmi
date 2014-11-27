@@ -96,6 +96,14 @@ class LxmlLinkExtractorTest(unittest.TestCase):
             Link(url='http://example.com/sample_%E1.html', text='sample \xe1 text'.decode('latin1')),
         ])
 
+    def test_extraction_encoding_fallback(self):
+        body = get_testdata('link_extractor', 'linkextractor_fallback.html')
+        response = HtmlResponse(url='http://example.com/fallback', body=body)
+        lx = LxmlLinkExtractor(unique=False)
+        self.assertEqual(lx.extract_links(response), [
+            Link(url='http://example.com/aktu%C3%A1ln%C3%AD_sd%C4%9Blen%C3%AD.htm', text=''),
+        ])
+
     def test_link_nofollow(self):
         html = '''
         <a href="page.html?action=print" rel="nofollow">Printer-friendly page</a>

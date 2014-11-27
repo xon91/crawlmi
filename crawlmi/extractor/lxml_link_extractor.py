@@ -1,5 +1,3 @@
-from urlparse import urlparse, urlunparse
-
 from crawlmi import log
 from crawlmi.extractor import Link, BaseLinkExtractor
 from crawlmi.http import HtmlResponse
@@ -20,15 +18,22 @@ class LxmlLinkExtractor(BaseLinkExtractor):
 
     def _extract_links_from_html(self, html, response_encoding):
         links = []
-        for e, a, l, p in html.iterlinks():
-            if self.tag_func(e.tag):
-                if self.attr_func(a):
+        for el, attr, attr_val, pos in html.iterlinks():
+            if self.tag_func(el.tag):
+                if self.attr_func(attr):
                     try:
-                        url = requote_url(to_str(to_unicode(l, 'utf-8'), response_encoding))
+                        url = attr_val
+                        if isinstance(url, unicode):
+                            try:
+                                url = to_str(url, response_encoding)
+                            except UnicodeEncodeError:
+                                # fallback
+                                url = to_str(url, 'utf-8')
+                        url = requote_url(url)
                         url = correct_relative_path(url)
-                        text = e.text or u''
+                        text = el.text or u''
                         text = to_unicode(text, 'utf-8')
-                        nofollow = (e.attrib.get('rel') == 'nofollow')
+                        nofollow = (el.attrib.get('rel') == 'nofollow')
                     except Exception as e:
                         log.msg(
                             format='Error occurred while extracting links from %(url)s. Error (%(etype)s): %(error)s',
