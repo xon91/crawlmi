@@ -137,6 +137,7 @@ class HttpTest(unittest.TestCase):
         d.addCallback(self.assertEquals, body)
         return d
 
+    @defer.inlineCallbacks
     def test_download_size_limit(self):
         meta = {'DOWNLOAD_SIZE_LIMIT': 3}
         request = Request(self.getURL('file'), meta=meta)
