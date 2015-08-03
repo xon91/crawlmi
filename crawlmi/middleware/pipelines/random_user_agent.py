@@ -15,6 +15,7 @@ class RandomUserAgent(object):
             self.user_agents = read_list_data_file(join(dirname(__file__), 'user_agents.txt'))
 
     def process_request(self, request):
-        ua = random.choice(self.user_agents)
+        user_agents = request.meta.get('RANDOM_USER_AGENT_LIST', self.user_agents)
+        ua = random.choice(user_agents)
         request.headers.setdefault('User-Agent', ua)
         return request
