@@ -11,7 +11,7 @@ class HttpsDownloadHandler(object):
 
     def __init__(self, settings):
         self.settings = settings
-        self.ssl_methods = [SSL.SSLv3_METHOD, SSL.TLSv1_METHOD]
+        self.ssl_methods = settings.get('DOWNLOAD_HANDLER_SSL_METHODS')
 
     def download_request(self, request):
         '''Return a deferred for the HTTP download.'''

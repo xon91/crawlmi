@@ -1,3 +1,5 @@
+from OpenSSL import SSL
+
 # General settings
 
 DATA_DIR = None
@@ -28,6 +30,8 @@ DOWNLOAD_HANDLERS = {
     # and doesn't cooperate well with bind_address settings. Because of
     # persistence, it still uses the old address.
 }
+
+DOWNLOAD_HANDLER_SSL_METHODS = [SSL.SSLv3_METHOD, SSL.TLSv1_METHOD]
 
 DOWNLOAD_TIMEOUT = 180  # 3mins
 DOWNLOAD_SIZE_LIMIT = 0  # size limit of object to download (600KB is good option)

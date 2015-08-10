@@ -23,7 +23,7 @@ from crawlmi.core.context_factory import CrawlmiClientContextFactory
 class HTTP11DownloadHandler(object):
     def __init__(self, settings):
         self.settings = settings
-        self.ssl_methods = [SSL.SSLv3_METHOD, SSL.TLSv1_METHOD]
+        self.ssl_methods = settings.get('DOWNLOAD_HANDLER_SSL_METHODS')
         self.context_factories = [CrawlmiClientContextFactory(method) for method in self.ssl_methods]
         self.pool = HTTPConnectionPool(reactor, persistent=True)
         self.pool.maxPersistentPerHost = settings.get_int('CONCURRENT_REQUESTS_PER_DOMAIN')
