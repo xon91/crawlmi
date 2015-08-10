@@ -1,5 +1,5 @@
-version_info = (0, 1, 3)
-__version__ = '0.1.3'
+version_info = (0, 1, 4)
+__version__ = '0.1.4'
 
 
 # Ignore noisy twisted deprecation warnings
