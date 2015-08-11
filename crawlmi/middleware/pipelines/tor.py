@@ -10,8 +10,6 @@ import socket
 
 from crawlmi import log
 from crawlmi.exceptions import NotConfigured
-from crawlmi.http import Request
-from crawlmi.middleware.pipelines.retry import Retry
 from crawlmi.signals import Signal
 
 
@@ -19,7 +17,7 @@ from crawlmi.signals import Signal
 new_tor_identity = Signal('new_tor_identity')
 
 
-class Tor(Retry):
+class Tor(object):
     def __init__(self, engine):
         super(Tor, self).__init__(engine)
 
@@ -29,8 +27,7 @@ class Tor(Retry):
             raise NotConfigured()
         self.tor_connection = settings.get('TOR_CONNECTION')
         self.tor_password = settings.get('TOR_PASSWORD')
-        engine.signals.connect(self.new_tor_identity,
-                               signal=new_tor_identity)
+        engine.signals.connect(self.new_tor_identity, signal=new_tor_identity)
 
     def process_request(self, request):
         if request.proxy is None:
@@ -38,14 +35,6 @@ class Tor(Retry):
             log.msg(format='Using tor for request %(request)s',
                     level=log.DEBUG, request=request)
         return request
-
-    def _retry(self, request, reason):
-        if request.proxy != self.tor_proxy:
-            return
-        retry_req = super(Tor, self)._retry(request, reason)
-        if isinstance(retry_req, Request):
-            self.new_tor_identity()
-        return retry_req
 
     def new_tor_identity(self):
         '''Sets new tor identity.
