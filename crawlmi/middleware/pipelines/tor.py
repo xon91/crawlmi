@@ -19,8 +19,6 @@ new_tor_identity = Signal('new_tor_identity')
 
 class Tor(object):
     def __init__(self, engine):
-        super(Tor, self).__init__(engine)
-
         settings = engine.settings
         self.tor_proxy = settings.get('TOR_HTTP_PROXY')
         if not self.tor_proxy:
