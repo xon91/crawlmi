@@ -3,3 +3,4 @@ lxml
 pyOpenSSL
 charade
 cssselect>=0.9
+xextract==0.0.4
