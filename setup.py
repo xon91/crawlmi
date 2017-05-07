@@ -34,10 +34,12 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
     ],
     install_requires=[
-        'Twisted>=13.1.0',
-        'lxml',
-        'pyOpenSSL',
         'charade',
         'cssselect>=0.9',
+        'lxml',
+        'PyDispatcher>=2.0.5',
+        'pyOpenSSL',
+        'Twisted>=13.1.0',
+        'xextract==0.0.4',
     ]
 )

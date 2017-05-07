@@ -1,11 +1,11 @@
+from pydispatch import dispatcher
+from pydispatch.dispatcher import (Any, Anonymous, liveReceivers,
+    getAllReceivers, disconnect)
+from pydispatch.robustapply import robustApply
 from twisted.internet import defer
 from twisted.python.failure import Failure
 
 from crawlmi import log
-from crawlmi.xlib.pydispatch import dispatcher
-from crawlmi.xlib.pydispatch.dispatcher import (Any, Anonymous, liveReceivers,
-    getAllReceivers, disconnect)
-from crawlmi.xlib.pydispatch.robustapply import robustApply
 
 
 class SignalManager(object):
