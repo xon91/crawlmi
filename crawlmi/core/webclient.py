@@ -24,8 +24,7 @@ def _parse_url_args(url):
 
 
 class BadHttpHeaderError(Exception):
-    '''Raised when bad http header have beed received.
-    '''
+    '''Raised when bad http header have beed received.'''
 
 
 class CrawlmiHTTPClient(HTTPClient):
@@ -91,6 +90,11 @@ class CrawlmiHTTPClient(HTTPClient):
 
     def timeout(self):
         self.transport.loseConnection()
+
+        # transport cleanup needed for HTTPS connections
+        if self.factory.url.startswith('https'):
+            self.transport.stopProducing()
+
         self.factory.noPage(
             defer.TimeoutError('Getting %s took longer than %s seconds.' %
                                (self.factory.url, self.factory.timeout)))
@@ -120,8 +124,7 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
         self.headers = Headers(request.headers)
         self.response_headers = None
         self.start_time = time()
-        self.deferred = defer.Deferred()
-        self.deferred.addCallback(self._build_response, request)
+        self.deferred = defer.Deferred().addCallback(self._build_response, request)
         self.invalid_headers = []
         self.timeout = timeout
         self.download_size = download_size
@@ -144,6 +147,9 @@ class CrawlmiHTPPClientFactory(HTTPClientFactory):
             self.headers['Content-Length'] = len(self.body)
             # just in case a broken http/1.1 decides to keep connection alive
             self.headers.setdefault('Connection', 'close')
+        # Content-Length must be specified in POST method even with no body
+        elif self.method == b'POST':
+            self.headers['Content-Length'] = 0
 
     def _build_response(self, body, request):
         if self.invalid_headers:
