@@ -40,6 +40,6 @@ setup(
         'PyDispatcher>=2.0.5',
         'pyOpenSSL',
         'Twisted>=13.1.0',
-        'xextract==0.0.4',
+        'xextract',
     ]
 )
