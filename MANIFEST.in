@@ -1,5 +1,6 @@
 include README.md
 include MANIFEST.in
+include crawlmi/VERSION
 include crawlmi/http/response/mime.types
 include crawlmi/middleware/pipelines/user_agents.txt
 recursive-include crawlmi/templates *

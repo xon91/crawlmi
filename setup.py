@@ -1,5 +1,10 @@
+from os.path import dirname, join
 from setuptools import setup, find_packages
-version = version = __import__('crawlmi').__version__
+
+
+with open(join(dirname(__file__), 'crawlmi/VERSION'), 'rb') as f:
+    version = f.read().decode('ascii').strip()
+
 
 setup(
     name='crawlmi',
@@ -29,7 +34,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
     ],
     install_requires=[
-        'Twisted>=13.0.0',
+        'Twisted>=13.1.0',
         'lxml',
         'pyOpenSSL',
         'charade',
