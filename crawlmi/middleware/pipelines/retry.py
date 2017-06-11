@@ -22,6 +22,7 @@ from twisted.internet.error import (TimeoutError as ServerTimeoutError,
     DNSLookupError, ConnectionRefusedError, ConnectionDone, ConnectError,
     ConnectionLost, TCPTimedOutError)
 from twisted.internet.defer import TimeoutError as UserTimeoutError
+from twisted.web.client import ResponseFailed
 
 from crawlmi import log
 from crawlmi.core.webclient import BadHttpHeaderError
@@ -32,14 +33,13 @@ class Retry(object):
     # decompress an empty response
     EXCEPTIONS_TO_RETRY = (UserTimeoutError, ServerTimeoutError,
         ConnectionRefusedError, ConnectionDone, ConnectError, ConnectionLost,
-        TCPTimedOutError, DNSLookupError, IOError, zlib.error,
+        TCPTimedOutError, DNSLookupError, IOError, zlib.error, ResponseFailed,
         BadHttpHeaderError)
 
     def __init__(self, engine):
         settings = engine.settings
         self.max_retry_times = settings.get_int('RETRY_TIMES')
-        self.retry_http_codes = set(int(x) for x in
-                                    settings.get_list('RETRY_HTTP_CODES'))
+        self.retry_http_codes = set(int(x) for x in settings.get_list('RETRY_HTTP_CODES'))
         self.priority_adjust = settings.get_int('RETRY_PRIORITY_ADJUST')
 
     def process_response(self, response):
