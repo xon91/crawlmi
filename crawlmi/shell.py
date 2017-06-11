@@ -59,7 +59,6 @@ class Shell(object):
         self.vars['spider'] = self.engine.spider
         self.vars['request'] = request
         self.vars['response'] = response
-        self.vars['xs'] = getattr(response, 'selector', None)
         self.vars['fetch'] = self.fetch
         self.vars['view'] = open_in_browser
         self.vars['shelp'] = self.print_help

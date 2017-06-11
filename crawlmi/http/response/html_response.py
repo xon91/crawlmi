@@ -2,7 +2,6 @@ import re
 from urlparse import urljoin
 
 from crawlmi.http import TextResponse
-from crawlmi.parser.selectors import HtmlXPathSelector
 from crawlmi.utils.url import requote_url
 
 from xextract.extractors.lxml_extractor import HtmlXPathExtractor
@@ -14,15 +13,8 @@ _base_url_re = re.compile(r'<base\s+href\s*=\s*[\"\']\s*([^\"\'\s]+)\s*[\"\']', 
 class HtmlResponse(TextResponse):
     def __init__(self, *args, **kwargs):
         super(HtmlResponse, self).__init__(*args, **kwargs)
-        self._selector = None
         self._extractor = None
         self._base_url = None
-
-    @property
-    def selector(self):
-        if self._selector is None:
-            self._selector = HtmlXPathSelector(self)
-        return self._selector
 
     @property
     def extractor(self):
