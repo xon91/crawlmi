@@ -24,16 +24,16 @@ class HttpCompression(object):
             encoding = content_encoding.pop()
             if not content_encoding:
                 del response.headers['Content-Encoding']
-            decoded_body = self._decode(response.body, encoding.lower(),
-                                        max_length)
-            resp_cls = factory.from_args(headers=response.headers,
-                                         url=response.url)
+            decoded_body = self._decode(response.body, encoding.lower(), max_length)
+            resp_cls = factory.from_args(headers=response.headers, url=response.url)
             response = response.replace(cls=resp_cls, body=decoded_body)
+
         return response
 
     def _decode(self, body, encoding, max_length=0):
         if encoding == 'gzip' or encoding == 'x-gzip':
             body = gunzip(body, max_length)
+
         elif encoding == 'deflate':
             try:
                 if max_length:
@@ -58,4 +58,5 @@ class HttpCompression(object):
                             'Response exceeded %s bytes' % max_length)
                 else:
                     body = zlib.decompress(body, -15)
+
         return body
