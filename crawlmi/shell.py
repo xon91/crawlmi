@@ -3,6 +3,7 @@ import signal
 import traceback
 
 from twisted.internet import reactor, threads
+import xextract
 
 from crawlmi.http import Request, Response
 from crawlmi.utils.console import start_python_console
@@ -62,13 +63,17 @@ class Shell(object):
         self.vars['fetch'] = self.fetch
         self.vars['view'] = open_in_browser
         self.vars['shelp'] = self.print_help
+        self.vars.update(
+            (v, getattr(xextract, v))
+            for v in xextract.parsers.__all__)
+
         # some useful objects
         self.vars['Request'] = Request
         self.vars['Response'] = Response
         self.vars.setdefault('pprint', pprint)
         self.print_vars = set(self.update_vars(self.vars) or [])
-        self.print_vars |= set(['engine', 'settings', 'spider', 'request',
-                                'response', 'xs'])
+        self.print_vars |= set(['engine', 'settings', 'spider', 'request', 'response'])
+        self.print_vars |= set(xextract.parsers.__all__)
         self.print_help()
 
     def print_help(self):
@@ -82,6 +87,7 @@ class Shell(object):
         self.p('  shelp()           Shell help (print this help)')
         self.p('  fetch(req_or_url) Fetch request (or URL) and update local objects')
         self.p('  view(response)    View response in a browser')
+        self.p('  xextract parsers  %s' % ', '.join(xextract.parsers.__all__))
 
     def p(self, line=''):
         print "[c] %s" % line
