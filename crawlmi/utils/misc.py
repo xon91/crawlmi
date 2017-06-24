@@ -1,3 +1,4 @@
+from importlib import import_module
 import inspect
 from pkgutil import iter_modules
 
@@ -29,7 +30,7 @@ def load_object(path):
 
     module, name = path[:dot], path[dot+1:]
     try:
-        mod = __import__(module, {}, {}, [''])
+        mod = import_module(module)
     except ImportError as e:
         raise ImportError('Error loading object `%s`: %s' % (path, e))
 
@@ -50,7 +51,7 @@ def iter_submodules(module_path):
     '''
 
     mods = []
-    mod = __import__(module_path, {}, {}, [''])
+    mod = import_module(module_path)
     mods.append(mod)
     if hasattr(mod, '__path__'):
         for _, subpath, ispkg in iter_modules(mod.__path__):
@@ -58,7 +59,7 @@ def iter_submodules(module_path):
             if ispkg:
                 mods += iter_submodules(fullpath)
             else:
-                submod = __import__(fullpath, {}, {}, [''])
+                submod = import_module(fullpath)
                 mods.append(submod)
     return mods
 

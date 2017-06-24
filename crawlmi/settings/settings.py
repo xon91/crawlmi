@@ -1,3 +1,6 @@
+from importlib import import_module
+
+
 class Settings(object):
     '''Settings is a dictionary-like data structure with some additional
     conveninent get methods for data conversions.
@@ -9,7 +12,7 @@ class Settings(object):
         Take all the module variables which name doesn't start with underscore.
         '''
         if isinstance(module_or_path, basestring):
-            module_or_path = __import__(module_or_path, {}, {}, [''])
+            module_or_path = import_module(module_or_path)
         args = filter(lambda x: not x.startswith('_'), dir(module_or_path))
         return cls(dict((k, getattr(module_or_path, k)) for k in args))
 

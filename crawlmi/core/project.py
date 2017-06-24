@@ -1,4 +1,5 @@
 from ConfigParser import SafeConfigParser
+from importlib import import_module
 import os
 import sys
 import warnings
@@ -32,7 +33,7 @@ class Project(object):
             if self.cfg.has_option('crawlmi', 'settings'):
                 settings_module_path = self.cfg.get('crawlmi', 'settings')
                 try:
-                    settings_module = __import__(settings_module_path, {}, {}, [''])
+                    settings_module = import_module(settings_module_path)
                 except ImportError as exc:
                     warnings.warn(
                         'Cannot import crawlmi settings module %s: %s' %

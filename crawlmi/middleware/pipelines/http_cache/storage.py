@@ -1,3 +1,4 @@
+from importlib import import_module
 import os
 import pickle
 from time import time
@@ -17,7 +18,7 @@ class DbmCacheStorage(object):
         self.cache_dir = project.data_path(settings['HTTP_CACHE_DIR'],
                                            create_dir=True)
         self.expiration_secs = settings.get_int('HTTP_CACHE_EXPIRATION_SECS')
-        self.db_module = __import__(settings['HTTP_CACHE_DBM_MODULE'], {}, {}, [''])
+        self.db_module = import_module(settings['HTTP_CACHE_DBM_MODULE'])
         self.db = None
 
     def open(self):
