@@ -1,6 +1,5 @@
 import os
 import posixpath
-import re
 import urllib
 from urlparse import ParseResult, urlparse, urlunparse, parse_qsl
 
@@ -161,11 +160,11 @@ def has_url_any_extension(url, extensions):
     return posixpath.splitext(safe_urlparse(url).path)[1].lower() in extensions
 
 
-_utm_tags_re = re.compile('|'.join(['utm_source', 'utm_medium', 'utm_campaign',
-                                    'utm_term', 'utm_content']))
+_utm_tags = frozenset(['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'])
 
 def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
-                     strip_utm_tags=True, strip_www=False, encoding=None):
+                     strip_utm_tags=True, strip_www=False, strip_query_params=None,
+                     encoding=None):
     '''Canonicalize the given url by applying the following procedures:
 
     - sort query arguments, first by key, then by value
@@ -176,16 +175,16 @@ def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
     - remove query arguments with blank values (unless keep_blank_values is True)
     - remove fragments (unless keep_fragments is True)
     - strip `www.` subdomain (unless strip_www is False)
+    - strip query paramters (if strip_query_params is given as a list of params to strip)
     '''
-    def _strip_tags(keyvals):
-        return filter(lambda (k, v): not _utm_tags_re.match(k), keyvals)
-
     if isinstance(url, basestring):
         url = to_str(url, encoding)
     else:
         raise TypeError('Bad type for `url` object: %s' % type(url))
 
     scheme, netloc, path, params, query, fragment = urlparse(url)
+
+    # canonicalize netloc
     netloc = netloc.lower()
     if strip_www:
         auth, _, domain = netloc.rpartition('@')
@@ -193,20 +192,18 @@ def canonicalize_url(url, keep_blank_values=True, keep_fragments=False,
             domain = domain[4:]
             netloc = '%s@%s' % (auth, domain) if auth else domain
 
+    # canonicalize query params
     keyvals = parse_qsl(query, keep_blank_values)
     keyvals.sort()
     if strip_utm_tags:
-        keyvals = _strip_tags(keyvals)
+        keyvals = filter(lambda (k, v): k not in _utm_tags, keyvals)
+    if strip_query_params:
+        keyvals = filter(lambda (k, v): k not in strip_query_params, keyvals)
     query = urllib.urlencode(keyvals)
+
     path = _correct_relative_path(path)
     if not path:
         path = '/'
     fragment = '' if not keep_fragments else fragment
-    # sometimes utm tags are inside fragment
-    if fragment and strip_utm_tags:
-        try:
-            parsed_fragment = parse_qsl(fragment, keep_blank_values=True, strict_parsing=True)
-            fragment = urllib.urlencode(_strip_tags(parsed_fragment))
-        except ValueError:
-            pass
+
     return requote_url(urlunparse([scheme, netloc, path, params, query, fragment]))

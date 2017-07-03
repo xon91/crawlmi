@@ -163,6 +163,10 @@ class UrlTest(unittest.TestCase):
                                           u'http://user:pass@www.example.com/do?a=1')
         self.assertEqual(canonicalize_url(u'http://user:pass@www.example.com/do?a=1#frag', keep_fragments=True),
                                           u'http://user:pass@www.example.com/do?a=1#frag')
+        self.assertEqual(canonicalize_url('http://gh.com/test?msg=hello#utm_source=gh&utm_medium=320banner&utm_campaign=bpp', keep_fragments=True),
+            'http://gh.com/test?msg=hello#utm_source=gh&utm_medium=320banner&utm_campaign=bpp')
+        self.assertEqual(canonicalize_url('http://gh.com/test?msg=hello#a;b;utm_source=gh', keep_fragments=True),
+            'http://gh.com/test?msg=hello#a;b;utm_source=gh')
 
         # dont convert safe characters to percent encoding representation
         self.assertEqual(canonicalize_url(
@@ -195,11 +199,6 @@ class UrlTest(unittest.TestCase):
         # utm tags
         self.assertEqual(canonicalize_url('http://gh.com/test?msg=hello&utm_source=gh&utm_medium=320banner&utm_campaign=bpp'),
             'http://gh.com/test?msg=hello')
-        self.assertEqual(canonicalize_url('http://gh.com/test?msg=hello#utm_source=gh&utm_medium=320banner&utm_campaign=bpp', keep_fragments=True),
-            'http://gh.com/test?msg=hello')
-        # when fragment is not query-like, keep utm
-        self.assertEqual(canonicalize_url('http://gh.com/test?msg=hello#a;b;utm_source=gh', keep_fragments=True),
-            'http://gh.com/test?msg=hello#a;b;utm_source=gh')
 
         # stip www prefix
         self.assertEqual(canonicalize_url(
@@ -220,3 +219,11 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(canonicalize_url(
             'http://user:pass@example.com/', strip_www=True),
             'http://user:pass@example.com/')
+
+        # strip query params
+        self.assertEqual(canonicalize_url(
+            'http://www.example.com/?a=b&c=d', strip_query_params=['a']),
+            'http://www.example.com/?c=d')
+        self.assertEqual(canonicalize_url(
+            'http://www.example.com/?a=b&c=d', strip_query_params=['a', 'c']),
+            'http://www.example.com/')
