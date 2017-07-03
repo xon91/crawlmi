@@ -41,13 +41,28 @@ class Settings(object):
 
     def get_bool(self, name, default=False, req_or_resp=None):
         '''
-        True is: 1, '1', True
-        False is: 0, '0', False, None
+        Get a setting value as a boolean.
+
+        `1`, `'1'`, `True` and `'True'` return `True`,
+        while `0`, `'0'`, `False`, `'False'` and `None` return `False`.
+
+        For example, settings populated through environment variables set to
+        `'0'` will return `False` when using this method.
         '''
         value = self.get(name, default, req_or_resp)
         if value is None:
             return False
-        return bool(int(value))
+
+        try:
+            return bool(int(value))
+        except ValueError:
+            if value in ("True", "true"):
+                return True
+            if value in ("False", "false"):
+                return False
+            raise ValueError("Supported values for boolean settings "
+                             "are 0/1, True/False, '0'/'1', "
+                             "'True'/'False' and 'true'/'false'")
 
     def get_int(self, name, default=0, req_or_resp=None):
         return int(self.get(name, default, req_or_resp))
