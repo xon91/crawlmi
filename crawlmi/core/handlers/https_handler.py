@@ -34,6 +34,6 @@ class HttpsDownloadHandler(object):
         host, port = factory.host, factory.port
         bind_address = request.meta.get('bind_address')
         reactor.connectSSL(host, port, factory,
-                           CrawlmiClientContextFactory(method),
+                           CrawlmiClientContextFactory(method, host, port),
                            bindAddress=bind_address)
         return factory.deferred

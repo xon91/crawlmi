@@ -7,6 +7,7 @@ from crawlmi import twisted_version
 if twisted_version >= (14, 0, 0):
     from zope.interface.declarations import implementer
 
+    from twisted.internet._sslverify import ClientTLSOptions
     from twisted.internet.ssl import (optionsForClientTLS,
                                       CertificateOptions,
                                       platformTrust)
@@ -28,9 +29,11 @@ if twisted_version >= (14, 0, 0):
          understand the SSLv3, TLSv1, TLSv1.1 and TLSv1.2 protocols.'
         """
 
-        def __init__(self, method=SSL.SSLv23_METHOD, *args, **kwargs):
+        def __init__(self, method=SSL.SSLv23_METHOD, hostname=None, port=None, *args, **kwargs):
             super(CrawlmiClientContextFactory, self).__init__(*args, **kwargs)
             self._ssl_method = method
+            self._hostname = hostname
+            self._port = port
 
         def getCertificateOptions(self):
             # setting verify=True will require you to provide CAs
@@ -53,7 +56,13 @@ if twisted_version >= (14, 0, 0):
         # kept for old-style HTTP/1.0 downloader context twisted calls,
         # e.g. connectSSL()
         def getContext(self, hostname=None, port=None):
-            return self.getCertificateOptions().getContext()
+            hostname = hostname or self._hostname
+            port = port or self._port
+
+            ctx = self.getCertificateOptions().getContext()
+            if hostname and ClientTLSOptions is not None: # workaround for TLS SNI
+                ClientTLSOptions(hostname, ctx)
+            return ctx
 
         def creatorForNetloc(self, hostname, port):
             return CrawlmiClientTLSOptions(hostname.decode("ascii"), self.getContext())
