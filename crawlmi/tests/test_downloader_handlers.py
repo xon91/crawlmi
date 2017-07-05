@@ -10,7 +10,7 @@ from twisted.web.test.test_webclient import (ForeverTakingResource,
         PayloadResource, BrokenDownloadResource)
 
 from crawlmi.core.handlers import (FileDownloadHandler, HttpDownloadHandler,
-                                   HTTP11DownloadHandler, GeneralHandler)
+                                   GeneralHandler)
 from crawlmi.exceptions import NotConfigured, NotSupported, DownloadSizeError
 from crawlmi.http import Request
 from crawlmi.settings import Settings
@@ -145,10 +145,6 @@ class HttpTest(unittest.TestCase):
         yield self.assertFailure(d, DownloadSizeError)
 
 
-class Http11Test(HttpTest):
-    download_handler_cls = HTTP11DownloadHandler
-
-
 class UriResource(resource.Resource):
     '''Return the full uri that was requested'''
 
@@ -207,10 +203,6 @@ class HttpProxyTest(unittest.TestCase):
 
         request = Request(self.getURL('path/to/resource'))
         return self.download_request(request).addCallback(_test)
-
-
-class Http11ProxyTest(HttpProxyTest):
-    download_handler_cls = HTTP11DownloadHandler
 
 
 class NonConfiguredHandler(object):
