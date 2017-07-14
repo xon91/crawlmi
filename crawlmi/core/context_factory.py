@@ -7,7 +7,6 @@ from crawlmi import twisted_version
 if twisted_version >= (14, 0, 0):
     from zope.interface.declarations import implementer
 
-    from twisted.internet._sslverify import ClientTLSOptions
     from twisted.internet.ssl import (optionsForClientTLS,
                                       CertificateOptions,
                                       platformTrust)
@@ -60,8 +59,8 @@ if twisted_version >= (14, 0, 0):
             port = port or self._port
 
             ctx = self.getCertificateOptions().getContext()
-            if hostname and ClientTLSOptions is not None: # workaround for TLS SNI
-                ClientTLSOptions(hostname, ctx)
+            if hostname: # workaround for TLS SNI
+                CrawlmiClientTLSOptions(hostname, ctx)
             return ctx
 
         def creatorForNetloc(self, hostname, port):
