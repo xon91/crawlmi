@@ -19,7 +19,7 @@ if twisted_version >= (14, 0, 0):
 
     @implementer(IPolicyForHTTPS)
     class CrawlmiClientContextFactory(BrowserLikePolicyForHTTPS):
-        """
+        '''
         Non-peer-certificate verifying HTTPS context factory
 
         Default OpenSSL method is TLS_METHOD (also called SSLv23_METHOD)
@@ -27,7 +27,7 @@ if twisted_version >= (14, 0, 0):
 
         'A TLS/SSL connection established with [this method] may
          understand the SSLv3, TLSv1, TLSv1.1 and TLSv1.2 protocols.'
-        """
+        '''
 
         def __init__(self, method=SSL.SSLv23_METHOD, hostname=None, port=None, *args, **kwargs):
             super(CrawlmiClientContextFactory, self).__init__(*args, **kwargs)
@@ -65,12 +65,12 @@ if twisted_version >= (14, 0, 0):
             return ctx
 
         def creatorForNetloc(self, hostname, port):
-            return CrawlmiClientTLSOptions(hostname.decode("ascii"), self.getContext())
+            return CrawlmiClientTLSOptions(hostname.decode('ascii'), self.getContext())
 
 
     @implementer(IPolicyForHTTPS)
     class BrowserLikeContextFactory(CrawlmiClientContextFactory):
-        """
+        '''
         Twisted-recommended context factory for web clients.
 
         Quoting http://twistedmatrix.com/documents/current/api/twisted.web.client.Agent.html:
@@ -82,14 +82,14 @@ if twisted_version >= (14, 0, 0):
 
         Default OpenSSL method is TLS_METHOD (also called SSLv23_METHOD)
         which allows TLS protocol negotiation.
-        """
+        '''
         def creatorForNetloc(self, hostname, port):
 
             # trustRoot set to platformTrust() will use the platform's root CAs.
             #
             # This means that a website like https://www.cacert.org will be rejected
             # by default, since CAcert.org CA certificate is seldom shipped.
-            return optionsForClientTLS(hostname.decode("ascii"),
+            return optionsForClientTLS(hostname.decode('ascii'),
                                        trustRoot=platformTrust(),
                                        extraCertificateOptions={
                                             'method': self._ssl_method,
@@ -98,7 +98,7 @@ if twisted_version >= (14, 0, 0):
 else:
 
     class CrawlmiClientContextFactory(ClientContextFactory):
-        "A SSL context factory which is more permissive against SSL bugs."
+        'A SSL context factory which is more permissive against SSL bugs.'
         # see https://github.com/scrapy/scrapy/issues/82
         # and https://github.com/scrapy/scrapy/issues/26
         # and https://github.com/scrapy/scrapy/issues/981

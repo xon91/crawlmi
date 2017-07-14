@@ -48,14 +48,14 @@ if twisted_version >= (14, 0, 0):
 
 
     class CrawlmiClientTLSOptions(ClientTLSOptions):
-        """
+        '''
         SSL Client connection creator ignoring certificate verification errors
         (for genuinely invalid certificates or bugs in verification code).
 
         Same as Twisted's private _sslverify.ClientTLSOptions,
         except that VerificationError and ValueError exceptions are caught,
         so that the connection is not closed, only logging warnings.
-        """
+        '''
 
         def _identityVerifyingInfoCallback(self, connection, where, ret):
             if where & SSL_CB_HANDSHAKE_START:
